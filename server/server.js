@@ -10,15 +10,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-
-// Serve static files
 app.use(express.static('public'));
 
-// Optional: Root greeting
-app.get('/', (req, res) => {
-  res.sendFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/index.html'));
-});
+app.use(express.json());
 
 // Mount API routes
 app.use('/api/creatures', creaturesRoutes);
