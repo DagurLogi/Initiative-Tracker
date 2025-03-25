@@ -1,0 +1,32 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs and DB
+*.log
+*.sqlite
+*.db
+db/
+
+# VSCode + OS junk
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build artifacts (optional, if you use them)
+dist/
+build/
+public/build/
+
+# Frontend cache/maps (optional)
+*.map
+
+# Others
+coverage/

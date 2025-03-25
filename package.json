@@ -1,0 +1,25 @@
+{
+  "name": "initiative-tracker",
+  "version": "1.0.0",
+  "description": "Initiative tracker for the tabletop roleplaying game Dungeons & Dragons. Helps the dungeon master with their work.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DagurLogi/Initiative-Tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DagurLogi/Initiative-Tracker/issues"
+  },
+  "homepage": "https://github.com/DagurLogi/Initiative-Tracker#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pg": "^8.14.1"
+  }
+}
