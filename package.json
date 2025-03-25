@@ -4,9 +4,8 @@
   "description": "Initiative tracker for the tabletop roleplaying game Dungeons & Dragons. Helps the dungeon master with their work.",
   "main": "index.js",
   "type": "module",
-
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/server.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +22,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "initiative-tracker": "file:",
     "pg": "^8.14.1"
   }
 }

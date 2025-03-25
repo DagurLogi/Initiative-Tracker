@@ -1,15 +1,158 @@
-// server/routes/creatures.js
+// @ts-nocheck
+
 import express from 'express';
+import pool from '../db.js';
 
 const router = express.Router();
 
-// Example GET route
-router.get('/', (req, res) => {
-  res.json({ message: 'GET all creatures - not yet connected to DB' });
+router.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM creatures');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ DB query error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
-// You could also add other routes later like:
-// router.post('/create', ...)
-// router.get('/:id', ...)
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM creatures WHERE id = $1', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Creature not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('❌ DB query error (get by ID):', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Create a new creature
+router.post('/', async (req, res) => {
+  const {
+    name,
+    meta,
+    armor_class,
+    hit_points,
+    speed,
+    stats,
+    saving_throws,
+    skills,
+    senses,
+    languages,
+    challenge,
+    traits,
+    actions,
+    legendary_actions,
+    img_url
+  } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO creatures (
+        name, meta, armor_class, hit_points, speed, stats,
+        saving_throws, skills, senses, languages, challenge,
+        traits, actions, legendary_actions, img_url
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6,
+        $7, $8, $9, $10, $11,
+        $12, $13, $14, $15
+      ) RETURNING *`,
+      [
+        name, meta, armor_class, hit_points, speed, stats,
+        saving_throws, skills, senses, languages, challenge,
+        traits, actions, legendary_actions, img_url
+      ]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('❌ DB insert error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// PUT /api/creatures/:id
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    meta,
+    armor_class,
+    hit_points,
+    speed,
+    stats,
+    saving_throws,
+    skills,
+    senses,
+    languages,
+    challenge,
+    traits,
+    actions,
+    legendary_actions,
+    img_url
+  } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE creatures
+       SET name = $1, meta = $2, armor_class = $3, hit_points = $4, speed = $5, stats = $6, saving_throws = $7,
+           skills = $8, senses = $9, languages = $10, challenge = $11, traits = $12, actions = $13,
+           legendary_actions = $14, img_url = $15
+       WHERE id = $16
+       RETURNING *`,
+      [
+        name,
+        meta,
+        armor_class,
+        hit_points,
+        speed,
+        stats,
+        saving_throws,
+        skills,
+        senses,
+        languages,
+        challenge,
+        traits,
+        actions,
+        legendary_actions,
+        img_url,
+        id
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Creature not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('❌ DB update error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// DELETE /api/creatures/:id
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM creatures WHERE id = $1', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Creature not found' });
+    }
+
+    res.json({ message: 'Creature deleted successfully' });
+  } catch (error) {
+    console.error('❌ DB delete error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 export default router;

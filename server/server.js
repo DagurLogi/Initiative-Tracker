@@ -1,6 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import pool from './db.js'; // Use the pool defined in db.js
+import creaturesRoutes from './routes/creatures.js';
+import pool from './db.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -9,15 +12,21 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()'); // test query
-    res.send(`Database time is: ${result.rows[0].now}`);
-  } catch (error) {
-    console.error('❌ Failed to connect to the database:', error);
-    res.status(500).send('Database connection error');
-  }
+// Serve static files
+app.use(express.static('public'));
+
+// Optional: Root greeting
+app.get('/', (req, res) => {
+  res.sendFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/index.html'));
 });
+
+// Mount API routes
+app.use('/api/creatures', creaturesRoutes);
+
+// Test DB connection
+pool.connect()
+  .then(() => console.log('✅ Connected to database'))
+  .catch((err) => console.error('❌ Failed to connect to the database:', err));
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
