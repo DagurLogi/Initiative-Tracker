@@ -82,3 +82,19 @@
     background-color: #ffeeba;
   }
   
+  .menu-link {
+    display: inline-block;
+    margin: 1rem;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    background-color: #4b0082;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  
+  .menu-link:hover {
+    background-color: #6a0dad;
+  }
+  
