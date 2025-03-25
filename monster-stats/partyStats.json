@@ -1,0 +1,46 @@
+{
+    "groupName": "The Fellowship",
+    "members": [
+      {
+        "name": "Aragorn",
+        "class": "Ranger",
+        "level": 5,
+        "hp": 45,
+        "ac": 18,
+        "initiative": 3,
+        "passivePerception": 14,
+        "resistances": ["poison", "cold"],
+        "immunities": ["charm"],
+        "statusEffects": [
+          {
+            "name": "Bless",
+            "roundsRemaining": 3
+          }
+        ],
+        "concentrating": true
+      },
+      {
+        "name": "Gandalf",
+        "class": "Wizard",
+        "level": 10,
+        "hp": 38,
+        "ac": 18,
+        "initiative": 3,
+        "passivePerception": 14,
+        "resistances": ["fire"],
+        "statusEffects": [],
+        "concentrating": false
+      },
+      {
+        "name": "Legolas",
+        "class": "Rogue",
+        "level": 6,
+        "hp": 40,
+        "ac": 18,
+        "initiative": 3,
+        "passivePerception": 14,
+        "concentrating": false
+      }
+    ]
+  }
+  

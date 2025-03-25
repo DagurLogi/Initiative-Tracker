@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Party</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>🛡️ Create a New Party</h1>
+
+  <form id="party-form">
+    <label for="groupName">Party Name:</label>
+    <input type="text" id="groupName" name="groupName" required />
+
+    <h2>Members</h2>
+    <div id="members-container"></div>
+
+    <button type="button" onclick="addMember()">➕ Add Member</button>
+    <br><br>
+    <button type="submit">✅ Create Party</button>
+  </form>
+
+  <script src="create-party.js"></script>
+</body>
+</html>
