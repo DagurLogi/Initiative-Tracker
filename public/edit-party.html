@@ -1,3 +1,4 @@
+<!-- public/edit-party.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,20 +7,21 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>✍️ Edit Party</h1>
+  <h1>📝 Edit Party</h1>
+
   <form id="editPartyForm">
     <label>
-      Party Name:
+      Group Name:
       <input type="text" id="groupName" required />
     </label>
 
     <div id="memberList"></div>
-
-    <button type="button" id="addMemberBtn">+ Add Member</button>
-    <br/><br/>
-    <button type="submit">🔄 Save Changes</button>
-    <a href="/view-parties.html" style="margin-left: 1rem;">Cancel</a>
+    <button type="button" id="addMemberBtn">Add Member</button>
+    <br><br>
+    <button type="submit">Save Changes</button>
   </form>
+
+  <a href="/view-parties.html" style="display: block; margin-top: 2rem;">← Back to Party List</a>
 
   <script src="edit-party.js"></script>
 </body>
