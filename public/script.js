@@ -46,7 +46,20 @@ async function fetchCreatures() {
             <p><strong>Armor Class:</strong> ${creature.armor_class}</p>
             <p><strong>Hit Points:</strong> ${creature.hit_points}</p>
             <p><strong>Speed:</strong> ${creature.speed}</p>
-            <p><strong>Stats:</strong> ${JSON.stringify(creature.stats)}</p>
+            <div>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                    ${['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].map(stat => {
+                    const value = creature.stats?.[stat] || '?';
+                    const mod = creature.stats?.[`${stat}_mod`] || '';
+                    return `
+                        <div style="text-align: center;">
+                        <div><strong>${stat}</strong></div>
+                        <div>${value} ${mod}</div>
+                        </div>
+                    `;
+                    }).join('')}
+                </div>
+            </div>
             <p><strong>Saving Throws:</strong> ${creature.saving_throws}</p>
             <p><strong>Skills:</strong> ${creature.skills}</p>
             <p><strong>Senses:</strong> ${creature.senses}</p>
@@ -54,7 +67,9 @@ async function fetchCreatures() {
             <p><strong>Challenge:</strong> ${creature.challenge}</p>
             <hr/>
             <div><strong>Traits:</strong> ${creature.traits}</div>
+            <hr/>
             <div><strong>Actions:</strong> ${creature.actions}</div>
+            <hr/>
             <div><strong>Legendary Actions:</strong> ${creature.legendary_actions}</div>
             <img src="${creature.img_url}" alt="${creature.name}" style="max-width: 100%; margin-top: 1rem;" />
           `;
