@@ -3,7 +3,7 @@ import path from 'path';
 import pool from '../server/db.js';
 
 const filePath = path.resolve('monster-stats', 'srd_5e_monsters.json');
-const rawData = fs.readFileSync(filePath);
+const rawData = fs.readFileSync(filePath, 'utf-8');
 const monsters = JSON.parse(rawData);
 
 async function importMonsters() {
