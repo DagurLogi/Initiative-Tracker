@@ -1,42 +1,73 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const list = document.getElementById('party-list');
-    if (!list) {
-      console.error('❌ Element with ID "party-list" not found.');
-      return;
-    }
-  
+// public/view-parties.js
+
+async function fetchParties() {
     try {
-      const response = await fetch('/api/party');
-      const parties = await response.json();
+      const res = await fetch('/api/party');
+      const parties = await res.json();
+  
+      const container = document.getElementById('partiesContainer');
+      if (container) {
+        container.innerHTML = '';
+      }
   
       if (!Array.isArray(parties) || parties.length === 0) {
-        list.innerHTML = '<p>No parties found.</p>';
+        if (container) {
+          container.innerHTML = '<p>No parties found.</p>';
+        }
         return;
       }
   
       parties.forEach(party => {
-        const partyDiv = document.createElement('div');
-        partyDiv.className = 'party';
+        const div = document.createElement('div');
+        div.className = 'party-card';
+        div.innerHTML = `
+        <h2>${party.name}</h2>
+        <button class="toggle-members">Show Members</button>
+        <a class="menu-link" href="/edit-party.html?id=${party.id}">Edit</a>
+        <button class="delete-party" data-id="${party.id}">Delete</button>
+        <div class="members hidden">
+          ${party.members.map(m => `
+            <div class="member">
+              <strong>${m.name}</strong> (Level ${m.level} ${m.class})<br/>
+              HP: ${m.hp}, AC: ${m.ac}, Init: ${m.initiative}, PP: ${m.passivePerception}<br/>
+              Resistances: ${m.resistances.join(', ') || 'None'}<br/>
+              Immunities: ${m.immunities.join(', ') || 'None'}
+            </div>
+          `).join('<hr/>')}
+        </div>
+        <hr/>
+      `;
+      
   
-        const membersHTML = party.members.map(member => `
-          <li>
-            <strong>${member.name}</strong> - ${member.class} (Lvl ${member.level}) 
-            - HP: ${member.hp}, AC: ${member.ac}, Init: ${member.initiative}, PP: ${member.passivePerception}
-            ${member.concentrating ? '⚠️ Concentrating' : ''}
-          </li>
-        `).join('');
+        if (container) {
+          container.appendChild(div);
+        }
   
-        partyDiv.innerHTML = `
-          <h2>${party.name}</h2>
-          <ul>${membersHTML}</ul>
-          <hr />
-        `;
+        div.querySelector('.toggle-members')?.addEventListener('click', () => {
+          div.querySelector('.members')?.classList.toggle('hidden');
+        });
   
-        list.appendChild(partyDiv);
+        div.querySelector('.delete-party')?.addEventListener('click', async (e) => {
+          const target = e.target;
+          const id = target instanceof HTMLElement ? target.getAttribute('data-id') : null;
+          if (id && confirm('Are you sure you want to delete this party?')) {
+            const delRes = await fetch(`/api/party/${id}`, { method: 'DELETE' });
+            if (delRes.ok) {
+              fetchParties(); // Refresh
+            } else {
+              alert('❌ Failed to delete party');
+            }
+          }
+        });
       });
     } catch (err) {
-      console.error('❌ Failed to fetch parties:', err);
-      list.innerHTML = '<p>Error loading parties.</p>';
+      console.error('❌ Failed to load parties:', err);
+      const container = document.getElementById('partiesContainer');
+      if (container) {
+        container.innerHTML = `<p>Error loading parties.</p>`;
+      }
     }
-  });
+  }
+  
+  document.addEventListener('DOMContentLoaded', fetchParties);
   
