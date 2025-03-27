@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import creaturesRoutes from './routes/creatures.js';
 import partyRoutes from './routes/party.js';
+import encounterRoutes from './routes/encounter.js';
 import pool from './db.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,7 +19,7 @@ app.use(express.json());
 // Mount API routes
 app.use('/api/creatures', creaturesRoutes);
 app.use('/api/party', partyRoutes);
-
+app.use('/api/encounter', encounterRoutes);
 
 
 // Test DB connection

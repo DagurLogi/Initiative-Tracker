@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Encounter</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .split-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .encounter-left,
+    .encounter-right {
+      flex: 1;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .encounter-left {
+      background-color: #fdf6e3;
+      overflow-y: auto;
+    }
+
+    .encounter-right {
+      background-color: #fff;
+      border-left: 1px solid #ccc;
+      overflow-y: auto;
+    }
+
+    .monster-preview {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .monster-preview:hover {
+      background-color: #ffeeba;
+    }
+
+    .selected-monster {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .remove-monster {
+      background: red;
+      color: white;
+      border: none;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Create an Encounter</h1>
+  <div class="split-container">
+    <!-- Left side: Encounter Info -->
+    <div class="encounter-left">
+      <form id="encounterForm">
+        <label for="encounterName">Encounter Name:</label>
+        <input type="text" id="encounterName" name="encounterName" required />
+
+        <label for="partySelect">Select Party:</label>
+        <select id="partySelect" required>
+          <option disabled selected value="">-- Choose party --</option>
+          <!-- Party options will be populated here -->
+        </select>
+
+        <h3>Selected Monsters</h3>
+        <div id="selectedMonsters"></div>
+
+        <h3>Initiative Input</h3>
+        <div id="initiativeInputs"></div>
+
+        <button type="submit">Save Encounter</button>
+      </form>
+    </div>
+
+    <!-- Right side: Monster list -->
+    <div class="encounter-right">
+      <h3>Available Monsters</h3>
+      <div id="monsterList"></div>
+    </div>
+  </div>
+
+  <a href="/" class="back-button">← Back to Home</a>
+
+  <script src="create-encounter.js"></script>
+</body>
+</html>

@@ -106,4 +106,32 @@
     border-radius: 8px;
   }
  
+  .floating {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+  }
+  
+  .back-button {
+    display: block;
+    text-align: center;
+    padding: 1rem;
+    background-color: #fdf6e3;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 1.2rem;
+    color: black;
+    transition: background-color 0.3s ease;
+  
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .back-button:hover {
+    background-color: #ffeeba;
+  }
   
