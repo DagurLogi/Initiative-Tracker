@@ -49,37 +49,56 @@ function addMonsterToEncounter(creature) {
 }
 
 function renderSelectedMonsters() {
-  selectedMonstersDiv.innerHTML = '';
-  selectedMonstersMap.forEach(monster => {
-    const div = document.createElement('div');
-    div.className = 'selected-monster';
-    div.innerHTML = `
-      <span>${monster.name}</span>
-      <input type="number" value="${monster.count}" data-id="${monster.id}" min="1" style="width: 60px" />
-      <button class="remove-monster" data-id="${monster.id}">X</button>
-    `;
-    selectedMonstersDiv.appendChild(div);
-  });
-
-  selectedMonstersDiv.querySelectorAll('input[type="number"]').forEach(input => {
-    input.addEventListener('input', e => {
-      const inputElem = /** @type {HTMLInputElement} */ (e.target);
-      const id = parseInt(inputElem.getAttribute('data-id') || '0');
-      if (selectedMonstersMap.has(id)) {
-        selectedMonstersMap.get(id).count = parseInt(inputElem.value);
-      }
+    selectedMonstersDiv.innerHTML = '';
+    selectedMonstersMap.forEach(monster => {
+      const div = document.createElement('div');
+      div.className = 'selected-monster';
+      div.innerHTML = `
+        <span>${monster.name}</span>
+        <label>Qty: 
+          <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
+        </label>
+        <label>Group size: 
+          <input type="number" value="${monster.groupSize || 1}" data-id="${monster.id}" class="group-size" min="1" max="10" />
+        </label>
+        <button class="remove-monster" data-id="${monster.id}">X</button>
+      `;
+      selectedMonstersDiv.appendChild(div);
     });
-  });
-
-  selectedMonstersDiv.querySelectorAll('.remove-monster').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const btnElem = /** @type {HTMLElement} */ (e.target);
-      const id = parseInt(btnElem.getAttribute('data-id') || '0');
-      selectedMonstersMap.delete(id);
-      renderSelectedMonsters();
+  
+    // Quantity input
+    selectedMonstersDiv.querySelectorAll('.monster-count').forEach(input => {
+      input.addEventListener('input', e => {
+        const inputElem = /** @type {HTMLInputElement} */ (e.target);
+        const id = parseInt(inputElem.getAttribute('data-id') || '0');
+        if (selectedMonstersMap.has(id)) {
+          selectedMonstersMap.get(id).count = parseInt(inputElem.value);
+        }
+      });
     });
-  });
-}
+  
+    // Group size input
+    selectedMonstersDiv.querySelectorAll('.group-size').forEach(input => {
+      input.addEventListener('input', e => {
+        const inputElem = /** @type {HTMLInputElement} */ (e.target);
+        const id = parseInt(inputElem.getAttribute('data-id') || '0');
+        if (selectedMonstersMap.has(id)) {
+          selectedMonstersMap.get(id).groupSize = parseInt(inputElem.value);
+        }
+      });
+    });
+  
+    // Remove monster
+    selectedMonstersDiv.querySelectorAll('.remove-monster').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const btnElem = /** @type {HTMLElement} */ (e.target);
+        const id = parseInt(btnElem.getAttribute('data-id') || '0');
+        selectedMonstersMap.delete(id);
+        renderSelectedMonsters();
+      });
+    });
+  }
+  
 
 partySelect.addEventListener('change', async () => {
   const id = /** @type {HTMLSelectElement} */ (partySelect).value;
