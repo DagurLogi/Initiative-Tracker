@@ -29,7 +29,7 @@ async function fetchParties() {
           ${party.members.map(m => `
             <div class="member">
               <strong>${m.name}</strong> (Level ${m.level} ${m.class})<br/>
-              HP: ${m.hp}, AC: ${m.ac}, Init: ${m.initiative}, PP: ${m.passivePerception}<br/>
+              HP: ${m.hp}, AC: ${m.ac}, Dex: ${m.dex}, PP: ${m.passivePerception}<br/>
               Resistances: ${m.resistances.join(', ') || 'None'}<br/>
               Immunities: ${m.immunities.join(', ') || 'None'}
             </div>

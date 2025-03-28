@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <input type="number" placeholder="Level" class="level" required />
       <input type="number" placeholder="Max HP" class="hp" required />
       <input type="number" placeholder="AC" class="ac" required />
-      <input type="number" placeholder="Initiative" class="initiative" required />
+      <input type="number" placeholder="Dexterity" class="dex" required />
       <input type="number" placeholder="Passive Perception" class="pp" required />
       <input type="text" placeholder="Resistances (comma-separated)" class="resistances" />
       <input type="text" placeholder="Immunities (comma-separated)" class="immunities" />
@@ -62,11 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
         level: getNum('.level'),
         hp: getNum('.hp'),
         ac: getNum('.ac'),
-        initiative: getNum('.initiative'),
+        dex: getNum('.dex'),
         passivePerception: getNum('.pp'),
         resistances: getVal('.resistances')?.split(',').map(s => s.trim()).filter(Boolean) || [],
         immunities: getVal('.immunities')?.split(',').map(s => s.trim()).filter(Boolean) || [],
-        // concentrating will be handled in battle logic later
+        initiative: 0 // default for encounter-time assignment
       });
     });
 
