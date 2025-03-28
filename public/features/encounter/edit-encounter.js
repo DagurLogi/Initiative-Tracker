@@ -37,7 +37,7 @@
           div.textContent = `${creature.name} (${creature.meta})`;
           div.addEventListener('click', () => {
             if (!selectedMonstersMap.has(creature.id)) {
-              selectedMonstersMap.set(creature.id, { id: creature.id, name: creature.name, count: 1, groupSize: 1, initiative: 0 });
+              selectedMonstersMap.set(creature.id, { id: creature.id, name: creature.name, count: 1, groupSize: 1, initiatives: [] });
               renderSelectedMonsters();
             }
           });
@@ -55,6 +55,9 @@
       selectedMonstersMap.forEach(monster => {
         const div = document.createElement('div');
         div.className = 'selected-monster';
+  
+        const inputs = monster.initiatives?.map((val, i) => `<input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val}" />`).join('') || '';
+  
         div.innerHTML = `
           <span>${monster.name}</span>
           <label>Qty: 
@@ -63,9 +66,7 @@
           <label>Group size: 
             <input type="number" value="${monster.groupSize || 1}" data-id="${monster.id}" class="group-size" min="1" max="10" />
           </label>
-          <label>Initiative: 
-            <input type="number" value="${monster.initiative || ''}" data-id="${monster.id}" class="monster-init" />
-          </label>
+          <div>Initiatives: ${inputs}</div>
           <button class="remove-monster" data-id="${monster.id}">X</button>
         `;
         selectedMonstersDiv?.appendChild(div);
@@ -77,6 +78,7 @@
           const id = parseInt(target.getAttribute('data-id') || '0');
           if (selectedMonstersMap.has(id)) {
             selectedMonstersMap.get(id).count = parseInt(target.value);
+            updateMonsterInitiatives(id);
           }
         });
       });
@@ -87,6 +89,7 @@
           const id = parseInt(target.getAttribute('data-id') || '0');
           if (selectedMonstersMap.has(id)) {
             selectedMonstersMap.get(id).groupSize = parseInt(target.value);
+            updateMonsterInitiatives(id);
           }
         });
       });
@@ -95,8 +98,9 @@
         input.addEventListener('input', e => {
           const target = /** @type {HTMLInputElement} */ (e.target);
           const id = parseInt(target.getAttribute('data-id') || '0');
+          const index = parseInt(target.getAttribute('data-index') || '0');
           if (selectedMonstersMap.has(id)) {
-            selectedMonstersMap.get(id).initiative = parseInt(target.value);
+            selectedMonstersMap.get(id).initiatives[index] = parseInt(target.value);
           }
         });
       });
@@ -109,6 +113,13 @@
           renderSelectedMonsters();
         });
       });
+    }
+  
+    function updateMonsterInitiatives(id) {
+      const monster = selectedMonstersMap.get(id);
+      const totalGroups = Math.ceil((monster.count || 1) / (monster.groupSize || 1));
+      monster.initiatives = Array.from({ length: totalGroups }, (_, i) => monster.initiatives?.[i] ?? 0);
+      renderSelectedMonsters();
     }
   
     async function loadEncounter() {
@@ -144,8 +155,19 @@
       }
   
       data.monsters.forEach(monster => {
-        selectedMonstersMap.set(monster.id, monster);
+        const count = monster.count || 1;
+        const groupSize = monster.groupSize || 1;
+        const totalGroups = Math.ceil(count / groupSize);
+  
+        const matching = data.initiative.filter(i => i.name.startsWith(monster.name));
+        const initiatives = matching.map(i => i.initiative);
+  
+        selectedMonstersMap.set(monster.id, {
+          ...monster,
+          initiatives: initiatives.length ? initiatives : Array(totalGroups).fill(0),
+        });
       });
+  
       renderSelectedMonsters();
     }
   
@@ -176,12 +198,12 @@
         }
       });
   
-      // Add monster initiatives from selectedMonstersMap
       monsters.forEach(monster => {
-        if (typeof monster.initiative === 'number') {
+        const totalGroups = Math.ceil((monster.count || 1) / (monster.groupSize || 1));
+        for (let i = 0; i < totalGroups; i++) {
           initiatives.push({
-            name: monster.name,
-            initiative: monster.initiative,
+            name: totalGroups > 1 ? `${monster.name} Group ${i + 1}` : monster.name,
+            initiative: monster.initiatives[i] || 0,
             dex: 0,
             type: 'monster'
           });
@@ -192,12 +214,7 @@
         const res = await fetch(`/api/encounter/${encounterId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name,
-            partyId,
-            monsters,
-            initiatives
-          })
+          body: JSON.stringify({ name, partyId, monsters, initiatives })
         });
   
         if (res.ok) {

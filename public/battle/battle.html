@@ -4,6 +4,38 @@
   <meta charset="UTF-8" />
   <title>🛡️ Battle Tracker</title>
   <link rel="stylesheet" href="../styles/styles.css" />
+  <style>
+    .initiative-list {
+      margin-top: 1rem;
+    }
+  
+    .combatant-card {
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  
+    .combatant-card.active {
+      border-color: #4b0082;
+      background-color: #efeaff;
+    }
+  
+    .combatant-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+    }
+  
+    .combatant-details {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: #333;
+    }
+  </style>
+  
 </head>
 <body>
   <h1 id="encounterTitle">⚔️ Encounter: <span>Loading...</span></h1>
@@ -11,7 +43,7 @@
   <p><em>The battle begins. Dice have been rolled, swords are drawn, and fate is watching.</em></p>
 
   <h2>📜 Initiative Order</h2>
-  <ul id="initiativeList"></ul>
+  <div id="initiativeList" class="initiative-list"></div>
 
   <div>
     <button id="prevBtn">⏪ Previous</button>

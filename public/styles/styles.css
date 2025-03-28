@@ -135,3 +135,42 @@
     background-color: #ffeeba;
   }
   
+  /* Split layout for edit encounter */
+.encounter-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: flex-start;
+  padding: 1rem;
+}
+
+.left-panel {
+  flex: 1;
+  min-width: 300px;
+}
+
+.right-panel {
+  flex: 1;
+  min-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-left: 2px solid #ccc;
+  padding-left: 1rem;
+  background-color: #f9f9f9;
+}
+
+.monster-preview {
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  background-color: #f0f8ff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.monster-preview:hover {
+  background-color: #dbeeff;
+  transform: scale(1.02);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
