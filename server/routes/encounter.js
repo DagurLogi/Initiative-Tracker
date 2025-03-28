@@ -38,20 +38,20 @@ router.get('/:id', async (req, res) => {
         const member = partyMembers.find(p => p.name === entry.name);
         return {
           ...entry,
-          ac: member?.ac ?? null,
-          hp: member?.hp ?? null,
-          maxHp: member?.hp ?? null,
-          passivePerception: member?.passivePerception ?? null,
+          ac: member?.ac ?? '?',
+          hp: member?.hp ?? '?',
+          maxHp: member?.hp ?? '?',
+          passivePerception: member?.passivePerception ?? '?',
         };
       } else {
         const baseName = entry.name.split(' Group')[0];
         const creature = creatureMap.get(baseName);
         return {
           ...entry,
-          ac: creature?.ac ?? null,
-          hp: creature?.hp ?? null,
-          maxHp: creature?.hp ?? null,
-          passivePerception: creature?.passivePerception ?? null,
+          ac: creature?.ac ?? '?',
+          hp: creature?.hp ?? '?',
+          maxHp: creature?.hp ?? '?',
+          passivePerception: creature?.passivePerception ?? '?',
         };
       }
     });
@@ -77,38 +77,48 @@ router.post('/', async (req, res) => {
 
   const fullInitiative = [...initiatives];
 
-  // Group monsters into user-defined group size for initiative
-  monsters.forEach(monster => {
-    const count = monster.count || 1;
-    const groupSize = monster.groupSize && monster.groupSize > 0 ? monster.groupSize : 1;
-    const totalGroups = Math.ceil(count / groupSize);
-
-    for (let i = 0; i < totalGroups; i++) {
-      const currentGroupCount = Math.min(groupSize, count - i * groupSize);
-      const dexMod = getDexMod(monster.id);
-      const roll = Math.floor(Math.random() * 20) + 1 + dexMod;
-      const label = totalGroups > 1 ? `${monster.name} Group ${i + 1}` : monster.name;
-      fullInitiative.push({ name: label, initiative: roll, type: 'monster', dex: dexMod });
-    }
-  });
-
   try {
+    const creatureRes = await pool.query('SELECT * FROM creatures');
+    const creatureMap = new Map(creatureRes.rows.map(c => [c.id, c]));
+
+    for (const monster of monsters) {
+      const creature = creatureMap.get(monster.id);
+      if (!creature) continue;
+
+      const hp = creature.hp ?? 10; // fallback
+      const count = monster.count || 1;
+      const groupSize = monster.groupSize && monster.groupSize > 0 ? monster.groupSize : 1;
+      const totalGroups = Math.ceil(count / groupSize);
+
+      for (let i = 0; i < totalGroups; i++) {
+        const members = [];
+        const groupCount = Math.min(groupSize, count - i * groupSize);
+        for (let j = 0; j < groupCount; j++) {
+          members.push({ name: `${monster.name} ${j + 1}`, hp, maxHp: hp });
+        }
+
+        const label = totalGroups > 1 ? `${monster.name} Group ${i + 1}` : monster.name;
+        fullInitiative.push({
+          name: label,
+          initiative: 0, // set later if needed
+          type: 'monster',
+          dex: 0,
+          members
+        });
+      }
+    }
+
     const result = await pool.query(
       'INSERT INTO encounters (name, party_id, monsters, initiative) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative)]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('❌ Failed to save encounter:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-// Helper to fetch creature's DEX mod from DB
-function getDexMod(creatureId) {
-  // Replace with DB lookup if needed. Default +0.
-  return 0;
-}
 
 // PUT update an existing encounter
 router.put('/:id', async (req, res) => {
