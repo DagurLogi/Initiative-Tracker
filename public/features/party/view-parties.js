@@ -23,7 +23,7 @@ async function fetchParties() {
         div.innerHTML = `
         <h2>${party.name}</h2>
         <button class="toggle-members">Show Members</button>
-        <a class="menu-link" href="/edit-party.html?id=${party.id}">Edit</a>
+        <a class="menu-link" href="edit-party.html?id=${party.id}">Edit</a>
         <button class="delete-party" data-id="${party.id}">Delete</button>
         <div class="members hidden">
           ${party.members.map(m => `

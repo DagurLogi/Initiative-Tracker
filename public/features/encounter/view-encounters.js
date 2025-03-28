@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
   
         card.querySelector('.enter-battle')?.addEventListener('click', () => {
-          window.location.href = `/battle.html?id=${encounter.id}`;
+          window.location.href = `../../battle/battle.html?id=${encounter.id}`;
         });
   
         card.querySelector('.delete-encounter')?.addEventListener('click', async () => {
