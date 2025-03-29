@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
         if (res.ok) {
           alert(`✅ Party ${partyId ? 'updated' : 'created'}!`);
-          window.location.href = '/view-parties.html';
+          window.location.href='view-parties.html';
         } else {
           const errorData = await res.json();
           console.error('❌ Server error:', errorData);
