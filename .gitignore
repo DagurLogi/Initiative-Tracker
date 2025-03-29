@@ -20,13 +20,19 @@ db/
 .DS_Store
 Thumbs.db
 
-# Build artifacts (optional, if you use them)
-dist/
-build/
+# Build artifacts
+dist/                   # <-- Root dist/ folder
+public/dist/            # <-- Compiled TS output
 public/build/
 
-# Frontend cache/maps (optional)
-*.map
+# Compiled JavaScript + source maps
+*.js.map
+*.tsbuildinfo
+public/**/*.js          # Ignore compiled JS files (but keep .ts!)
 
-# Others
+# Coverage/testing
 coverage/
+
+# Misc
+tmp/
+temp/

@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+// Encounter Api (updated backend route for proper monster initiative and stats)
+
 import express from 'express';
 import pool from '../db.js';
 
@@ -16,7 +18,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET encounter by ID with enriched initiative data
+// GET encounter by ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -24,41 +26,9 @@ router.get('/:id', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Encounter not found' });
     }
-
-    const encounter = result.rows[0];
-    const partyRes = await pool.query('SELECT * FROM parties WHERE id = $1', [encounter.party_id]);
-    const party = partyRes.rows[0];
-    const partyMembers = party?.members || [];
-
-    const creatureRes = await pool.query('SELECT * FROM creatures');
-    const creatureMap = new Map(creatureRes.rows.map(c => [c.name, c]));
-
-    const enhancedInitiative = encounter.initiative.map(entry => {
-      if (entry.type === 'player') {
-        const member = partyMembers.find(p => p.name === entry.name);
-        return {
-          ...entry,
-          ac: member?.ac ?? '?',
-          hp: member?.hp ?? '?',
-          maxHp: member?.hp ?? '?',
-          passivePerception: member?.passivePerception ?? '?',
-        };
-      } else {
-        const baseName = entry.name.split(' Group')[0];
-        const creature = creatureMap.get(baseName);
-        return {
-          ...entry,
-          ac: creature?.ac ?? '?',
-          hp: creature?.hp ?? '?',
-          maxHp: creature?.hp ?? '?',
-          passivePerception: creature?.passivePerception ?? '?',
-        };
-      }
-    });
-
-    res.json({ ...encounter, initiative: enhancedInitiative });
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error('❌ Failed to fetch enriched encounter:', err);
+    console.error('❌ Failed to fetch encounter:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -75,44 +45,77 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Please fill out the initiative before completing the encounter' });
   }
 
-  const fullInitiative = [...initiatives];
-
   try {
-    const creatureRes = await pool.query('SELECT * FROM creatures');
-    const creatureMap = new Map(creatureRes.rows.map(c => [c.id, c]));
+    const fullInitiative = [];
 
+    // Load all creatures from DB to map their full statblock
+    const creatureRes = await pool.query('SELECT id, name, stats FROM creatures');
+    const creatureMap = new Map();
+    creatureRes.rows.forEach(row => {
+      const stats = row.stats || {};
+      const dex = parseInt(stats.DEX) || 0;
+      const mod = parseInt((stats.DEX_mod || '0').replace(/[^-\d]/g, '')) || 0;
+      creatureMap.set(row.id, {
+        name: row.name,
+        dex,
+        mod,
+        fullStatblock: stats
+      });
+    });
+
+    // Add players
+    for (const player of initiatives) {
+      fullInitiative.push({
+        name: player.name,
+        initiative: player.initiative,
+        dex: player.dex || 0,
+        type: 'player'
+      });
+    }
+
+    // Add monsters with full statblock
     for (const monster of monsters) {
-      const creature = creatureMap.get(monster.id);
-      if (!creature) continue;
-
-      const hp = creature.hp ?? 10; // fallback
-      const count = monster.count || 1;
-      const groupSize = monster.groupSize && monster.groupSize > 0 ? monster.groupSize : 1;
+      const { id, name, count = 1, groupSize = 1 } = monster;
       const totalGroups = Math.ceil(count / groupSize);
+      const stat = creatureMap.get(id);
 
       for (let i = 0; i < totalGroups; i++) {
-        const members = [];
-        const groupCount = Math.min(groupSize, count - i * groupSize);
-        for (let j = 0; j < groupCount; j++) {
-          members.push({ name: `${monster.name} ${j + 1}`, hp, maxHp: hp });
-        }
+        const label = totalGroups > 1 ? `${name} Group ${i + 1}` : name;
+        const initiative = Math.floor(Math.random() * 20 + 1) + (stat?.mod || 0);
 
-        const label = totalGroups > 1 ? `${monster.name} Group ${i + 1}` : monster.name;
+        const members = Array.from({ length: groupSize }, (_, j) => ({
+          name: `${label.split(' Group')[0]} ${j + 1}`,
+          hp: null,
+          maxHp: null,
+          ac: null,
+          passivePerception: null,
+          statblock: stat?.fullStatblock || {}
+        }));
+
         fullInitiative.push({
           name: label,
-          initiative: 0, // set later if needed
+          initiative,
+          dex: stat?.dex || 0,
           type: 'monster',
-          dex: 0,
-          members
+          members,
+          statblock: stat?.fullStatblock || {}
         });
       }
     }
+
+    // Sort initiative with full logic
+    fullInitiative.sort((a, b) => {
+      if (b.initiative !== a.initiative) return b.initiative - a.initiative;
+      if ((b.dex || 0) !== (a.dex || 0)) return (b.dex || 0) - (a.dex || 0);
+      if ((a.type || 'player') === 'player' && (b.type || 'monster') === 'monster') return -1;
+      if ((a.type || 'player') === 'monster' && (b.type || 'player') === 'player') return 1;
+      return Math.random() < 0.5 ? -1 : 1;
+    });
 
     const result = await pool.query(
       'INSERT INTO encounters (name, party_id, monsters, initiative) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative)]
     );
-
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('❌ Failed to save encounter:', err);
