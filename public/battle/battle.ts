@@ -67,14 +67,35 @@ const battleState = {
 
   async initFromServer(encounterId: string) {
     const res = await fetch(`/api/battle/${encounterId}`);
+    
     if (res.ok) {
       const state = await res.json();
       this.combatants = state.combatants;
       this.currentIndex = state.currentIndex;
       this.round = state.round;
       this.turnCounter = state.turnCounter;
+    } else {
+      console.log("⚠️ No existing battle found. Initializing new one...");
+      // Battle doesn't exist, initialize fresh and persist
+      const initResponse = await fetch(`/api/encounter/${encounterId}`);
+      const data = await initResponse.json();
+      this.combatants = data.initiative.map((c: Combatant): Combatant => ({
+        ...c,
+        currentHp: c.hp || c.maxHp || 0,
+        statusEffects: [] as StatusEffect[],
+        members: c.members?.map((m: CombatantMember): CombatantMember => ({
+          ...m,
+          currentHp: m.hp || m.maxHp || 0
+        })) || []
+      }));
+      this.currentIndex = 0;
+      this.round = 1;
+      this.turnCounter = 1;
+      
+      await this.persistState(); 
     }
-  },
+  }
+  ,
 
   async persistState() {
     if (!encounterId) return;

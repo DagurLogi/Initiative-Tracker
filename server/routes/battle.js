@@ -5,6 +5,16 @@ import pool from '../db.js';
 const router = express.Router();
 
 // GET battle state by encounter ID
+router.get('/', async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM battles');
+      res.json(result.rows);
+    } catch (err) {
+      console.error('❌ Failed to fetch battles:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 router.get('/:encounterId', async (req, res) => {
   const { encounterId } = req.params;
 

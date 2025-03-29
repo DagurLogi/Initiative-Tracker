@@ -37,6 +37,25 @@ const battleState = {
             this.round = state.round;
             this.turnCounter = state.turnCounter;
         }
+        else {
+            console.log("⚠️ No existing battle found. Initializing new one...");
+            // Battle doesn't exist, initialize fresh and persist
+            const initResponse = await fetch(`/api/encounter/${encounterId}`);
+            const data = await initResponse.json();
+            this.combatants = data.initiative.map((c) => ({
+                ...c,
+                currentHp: c.hp || c.maxHp || 0,
+                statusEffects: [],
+                members: c.members?.map((m) => ({
+                    ...m,
+                    currentHp: m.hp || m.maxHp || 0
+                })) || []
+            }));
+            this.currentIndex = 0;
+            this.round = 1;
+            this.turnCounter = 1;
+            await this.persistState();
+        }
     },
     async persistState() {
         if (!encounterId)
