@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import creaturesRoutes from './routes/creatures.js';
 import partyRoutes from './routes/party.js';
 import encounterRoutes from './routes/encounter.js';
+import battleRoute from './routes/battle.js';
 import pool from './db.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,6 +21,8 @@ app.use(express.json());
 app.use('/api/creatures', creaturesRoutes);
 app.use('/api/party', partyRoutes);
 app.use('/api/encounter', encounterRoutes);
+app.use('/api/battle', battleRoute);
+
 
 
 // Test DB connection
