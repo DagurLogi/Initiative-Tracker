@@ -1,7 +1,5 @@
 // @ts-nocheck
 
-// Encounter Api (updated backend route for proper monster initiative and stats)
-
 import express from 'express';
 import pool from '../db.js';
 
@@ -33,7 +31,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST create a new encounter
+// POST create a new encounter with full statblocks and group-based initiative
 router.post('/', async (req, res) => {
   const { name, partyId, monsters, initiatives } = req.body;
 
@@ -48,11 +46,9 @@ router.post('/', async (req, res) => {
   try {
     const fullInitiative = [];
 
-    // 👉 Load party info for player stat mapping
     const partyRes = await pool.query('SELECT * FROM parties WHERE id = $1', [partyId]);
     const partyMembers = partyRes.rows[0]?.members || [];
 
-    // 👉 Load all monsters and create a creature stat map
     const creatureRes = await pool.query('SELECT id, name, stats FROM creatures');
     const creatureMap = new Map();
     creatureRes.rows.forEach(row => {
@@ -67,10 +63,9 @@ router.post('/', async (req, res) => {
       });
     });
 
-    // ✅ Add players to initiative, pulling full stats from the party
+    // Add players
     for (const player of initiatives) {
       const match = partyMembers.find(m => m.name === player.name);
-
       fullInitiative.push({
         name: player.name,
         initiative: player.initiative,
@@ -78,44 +73,52 @@ router.post('/', async (req, res) => {
         type: 'player',
         ac: match?.ac || null,
         hp: match?.hp || null,
-        maxHp: match?.maxHp || null,
+        maxHp: match?.hp || null,
         passivePerception: match?.passivePerception || null,
         statblock: match || {}
       });
     }
 
-    // ✅ Add monsters to initiative
+    // Add monsters with individual initiative sharing logic and full statblock
     for (const monster of monsters) {
       const { id, name, count = 1, groupSize = 1 } = monster;
-      const totalGroups = Math.ceil(count / groupSize);
       const stat = creatureMap.get(id);
+      const dex = stat?.dex || 0;
+      const mod = stat?.mod || 0;
 
-      for (let i = 0; i < totalGroups; i++) {
-        const label = totalGroups > 1 ? `${name} Group ${i + 1}` : name;
-        const initiative = Math.floor(Math.random() * 20 + 1) + (stat?.mod || 0);
+      const numGroups = Math.ceil(count / groupSize);
+      const groupRolls = Array.from({ length: numGroups }, () => {
+        const roll = Math.floor(Math.random() * 20 + 1);
+        return {
+          roll,
+          final: roll + mod,
+          naturalOne: roll === 1
+        };
+      });
 
-        const members = Array.from({ length: groupSize }, (_, j) => ({
-          name: `${label.split(' Group')[0]} ${j + 1}`,
-          hp: parseInt(stat?.fullStatblock['Hit Points']) || null,
-          maxHp: parseInt(stat?.fullStatblock['Hit Points']) || null,
-          ac: parseInt(stat?.fullStatblock['Armor Class']) || null,
-          passivePerception: parseInt(stat?.fullStatblock['Passive Perception']) || null,
-          statblock: stat?.fullStatblock || {}
-        }));
+      for (let i = 0; i < count; i++) {
+        const groupIndex = Math.floor(i / groupSize);
+        const { final, roll, naturalOne } = groupRolls[groupIndex];
 
         fullInitiative.push({
-          name: label,
-          initiative,
-          dex: stat?.dex || 0,
+          name: `${name} ${i + 1}`,
+          initiative: final,
+          rawInitiative: roll,
+          dex,
           type: 'monster',
-          members,
-          statblock: stat?.fullStatblock || {}
+          ac: parseInt(stat?.fullStatblock['Armor Class']) || null,
+          hp: parseInt(stat?.fullStatblock['Hit Points']) || null,
+          maxHp: parseInt(stat?.fullStatblock['Hit Points']) || null,
+          passivePerception: parseInt(stat?.fullStatblock['Passive Perception']) || null,
+          statblock: stat?.fullStatblock || {},
+          naturalOne
         });
       }
     }
 
-    // ✅ Sort initiative
     fullInitiative.sort((a, b) => {
+      if (a.naturalOne && !b.naturalOne) return 1;
+      if (!a.naturalOne && b.naturalOne) return -1;
       if (b.initiative !== a.initiative) return b.initiative - a.initiative;
       if ((b.dex || 0) !== (a.dex || 0)) return (b.dex || 0) - (a.dex || 0);
       if ((a.type || 'player') === 'player' && (b.type || 'monster') === 'monster') return -1;
@@ -123,7 +126,6 @@ router.post('/', async (req, res) => {
       return Math.random() < 0.5 ? -1 : 1;
     });
 
-    // ✅ Save to DB
     const result = await pool.query(
       'INSERT INTO encounters (name, party_id, monsters, initiative) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative)]
@@ -136,16 +138,17 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-// PUT update an existing encounter
+// PUT update encounter
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { name, partyId, monsters, initiatives } = req.body;
-  // Re-sort the initiative list like in POST route
+
   initiatives.sort((a, b) => {
+    if (a.naturalOne && !b.naturalOne) return 1;
+    if (!a.naturalOne && b.naturalOne) return -1;
     if (b.initiative !== a.initiative) return b.initiative - a.initiative;
     if ((b.dex || 0) !== (a.dex || 0)) return (b.dex || 0) - (a.dex || 0);
-    if ((a.type || 'player') === 'player' && (b.type || 'player') === 'monster') return -1;
+    if ((a.type || 'player') === 'player' && (b.type || 'monster') === 'monster') return -1;
     if ((a.type || 'player') === 'monster' && (b.type || 'player') === 'player') return 1;
     return Math.random() < 0.5 ? -1 : 1;
   });

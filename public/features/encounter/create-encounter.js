@@ -43,7 +43,13 @@ async function fetchCreatures() {
 
 function addMonsterToEncounter(creature) {
   if (selectedMonstersMap.has(creature.id)) return;
-  selectedMonstersMap.set(creature.id, { id: creature.id, name: creature.name, count: 1 });
+  selectedMonstersMap.set(creature.id, {
+    id: creature.id,
+    name: creature.name,
+    count: 1,
+    groupSize: 1 // 🆕 default group size
+  });
+  
   renderSelectedMonsters();
 }
 
