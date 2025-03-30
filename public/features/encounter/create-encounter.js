@@ -48,8 +48,7 @@ function addMonsterToEncounter(creature) {
     name: creature.name,
     count: 1,
     groupSize: 1 // 🆕 default group size
-  });
-  
+  });  
   renderSelectedMonsters();
 }
 

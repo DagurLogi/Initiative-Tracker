@@ -17,10 +17,11 @@ async function fetchCreatures() {
         const div = document.createElement('div');
         div.classList.add('creature-card');
         div.innerHTML = `
-          <h2>${creature.name}</h2>
-          <p><em>${creature.meta}</em></p>
-          <button onclick="viewStatBlock(${creature.id})">View Statblock</button>
+          <div class="creature-title">${creature.name} — ${creature.challenge || 'CR ?'}</div>
+          <div class="creature-meta">${creature.meta || 'Unknown type'}</div>
+          <button class="creature-button" onclick="viewStatBlock(${creature.id})">View Statblock</button>
         `;
+
         if (listDiv) {
           listDiv.appendChild(div);
         }
@@ -46,33 +47,42 @@ async function fetchCreatures() {
             <p><strong>Armor Class:</strong> ${creature.armor_class}</p>
             <p><strong>Hit Points:</strong> ${creature.hit_points}</p>
             <p><strong>Speed:</strong> ${creature.speed}</p>
-            <div>
-                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                    ${['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].map(stat => {
-                    const value = creature.stats?.[stat] || '?';
-                    const mod = creature.stats?.[`${stat}_mod`] || '';
-                    return `
-                        <div style="text-align: center;">
-                        <div><strong>${stat}</strong></div>
-                        <div>${value} ${mod}</div>
-                        </div>
-                    `;
-                    }).join('')}
-                </div>
+
+            <div style="margin-top: 0.5rem;">
+              <div style="display: flex; gap: 1rem;">
+                ${['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].map(stat => {
+                  const value = creature.stats?.[stat] || '?';
+                  const mod = creature.stats?.[`${stat}_mod`] || '';
+                  return `
+                    <div style="text-align: center;">
+                      <div><strong>${stat}</strong></div>
+                      <div>${value} ${mod}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
             </div>
+
             <p><strong>Saving Throws:</strong> ${creature.saving_throws}</p>
             <p><strong>Skills:</strong> ${creature.skills}</p>
             <p><strong>Senses:</strong> ${creature.senses}</p>
             <p><strong>Languages:</strong> ${creature.languages}</p>
             <p><strong>Challenge:</strong> ${creature.challenge}</p>
+            <p><strong>Damage Resistances:</strong> ${creature.damage_resistances || '—'}</p>
+            <p><strong>Damage Immunities:</strong> ${creature.damage_immunities || '—'}</p>
+            <p><strong>Damage Vulnerabilities:</strong> ${creature.damage_vulnerabilities || '—'}</p>
+            <p><strong>Condition Immunities:</strong> ${creature.condition_immunities || '—'}</p>
+
             <hr/>
             <div><strong>Traits:</strong> ${creature.traits}</div>
             <hr/>
             <div><strong>Actions:</strong> ${creature.actions}</div>
-            <hr/>
-            <div><strong>Legendary Actions:</strong> ${creature.legendary_actions}</div>
-            <img src="${creature.img_url}" alt="${creature.name}" style="max-width: 100%; margin-top: 1rem;" />
+            ${creature.reactions ? `<hr/><div><strong>Reactions:</strong> ${creature.reactions}</div>` : ''}
+            ${creature.legendary_actions ? `<hr/><div><strong>Legendary Actions:</strong> ${creature.legendary_actions}</div>` : ''}
+            
+            ${creature.img_url ? `<img src="${creature.img_url}" alt="${creature.name}" style="max-width: 100%; margin-top: 1rem;" />` : ''}
           `;
+
         }
   
         if (modal) {

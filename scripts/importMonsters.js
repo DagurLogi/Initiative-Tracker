@@ -13,11 +13,14 @@ async function importMonsters() {
         `INSERT INTO creatures (
           name, meta, armor_class, hit_points, speed,
           stats, saving_throws, skills, senses, languages,
-          challenge, traits, actions, legendary_actions, img_url
+          challenge, traits, actions, reactions, legendary_actions,
+          damage_immunities, damage_resistances, damage_vulnerabilities,
+          condition_immunities, img_url
         ) VALUES (
           $1, $2, $3, $4, $5,
           $6, $7, $8, $9, $10,
-          $11, $12, $13, $14, $15
+          $11, $12, $13, $14, $15,
+          $16, $17, $18, $19, $20
         )`,
         [
           monster.name || null,
@@ -46,7 +49,12 @@ async function importMonsters() {
           monster["Challenge"] || null,
           monster["Traits"] || null,
           monster["Actions"] || null,
+          monster["Reactions"] || null,
           monster["Legendary Actions"] || null,
+          monster["Damage Immunities"] || null,
+          monster["Damage Resistances"] || null,
+          monster["Damage Vulnerabilities"] || null,
+          monster["Condition Immunities"] || null,
           monster["img_url"] || null
         ]
       );

@@ -5,6 +5,14 @@ import pool from '../db.js';
 
 const router = express.Router();
 
+function extractFirstNumber(value) {
+  if (typeof value === 'string') {
+    const match = value.match(/\d+/);
+    return match ? parseInt(match[0]) : null;
+  }
+  return typeof value === 'number' ? value : null;
+}
+
 // GET all encounters
 router.get('/', async (req, res) => {
   try {
@@ -75,7 +83,9 @@ router.post('/', async (req, res) => {
         hp: match?.hp || null,
         maxHp: match?.hp || null,
         passivePerception: match?.passivePerception || null,
-        statblock: match || {}
+        currentHp: match?.hp || null,
+        statblock: match || {},
+        statusEffects: []
       });
     }
 
@@ -106,12 +116,14 @@ router.post('/', async (req, res) => {
           rawInitiative: roll,
           dex,
           type: 'monster',
-          ac: parseInt(stat?.fullStatblock['Armor Class']) || null,
-          hp: parseInt(stat?.fullStatblock['Hit Points']) || null,
-          maxHp: parseInt(stat?.fullStatblock['Hit Points']) || null,
-          passivePerception: parseInt(stat?.fullStatblock['Passive Perception']) || null,
+          ac: extractFirstNumber(stat?.fullStatblock['Armor Class']),
+          hp: extractFirstNumber(stat?.fullStatblock['Hit Points']),
+          maxHp: extractFirstNumber(stat?.fullStatblock['Hit Points']),
+          currentHp: extractFirstNumber(stat?.fullStatblock['Hit Points']),
+          passivePerception: extractFirstNumber(stat?.fullStatblock['Passive Perception']),
           statblock: stat?.fullStatblock || {},
-          naturalOne
+          naturalOne,
+          statusEffects: []
         });
       }
     }
@@ -170,19 +182,25 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE an encounter
+// DELETE an encounter and its related battle
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
+    // First, delete any associated battle
+    await pool.query('DELETE FROM battles WHERE encounter_id = $1', [id]);
+
+    // Then delete the encounter
     const result = await pool.query('DELETE FROM encounters WHERE id = $1 RETURNING *', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Encounter not found' });
     }
-    res.json({ message: 'Encounter deleted successfully' });
+
+    res.json({ message: 'Encounter and related battle deleted successfully' });
   } catch (err) {
-    console.error('❌ Failed to delete encounter:', err);
+    console.error('❌ Failed to delete encounter and battle:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 export default router;

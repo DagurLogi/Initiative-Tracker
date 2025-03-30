@@ -4,10 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Monster Manual</title>
-  <link rel="stylesheet" href="../../styles/styles.css" />
+
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="styles/styles.css" />
+  <!-- Page-Specific Styles -->
+  <link rel="stylesheet" href="styles/monsterManual.css" />
+
 </head>
 <body>
-  <h1>🐲 Welcome to the Monster Manual</h1>
+  <h1 style="text-align: center;">🐲 Welcome to the Monster Manual</h1>
   <div id="creature-list"></div>
 
   <!-- Modal -->
@@ -17,9 +22,11 @@
       <div id="statblockContent"></div>
     </div>
   </div>
-  <a href="/" class="back-button">← Back to Home</a>
+  
+  <div style="text-align: center; margin: 2rem 0;">
+    <a href="/" class="back-button">← Back to Home</a>
+  </div>
 
-  <!-- Script -->
   <script src="scripts/script.js"></script>
 </body>
 </html>

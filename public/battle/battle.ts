@@ -50,6 +50,14 @@ const modal = document.getElementById('statModal') as HTMLElement;
 const modalContent = document.getElementById('modalContent') as HTMLElement;
 const modalClose = document.getElementById('modalClose');
 
+function extractFirstNumber(value: any): number | null {
+  if (typeof value === 'string') {
+    const match = value.match(/\d+/);
+    return match ? parseInt(match[0]) : null;
+  }
+  return typeof value === 'number' ? value : null;
+}
+
 if (!tracker) throw new Error('initiativeList element not found');
 if (!modal) throw new Error('statModal element not found');
 if (!modalContent) throw new Error('modalContent element not found');
@@ -64,8 +72,11 @@ const battleState = {
   currentIndex: 0,
   round: 1,
   turnCounter: 1,
+  battleLength: 1,
+  encounterId: null as string | null,
 
   async initFromServer(encounterId: string) {
+    this.encounterId = encounterId; // Set encounterId when initializing from server
     const res = await fetch(`/api/battle/${encounterId}`);
     
     if (res.ok) {
@@ -73,41 +84,69 @@ const battleState = {
       this.combatants = state.combatants;
       this.currentIndex = state.currentIndex;
       this.round = state.round;
-      this.turnCounter = state.turnCounter;
+
+      // Set the battle length from the server state
+      this.battleLength = state.battleLength ?? 1;
+
+      // Initialize turnCounter properly
+      this.turnCounter = state.turnCounter ?? 1;
+
+      // Check if combatants are valid and adjust
+      if (state?.combatants && Array.isArray(state.combatants)) {
+        this.combatants = state.combatants;
+        this.currentIndex = state.currentIndex ?? 0;
+        this.round = state.round ?? 1;
+      } else {
+        throw new Error('Invalid battle state from server');
+      }
     } else {
       console.log("⚠️ No existing battle found. Initializing new one...");
-      // Battle doesn't exist, initialize fresh and persist
+      // Initialize new battle from encounter data
       const initResponse = await fetch(`/api/encounter/${encounterId}`);
       const data = await initResponse.json();
-      this.combatants = data.initiative.map((c: Combatant): Combatant => ({
-        ...c,
-        currentHp: c.hp || c.maxHp || 0,
-        statusEffects: [] as StatusEffect[],
-        members: c.members?.map((m: CombatantMember): CombatantMember => ({
-          ...m,
-          currentHp: m.hp || m.maxHp || 0
-        })) || []
-      }));
+
+      this.combatants = data.initiative.map((c: Combatant): Combatant => {
+        const statblock = c.statblock || {};
+        return {
+          ...c,
+          ac: c.ac ?? extractFirstNumber(statblock['Armor Class']) ?? undefined,
+          hp: c.hp ?? extractFirstNumber(statblock['Hit Points']) ?? undefined,
+          maxHp: c.maxHp ?? (extractFirstNumber(statblock['Hit Points']) ?? undefined),
+          passivePerception: c.passivePerception ?? (extractFirstNumber(statblock['Passive Perception']) ?? undefined),
+          currentHp: c.hp ?? extractFirstNumber(statblock['Hit Points']) ?? c.maxHp ?? 0,
+          statusEffects: [] as StatusEffect[],
+          members: c.members?.map((m: CombatantMember): CombatantMember => ({
+            ...m,
+            currentHp: m.hp ?? m.maxHp ?? extractFirstNumber(statblock['Hit Points']) ?? 0,
+            ac: m.ac ?? (extractFirstNumber(statblock['Armor Class']) ?? undefined),
+            maxHp: m.maxHp ?? (extractFirstNumber(statblock['Hit Points']) ?? undefined),
+            passivePerception: m.passivePerception ?? (extractFirstNumber(statblock['Passive Perception']) ?? undefined),
+            statblock: m.statblock || statblock
+          })) || []
+        };
+      });
+
       this.currentIndex = 0;
       this.round = 1;
-      this.turnCounter = 1;
-      
-      await this.persistState(); 
+      this.battleLength = 1; // Initialize battleLength to 1 when starting fresh
+      this.turnCounter = 1; // Initialize turnCounter to 1 when starting fresh
     }
-  }
-  ,
+
+    this.render();
+  },
 
   async persistState() {
-    if (!encounterId) return;
+    if (!this.encounterId) return; // Make sure encounterId is not null
     await fetch('/api/battle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        encounterId: parseInt(encounterId),
+        encounterId: parseInt(this.encounterId), // Use encounterId here
         combatants: this.combatants,
         currentIndex: this.currentIndex,
         round: this.round,
-        turnCounter: this.turnCounter
+        turnCounter: this.turnCounter,
+        battleLength: this.battleLength // Include battleLength
       })
     });
   },
@@ -122,9 +161,10 @@ const battleState = {
       this.currentIndex = 0;
       this.round++;
       this.turnCounter++;
+      this.battleLength++; // Increase battle length when moving to the next turn
       this.updateStatusEffects();
     }
-    this.persistState();
+    this.persistState(); // Persist the new battle state
     this.render();
   },
 
@@ -133,9 +173,10 @@ const battleState = {
     if (this.currentIndex < 0) {
       this.currentIndex = Math.max(0, this.combatants.length - 1);
       this.round = Math.max(1, this.round - 1);
-      this.turnCounter = Math.max(1, this.turnCounter - 1);
     }
-    this.persistState();
+    this.turnCounter = Math.max(1, this.turnCounter - 1);
+    this.battleLength--; // Decrease battle length when moving to the previous turn
+    this.persistState(); // Persist the new battle state
     this.render();
   },
 
