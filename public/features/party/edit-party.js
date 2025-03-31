@@ -14,29 +14,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   
     function addMemberRow(existing = {}) {
-      const div = document.createElement('div');
-      div.className = 'member';
-      div.innerHTML = `
-        <input type="text" placeholder="Name" class="name" value="${existing.name || ''}" required />
-        <input type="text" placeholder="Class" class="class" value="${existing.class || ''}" required />
-        <input type="number" placeholder="Level" class="level" value="${existing.level || ''}" required />
-        <input type="number" placeholder="Max HP" class="hp" value="${existing.hp || ''}" required />
-        <input type="number" placeholder="AC" class="ac" value="${existing.ac || ''}" required />
-        <input type="number" placeholder="Dexterity" class="dex" value="${existing.dex || ''}" required />
-        <input type="number" placeholder="Passive Perception" class="pp" value="${existing.passivePerception || ''}" required />
-        <input type="text" placeholder="Resistances (comma-separated)" class="resistances" value="${(existing.resistances || []).join(', ')}" />
-        <input type="text" placeholder="Immunities (comma-separated)" class="immunities" value="${(existing.immunities || []).join(', ')}" />
-        <button type="button" class="remove">Remove</button>
+      const row = document.createElement('tr');
+      row.className = 'member-row';
+      row.innerHTML = `
+        <td><input type="text" placeholder="Name" class="name responsive-input" value="${existing.name || ''}" required /></td>
+        <td><input type="text" placeholder="Class" class="class responsive-input" value="${existing.class || ''}" required /></td>
+        <td><input type="number" placeholder="Level" class="level responsive-input" value="${existing.level || ''}" required /></td>
+        <td><input type="number" placeholder="Max HP" class="hp responsive-input" value="${existing.hp || ''}" required /></td>
+        <td><input type="number" placeholder="AC" class="ac responsive-input" value="${existing.ac || ''}" required /></td>
+        <td><input type="number" placeholder="Dex" class="dex responsive-input" value="${existing.dex || ''}" required /></td>
+        <td><input type="number" placeholder="Passive Perception" class="pp responsive-input" value="${existing.passivePerception || ''}" required /></td>
+        <td><input type="text" placeholder="Fire, Cold..." class="resistances responsive-input" value="${(existing.resistances || []).join(', ')}" /></td>
+        <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities responsive-input" value="${(existing.immunities || []).join(', ')}" /></td>
+        <td><button type="button" class="remove">Remove</button></td>
       `;
       if (memberList) {
-        memberList.appendChild(div);
+        memberList.appendChild(row);
       } else {
         console.error('❌ Member list element is missing.');
       }
-  
-      div.querySelector('.remove')?.addEventListener('click', () => {
-        div.remove();
+    
+      row.querySelector('.remove')?.addEventListener('click', () => {
+        row.remove();
       });
+    
     }
   
     addMemberBtn.addEventListener('click', () => addMemberRow());
@@ -56,7 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
   
-      const memberElements = memberList.querySelectorAll('.member');
+      const memberElements = memberList.querySelectorAll('.member-row');
+
       const members = [];
   
       memberElements.forEach(member => {

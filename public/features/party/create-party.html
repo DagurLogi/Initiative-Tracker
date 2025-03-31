@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>🛡️Create Party</title>
-  
+
       <!-- Global Styles -->
       <link rel="stylesheet" href="../../styles/styles.css" />
       <!-- Page-Specific Styles -->
@@ -17,25 +17,28 @@
       <label for="groupName">Group Name:</label>
       <input type="text" id="groupName" class="form-input" required />
 
-      <table id="memberTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Class</th>
-            <th>Level</th>
-            <th>Hit Points</th>
-            <th>Armor Class</th>
-            <th>Initiative</th>
-            <th>Passive Perception</th>
-            <th>Resistances</th>
-            <th>Immunities</th>
-            <th>Remove</th>
-          </tr>
-        </thead>
-        <tbody id="memberList">
-          <!-- Members go here -->
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table id="memberTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Level</th>
+              <th>Hit Points</th>
+              <th>Armor Class</th>
+              <th>Initiative</th>
+              <th>Passive Perception</th>
+              <th>Resistances</th>
+              <th>Immunities</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody id="memberList">
+            <!-- Members go here -->
+          </tbody>
+        </table>
+      </div>
+
 
       <div class="mt-3">
         <button type="button" class="button" id="addMemberBtn">➕ Add Member</button>
@@ -44,7 +47,7 @@
     </form>
   </div>
 
-  <a href="/" class="back-button">← Back to Home</a>
+  <a href="/" class="back-button" style="bottom: 3.5rem;">← Back to Home</a>
   <script src="create-party.js"></script>
 </body>
 </html>
