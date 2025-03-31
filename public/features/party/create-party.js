@@ -12,24 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add new member row
   addMemberBtn.addEventListener('click', () => {
-    const div = document.createElement('div');
-    div.className = 'member';
-    div.innerHTML = `
-      <input type="text" placeholder="Name" class="name" required />
-      <input type="text" placeholder="Class" class="class" required />
-      <input type="number" placeholder="Level" class="level" required />
-      <input type="number" placeholder="Max HP" class="hp" required />
-      <input type="number" placeholder="AC" class="ac" required />
-      <input type="number" placeholder="Dexterity" class="dex" required />
-      <input type="number" placeholder="Passive Perception" class="pp" required />
-      <input type="text" placeholder="Resistances (comma-separated)" class="resistances" />
-      <input type="text" placeholder="Immunities (comma-separated)" class="immunities" />
-      <button type="button" class="remove">Remove</button>
+    const row = document.createElement('tr');
+    row.className = 'member-row';
+    row.innerHTML = `
+      <td><input type="text" placeholder="Name" class="name" required style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Class" class="class" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Level" class="level" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Max HP" class="hp" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="AC" class="ac" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Dex" class="dex" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Passive Perception" class="pp" required style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Fire, Cold..." class="resistances" style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities" style="width: 100%;" /></td>
+      <td><button type="button" class="remove">Remove</button></td>
     `;
-    memberList.appendChild(div);
+    memberList.appendChild(row);
 
-    div.querySelector('.remove')?.addEventListener('click', () => {
-      div.remove();
+    row.querySelector('.remove')?.addEventListener('click', () => {
+      row.remove();
     });
   });
 
@@ -49,12 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const memberElements = memberList.querySelectorAll('.member');
+    const memberRows = memberList.querySelectorAll('.member-row');
     const members = [];
 
-    memberElements.forEach(member => {
-      const getVal = (selector) => member.querySelector(selector)?.value.trim();
-      const getNum = (selector) => Number(member.querySelector(selector)?.value || 0);
+    memberRows.forEach(row => {
+      const getVal = (selector) => row.querySelector(selector)?.value.trim();
+      const getNum = (selector) => Number(row.querySelector(selector)?.value || 0);
 
       members.push({
         name: getVal('.name'),
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passivePerception: getNum('.pp'),
         resistances: getVal('.resistances')?.split(',').map(s => s.trim()).filter(Boolean) || [],
         immunities: getVal('.immunities')?.split(',').map(s => s.trim()).filter(Boolean) || [],
-        initiative: 0 // default for encounter-time assignment
+        initiative: 0
       });
     });
 

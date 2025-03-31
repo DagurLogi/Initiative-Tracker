@@ -21,22 +21,40 @@ async function fetchParties() {
         const div = document.createElement('div');
         div.className = 'party-card';
         div.innerHTML = `
-        <h2>${party.name}</h2>
-        <button class="toggle-members">Show Members</button>
-        <a class="menu-link" href="edit-party.html?id=${party.id}">Edit</a>
-        <button class="delete-party" data-id="${party.id}">Delete</button>
-        <div class="members hidden">
-          ${party.members.map(m => `
-            <div class="member">
-              <strong>${m.name}</strong> (Level ${m.level} ${m.class})<br/>
-              HP: ${m.hp}, AC: ${m.ac}, Dex: ${m.dex}, PP: ${m.passivePerception}<br/>
-              Resistances: ${m.resistances.join(', ') || 'None'}<br/>
-              Immunities: ${m.immunities.join(', ') || 'None'}
-            </div>
-          `).join('<hr/>')}
-        </div>
-        <hr/>
-      `;
+  <h2>${party.name}</h2>
+  <div class="button-row">
+    <button class="toggle-members button-secondary">👁 Show Members</button>
+    <a class="menu-link" href="edit-party.html?id=${party.id}">✏️ Edit</a>
+    <button class="button button-secondary delete-party" data-id="${party.id}">🗑 Delete</button>
+  </div>
+
+  <div class="members hidden">
+    <table class="party-members">
+      <thead>
+        <tr>
+          <th>Name</th><th>Class</th><th>Lvl</th><th>HP</th><th>AC</th><th>Dex</th><th>PP</th>
+          <th>Resistances</th><th>Immunities</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${party.members.map(m => `
+          <tr>
+            <td>${m.name}</td>
+            <td>${m.class}</td>
+            <td>${m.level}</td>
+            <td>${m.hp}</td>
+            <td>${m.ac}</td>
+            <td>${m.dex}</td>
+            <td>${m.passivePerception}</td>
+            <td>${m.resistances.join(', ') || '-'}</td>
+            <td>${m.immunities.join(', ') || '-'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+`;
+
       
   
         if (container) {

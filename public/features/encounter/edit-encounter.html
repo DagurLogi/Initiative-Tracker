@@ -3,39 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <title>🛠️ Edit Encounter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global Styles -->
   <link rel="stylesheet" href="../../styles/styles.css" />
+  <!-- Reuse the same CSS as create -->
+  <link rel="stylesheet" href="../../styles/edit-encounter.css" />
 </head>
 <body>
-  <h1>🛠️ Edit Encounter</h1>
+  <h1>Edit Encounter</h1>
 
-  <div class="encounter-layout">
-    <!-- LEFT PANEL -->
-    <div class="left-panel">
+  <div class="split-container">
+    <!-- LEFT SIDE -->
+    <div class="encounter-left">
       <form id="encounterForm">
         <label for="encounterName">Encounter Name:</label>
         <input type="text" id="encounterName" required />
 
         <label for="partySelect">Select Party:</label>
-        <select id="partySelect" required></select>
+        <select id="partySelect" required>
+          <option disabled selected value="">-- Choose party --</option>
+        </select>
 
         <h3>🧟‍♂️ Selected Monsters</h3>
+        <p style="font-size: 0.9rem; color: #555;">
+          💡 <strong>Tip:</strong> Group size determines how many monsters share the same initiative. 
+          For example, if you select 6 Goblins and set Group size to 2, you'll get 3 groups of 2 Goblins sharing the same initiative.
+        </p>        
         <div id="selectedMonsters"></div>
 
-        <h3>🧠 Initiative Input for Party Members</h3>
+        <h3>🧠 Initiative Input</h3>
         <div id="initiativeInputs"></div>
 
         <button type="submit">💾 Save Encounter</button>
       </form>
-
-      <a href="view-encounters.html" class="back-button">← Back to Encounter List</a>
     </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="right-panel">
-      <h3>📚 Browse Monsters</h3>
+    <!-- RIGHT SIDE -->
+    <div class="encounter-right">
+      <h3>Available Monsters</h3>
       <div id="monsterList" class="monster-list"></div>
     </div>
   </div>
+
+  <a href="view-encounters.html" class="back-button">← Back to Encounter List</a>
 
   <script src="edit-encounter.js"></script>
 </body>

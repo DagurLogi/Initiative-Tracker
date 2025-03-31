@@ -455,3 +455,16 @@
       padding: 0.75rem;
     }
   }
+
+  @media (max-width: 768px) {
+    .split-container {
+      flex-direction: column;
+    }
+  
+    .encounter-left,
+    .encounter-right {
+      border-left: none;
+      border-top: 1px solid var(--border-color);
+    }
+  }
+  
