@@ -166,10 +166,11 @@
       });
 
       const groupInitiatives = [];
-      for (let i = 0; i < totalGroups; i++) {
-        const slice = matching.slice(i * groupSize, (i + 1) * groupSize);
-        groupInitiatives.push(slice[0]?.initiative || 0);
-      }
+        for (let i = 0; i < totalGroups; i++) {
+          const slice = matching.slice(i * groupSize, (i + 1) * groupSize);
+          groupInitiatives.push(slice[0]?.initiative ?? Math.floor(Math.random() * 20 + 1));
+        }
+
 
       selectedMonstersMap.set(monster.id, {
         ...monster,
