@@ -75,7 +75,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           passivePerception: getNum('.pp'),
           resistances: getVal('.resistances')?.split(',').map(s => s.trim()).filter(Boolean) || [],
           immunities: getVal('.immunities')?.split(',').map(s => s.trim()).filter(Boolean) || [],
-          initiative: 0 // default for encounter-time assignment
+          initiative: 0,
+          concentration: false,
+          isDead: false,
+          deathSaves: {
+            successes: 0,
+            failures: 0
+          }
         });
       });
   

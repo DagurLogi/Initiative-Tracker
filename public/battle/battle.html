@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🛡️ Battle Tracker</title>
 
-    <!-- Global styles first -->
-    <link rel="stylesheet" href="../styles/styles.css" />
-    <!-- Component-specific styles second -->
-    <link rel="stylesheet" href="../styles/battleStyle.css" />
-
+  <!-- Global styles first -->
+  <link rel="stylesheet" href="../styles/styles.css" />
+  <link rel="stylesheet" href="../styles/battleStyle.css" />
 </head>
 <body>
   <div id="loading">
@@ -42,14 +40,49 @@
     <a href="/" class="back-button">← Back to Home</a>
   </footer>
 
-  <!-- Stat Block Modal -->
-  <div id="statModal" class="modal hidden">
-    <div class="modal-content">
-      <span id="modalClose" class="close" aria-label="Close modal">&times;</span>
-      <div id="modalContent"></div>
+  <!-- Combatant Template -->
+  <template id="combatant-template">
+    <div class="combatant-card" data-index="">
+      <h3 class="combatant-name clickable"></h3>
+
+      <div class="combatant-meta">
+        <span class="initiative"></span>
+        <span class="ac"></span>
+        <span class="hp"></span>
+      </div>
+
+      <div class="combatant-controls">
+        <label>
+          <input type="checkbox" class="concentration" />
+          Concentrating
+        </label>
+
+        <div class="death-saves hidden">
+          <span>Death Saves:</span>
+          <div>
+            ✔️ Success:
+            <input type="checkbox" class="success" />
+            <input type="checkbox" class="success" />
+            <input type="checkbox" class="success" />
+          </div>
+          <div>
+            ❌ Failures:
+            <input type="checkbox" class="fail" />
+            <input type="checkbox" class="fail" />
+            <input type="checkbox" class="fail" />
+          </div>
+        </div>
+
+        <div class="spell-slots hidden">
+          <span>Spell Slots:</span>
+          <ul class="slot-list"></ul>
+        </div>
+      </div>
+
+      <div class="statblock hidden"></div>
     </div>
-  </div>
-  
+  </template>
+
   <script src="../dist/battle/battle.js"></script>
 </body>
 </html>

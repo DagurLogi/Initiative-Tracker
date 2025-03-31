@@ -13,6 +13,25 @@ function extractFirstNumber(value) {
   return typeof value === 'number' ? value : null;
 }
 
+function extractSpellSlots(traitsHtmlEncoded) {
+  const decoded = decodeURIComponent(
+    traitsHtmlEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')
+  );
+
+  const slots = {};
+  const regex = /(\d+)(?:st|nd|rd|th)\s+level\s+\((\d+)\s+slots?\)/gi;
+
+  let match;
+  while ((match = regex.exec(decoded)) !== null) {
+    const level = parseInt(match[1], 10);
+    const maxSlots = parseInt(match[2], 10);
+    slots[level] = { max: maxSlots, used: 0 };
+  }
+
+  return slots;
+}
+
+
 // GET all encounters
 router.get('/', async (req, res) => {
   try {
@@ -85,8 +104,15 @@ router.post('/', async (req, res) => {
         currentHp: match?.hp || null,
         passivePerception: match?.passivePerception || null,
         statblock: cleanedStatblock,
-        statusEffects: []
+        statusEffects: [],
+        concentration: false,
+        isDead: false,
+        deathSaves: {
+          successes: 0,
+          failures: 0
+        }
       });
+      
       
     }
 
@@ -127,6 +153,12 @@ router.post('/', async (req, res) => {
           legendary_actions
         } = stat.fullStatblock;
       
+        let spellSlots = null;
+
+        if (traits && /Spellcasting/.test(traits)) {
+          spellSlots = extractSpellSlots(traits);
+        }
+
         fullInitiative.push({
           name: `${name} ${i + 1}`,
           initiative: final,
@@ -155,11 +187,15 @@ router.post('/', async (req, res) => {
             damage_resistances,
             damage_vulnerabilities,
             condition_immunities,
-            legendary_actions
+            legendary_actions,
+            ...(spellSlots ? { spellSlots } : {})
           },
           naturalOne,
-          statusEffects: []
+          statusEffects: [],
+          concentration: false,
+          isDead: false
         });
+
       }
       
     }
@@ -196,6 +232,9 @@ router.put('/:id', async (req, res) => {
     const partyRes = await pool.query('SELECT * FROM parties WHERE id = $1', [partyId]);
     const partyMembers = partyRes.rows[0]?.members || [];
 
+    const existingEncounter = await pool.query('SELECT * FROM encounters WHERE id = $1', [id]);
+    const existingInitiative = existingEncounter.rows[0]?.initiative || [];
+
     const creatureRes = await pool.query('SELECT * FROM creatures');
     const creatureMap = new Map();
     creatureRes.rows.forEach(row => {
@@ -210,17 +249,23 @@ router.put('/:id', async (req, res) => {
       });
     });
 
+    const findExisting = (name) => {
+      return existingInitiative.find(entry => entry.name === name);
+    };
+
     for (const player of initiatives) {
       if (player.type !== 'player') continue;
-    
+
       const match = partyMembers.find(m => m.name === player.name);
+      const existing = findExisting(player.name);
+
       const cleanedStatblock = {
         class: match?.class || null,
         level: match?.level || null,
         resistances: match?.resistances || [],
         immunities: match?.immunities || []
       };
-    
+
       fullInitiative.push({
         name: player.name,
         initiative: player.initiative,
@@ -229,49 +274,100 @@ router.put('/:id', async (req, res) => {
         ac: match?.ac || null,
         hp: match?.hp || null,
         maxHp: match?.hp || null,
-        currentHp: match?.hp || null,
+        currentHp: existing?.currentHp ?? match?.hp ?? null,
         passivePerception: match?.passivePerception || null,
         statblock: cleanedStatblock,
-        statusEffects: []
+        statusEffects: existing?.statusEffects || [],
+        concentration: existing?.concentration || false,
+        isDead: existing?.isDead || false,
+        deathSaves: existing?.deathSaves || { successes: 0, failures: 0 }
       });
     }
-    
 
     for (const monster of monsters) {
       const { id: monsterId, name, count = 1, groupSize = 1, initiatives: groupInitiatives = [] } = monster;
       const stat = creatureMap.get(monsterId);
       const dex = stat?.dex || 0;
+      const mod = stat?.mod || 0;
 
       for (let i = 0; i < count; i++) {
         const groupIndex = Math.floor(i / groupSize);
-      
         let initiative = groupInitiatives[groupIndex];
         let rolled = false;
-      
-        // If it's null or undefined, generate a new initiative
+
         if (initiative === null || initiative === undefined) {
           const roll = Math.floor(Math.random() * 20 + 1);
-          initiative = roll + (stat?.mod || 0);
+          initiative = roll + mod;
           rolled = true;
         }
-      
+
+        const nameWithSuffix = `${name} ${i + 1}`;
+        const existing = findExisting(nameWithSuffix);
+
+        const {
+          armor_class,
+          hit_points,
+          senses,
+          stats,
+          meta,
+          speed,
+          skills,
+          traits,
+          actions,
+          img_url,
+          challenge,
+          languages,
+          reactions,
+          saving_throws,
+          damage_immunities,
+          damage_resistances,
+          damage_vulnerabilities,
+          condition_immunities,
+          legendary_actions
+        } = stat.fullStatblock;
+
+        let spellSlots = null;
+        if (traits && /Spellcasting/.test(traits)) {
+          spellSlots = extractSpellSlots(traits);
+        }
+
         fullInitiative.push({
-          name: `${name} ${i + 1}`,
+          name: nameWithSuffix,
           initiative,
-          rawInitiative: rolled ? initiative - (stat?.mod || 0) : initiative,
+          rawInitiative: rolled ? initiative - mod : initiative,
           dex,
           type: 'monster',
-          ac: extractFirstNumber(stat?.fullStatblock.armor_class),
-          hp: extractFirstNumber(stat?.fullStatblock.hit_points),
-          maxHp: extractFirstNumber(stat?.fullStatblock.hit_points),
-          currentHp: extractFirstNumber(stat?.fullStatblock.hit_points),
-          passivePerception: extractFirstNumber(stat?.fullStatblock.senses),
-          statblock: stat?.fullStatblock || {},
-          naturalOne: rolled ? initiative - (stat?.mod || 0) === 1 : false,
-          statusEffects: []
+          ac: extractFirstNumber(armor_class),
+          hp: extractFirstNumber(hit_points),
+          maxHp: extractFirstNumber(hit_points),
+          currentHp: existing?.currentHp ?? extractFirstNumber(hit_points),
+          passivePerception: extractFirstNumber(senses),
+          statblock: {
+            meta,
+            speed,
+            stats,
+            senses,
+            skills,
+            traits,
+            actions,
+            img_url,
+            challenge,
+            languages,
+            reactions,
+            saving_throws,
+            damage_immunities,
+            damage_resistances,
+            damage_vulnerabilities,
+            condition_immunities,
+            legendary_actions,
+            ...(spellSlots ? { spellSlots: existing?.statblock?.spellSlots || spellSlots } : {})
+          },
+          naturalOne: rolled ? initiative - mod === 1 : false,
+          statusEffects: existing?.statusEffects || [],
+          concentration: existing?.concentration || false,
+          isDead: existing?.isDead || false
         });
       }
-      
     }
 
     fullInitiative.sort((a, b) => {
@@ -299,6 +395,7 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // DELETE encounter
 router.delete('/:id', async (req, res) => {

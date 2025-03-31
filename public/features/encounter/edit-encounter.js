@@ -56,7 +56,10 @@
       const div = document.createElement('div');
       div.className = 'selected-monster';
 
-      const inputs = monster.initiatives?.map((val, i) => `<input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val}" />`).join('') || '';
+      const inputs = monster.initiatives?.map((val, i) => 
+        `<input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val ?? ''}" />`
+      ).join('') || '';
+      
 
       div.innerHTML = `
         <span>${monster.name}</span>
@@ -100,9 +103,10 @@
         const id = parseInt(target.getAttribute('data-id') || '0');
         const index = parseInt(target.getAttribute('data-index') || '0');
         if (selectedMonstersMap.has(id)) {
-          selectedMonstersMap.get(id).initiatives[index] = parseInt(target.value);
+          selectedMonstersMap.get(id).initiatives[index] = target.value === '' ? null : parseInt(target.value);
         }
       });
+      
     });
 
     selectedMonstersDiv?.querySelectorAll('.remove-monster').forEach(btn => {
@@ -196,15 +200,22 @@
     initiativeInputs.forEach(input => {
       const el = /** @type {HTMLInputElement} */ (input);
       const name = el.getAttribute('data-name');
-      const value = parseInt(el.value);
+      const value = el.value === '' ? null : parseInt(el.value);
       const player = loadedParty?.members.find(m => m.name === name);
       if (name) {
         initiatives.push({
           name,
           initiative: value,
           dex: player?.dex || 0,
-          type: 'player'
+          type: 'player',
+          concentration: false,
+          isDead: false,
+          deathSaves: {
+            successes: 0,
+            failures: 0
+          }
         });
+        
       }
     });
 
@@ -221,8 +232,11 @@
             initiative: init,
             dex: 0,
             type: 'monster',
-            naturalOne: init === 1
+            naturalOne: init === 1,
+            concentration: false,
+            isDead: false
           });
+          
         }
       }
     });

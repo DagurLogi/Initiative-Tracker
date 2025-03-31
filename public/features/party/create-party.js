@@ -15,15 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const row = document.createElement('tr');
     row.className = 'member-row';
     row.innerHTML = `
-      <td><input type="text" placeholder="Name" class="name" required style="width: 100%;" /></td>
-      <td><input type="text" placeholder="Class" class="class" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Level" class="level" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Max HP" class="hp" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="AC" class="ac" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Dex" class="dex" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Passive Perception" class="pp" required style="width: 100%;" /></td>
-      <td><input type="text" placeholder="Fire, Cold..." class="resistances" style="width: 100%;" /></td>
-      <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities" style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Name" class="name responsive-input" required style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Class" class="class responsive-input" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Level" class="level responsive-input" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Max HP" class="hp responsive-input" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="AC" class="ac responsive-input" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Dex" class="dex responsive-input" required style="width: 100%;" /></td>
+      <td><input type="number" placeholder="Passive Perception" class="pp responsive-input" required style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Fire, Cold..." class="resistances responsive-input" style="width: 100%;" /></td>
+      <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities responsive-input" style="width: 100%;" /></td>
       <td><button type="button" class="remove">Remove</button></td>
     `;
     memberList.appendChild(row);
@@ -66,7 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
         passivePerception: getNum('.pp'),
         resistances: getVal('.resistances')?.split(',').map(s => s.trim()).filter(Boolean) || [],
         immunities: getVal('.immunities')?.split(',').map(s => s.trim()).filter(Boolean) || [],
-        initiative: 0
+        initiative: 0,
+        concentration: false,
+        isDead: false,
+        deathSaves: {
+          successes: 0,
+          failures: 0
+        }
       });
     });
 
