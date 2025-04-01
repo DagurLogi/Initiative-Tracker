@@ -213,7 +213,8 @@
               ${c.name} ${c.isConcentrating ? '👑' : ''}
             </h3>
 
-            <span>Init: ${c.initiative}</span>
+            <span>Init: ${c.naturalOne ? 'Natural 1' : c.initiative}</span>
+
           </div>
           <div class="combatant-details">
             AC: ${c.ac ?? '?'} |
@@ -353,9 +354,7 @@
       });
     });
     
-    
-    
-    
+   
     // LEGENDARY ACTION TRACKERS
     document.querySelectorAll('.legendary-plus').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -389,7 +388,7 @@
         });
       });
 
-// LEGENDARY RESISTANCE TRACKERS
+    // LEGENDARY RESISTANCE TRACKERS
       document.querySelectorAll('.resistance-plus').forEach(btn => {
         btn.addEventListener('click', () => {
           const btnElement = /** @type {HTMLElement} */ (btn);
@@ -438,7 +437,6 @@
       });
 
       setupHpHandlers();
-
   }
 
   function setupHpHandlers() {
@@ -449,13 +447,20 @@
     
     // ✅ Show popup when clicking current HP
     document.querySelectorAll('.hp-clickable').forEach(span => {
+      if (span.classList.contains('hp-handler-attached')) return;
+    
+      span.classList.add('hp-handler-attached');
+    
       span.addEventListener('click', e => {
         const target = e.currentTarget;
         if (!(target instanceof HTMLElement)) return;
         const name = target.dataset.name;
         if (!name) return;
-  
-        if (amountInput instanceof HTMLInputElement) amountInput.value = '';
+    
+        if (amountInput instanceof HTMLInputElement) {
+          amountInput.value = '';
+        }
+    
         if (form instanceof HTMLFormElement) {
           const hpModes = form.elements['hpMode'];
           if (hpModes instanceof RadioNodeList) {
@@ -463,15 +468,14 @@
               if (input instanceof HTMLInputElement) {
                 input.checked = input.value === 'damage';
               }
-              
             });
           }
         }
-  
+    
         if (hiddenTarget instanceof HTMLInputElement) {
           hiddenTarget.value = name;
         }
-        // Position popup near the clicked HP
+    
         if (popup) {
           const rect = target.getBoundingClientRect();
           popup.style.top = `${rect.bottom + window.scrollY}px`;
@@ -480,15 +484,20 @@
         }
       });
     });
+    
+    
   
     // ✅ Handle form submission
-    if (form instanceof HTMLFormElement) {
+    // ✅ Handle form submission — only once!
+    if (form instanceof HTMLFormElement && !form.classList.contains('submit-handler-attached')) {
+      form.classList.add('submit-handler-attached');
+
       form.addEventListener('submit', e => {
         e.preventDefault();
-  
+
         const amount = amountInput instanceof HTMLInputElement ? parseInt(amountInput.value) : NaN;
         const name = hiddenTarget instanceof HTMLInputElement ? hiddenTarget.value : null;
-  
+
         let mode = 'damage';
         const hpModes = form.elements['hpMode'];
         if (hpModes instanceof RadioNodeList) {
@@ -498,41 +507,51 @@
             }
           });
         }
-  
+
         const combatant = combatants.find(c => c.name === name);
         if (!combatant || isNaN(amount)) return;
-  
+
+        const currentHp = parseInt(combatant.currentHp) || 0;
+        const maxHp = parseInt(combatant.maxHp) || 0;
+
+        let newHp = currentHp;
+
         if (mode === 'damage') {
-          combatant.currentHp = Math.max(0, combatant.currentHp - amount);
-          if (combatant.currentHp === 0) {
+          newHp = Math.max(0, currentHp - amount);
+          if (newHp === 0) {
             combatant.isDead = true;
             combatant.isConcentrating = false;
           }
         } else {
-          combatant.currentHp = Math.min(combatant.maxHp, combatant.currentHp + amount);
+          newHp = Math.min(maxHp, currentHp + amount);
           combatant.isDead = false;
         }
-  
+
+        combatant.currentHp = newHp;
+        console.log(`[HP Update] ${combatant.name}: ${currentHp} → ${combatant.currentHp}`);
+
         const uiState = rememberUIState();
         renderCombatants();
         saveEncounterState();
         restoreUIState(uiState);
-  
+
         if (popup) popup.classList.add('hidden');
       });
     }
+
     const closeBtn = document.getElementById('close-hp-popup');
-    if (closeBtn) {
-closeBtn.addEventListener('click', () => {
-  if (popup) popup.classList.add('hidden');
+    if (closeBtn && !closeBtn.classList.contains('close-handler-attached')) {
+      closeBtn.classList.add('close-handler-attached');
 
-  const uiState = rememberUIState();
-      renderCombatants();
-      saveEncounterState();
-      restoreUIState(uiState);
+      closeBtn.addEventListener('click', () => {
+        if (popup) popup.classList.add('hidden');
 
-});
-}
+        const uiState = rememberUIState();
+        renderCombatants();
+        saveEncounterState();
+        restoreUIState(uiState);
+      });
+    }
 }
   
   function renderTracker() {

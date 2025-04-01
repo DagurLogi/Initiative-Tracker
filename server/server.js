@@ -15,7 +15,10 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
-app.use(express.json());
+// Increase JSON payload size limit to 10MB
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 
 // Mount API routes
 app.use('/api/creatures', creaturesRoutes);

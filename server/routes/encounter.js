@@ -18,6 +18,19 @@ function extractSpellSlots(traitsHtmlEncoded) {
     traitsHtmlEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')
   );
 
+  function extractLegendaryResistanceCount(traitsEncoded) {
+    const decoded = decodeURIComponent(traitsEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
+    const match = decoded.match(/Legendary Resistance \((\d+)\/Day\)/i);
+    return match ? parseInt(match[1]) : null;
+  }
+  
+  function extractLegendaryActionCount(legendaryEncoded) {
+    const decoded = decodeURIComponent(legendaryEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
+    const match = decoded.match(/can take (\d+) legendary actions/i);
+    return match ? parseInt(match[1]) : null;
+  }
+
+  
   const slots = {};
   const regex = /(\d+)(?:st|nd|rd|th)\s+level\s+\((\d+)\s+slots?\)/gi;
 
@@ -105,7 +118,7 @@ router.post('/', async (req, res) => {
         passivePerception: match?.passivePerception || null,
         statblock: cleanedStatblock,
         statusEffects: [],
-        concentration: false,
+        isConcentrating: false,
         isDead: false,
         deathSaves: {
           successes: 0,
@@ -124,7 +137,9 @@ router.post('/', async (req, res) => {
       const numGroups = Math.ceil(count / groupSize);
       const groupRolls = Array.from({ length: numGroups }, () => {
         const roll = Math.floor(Math.random() * 20 + 1);
-        return { roll, final: roll + mod, naturalOne: roll === 1 };
+        const isNaturalOne = roll === 1;
+        const final = isNaturalOne ? -99 : roll + mod;
+        return { roll, final, naturalOne: isNaturalOne };
       });
 
       for (let i = 0; i < count; i++) {
@@ -158,6 +173,12 @@ router.post('/', async (req, res) => {
         if (traits && /Spellcasting/.test(traits)) {
           spellSlots = extractSpellSlots(traits);
         }
+        
+        const resistMatch = traits?.match(/Legendary Resistance\s*\((\d+)\/Day/i);
+        const derivedMaxResist = resistMatch ? parseInt(resistMatch[1], 10) : 3;
+
+        const actionMatch = legendary_actions?.match(/can take\s*(\d+)\s*legendary actions/i);
+        const derivedMaxActions = actionMatch ? parseInt(actionMatch[1], 10) : 3;
 
         fullInitiative.push({
           name: `${name} ${i + 1}`,
@@ -188,13 +209,16 @@ router.post('/', async (req, res) => {
             damage_vulnerabilities,
             condition_immunities,
             legendary_actions,
+            legendaryActions: { max: derivedMaxActions, used: 0 },
+            legendaryResistances: { max: derivedMaxResist, used: 0 },
             ...(spellSlots ? { spellSlots } : {})
           },
           naturalOne,
           statusEffects: [],
-          concentration: false,
+          isConcentrating: false,
           isDead: false
         });
+        
 
       }
       
@@ -284,7 +308,7 @@ router.put('/:id', async (req, res) => {
         passivePerception: match?.passivePerception || null,
         statblock: cleanedStatblock,
         statusEffects: existing?.statusEffects || [],
-        concentration: existing?.concentration || false,
+        isConcentrating: existing?.isConcentrating || false,
         isDead: existing?.isDead || false,
         deathSaves: existing?.deathSaves || { successes: 0, failures: 0 }
       });
@@ -301,15 +325,18 @@ router.put('/:id', async (req, res) => {
         let initiative = groupInitiatives[groupIndex];
         let rolled = false;
 
+        let isNaturalOne = false;
         if (initiative === null || initiative === undefined) {
           const roll = Math.floor(Math.random() * 20 + 1);
-          initiative = roll + mod;
+          isNaturalOne = roll === 1;
+          initiative = isNaturalOne ? -99 : roll + mod;
           rolled = true;
         }
 
         const nameWithSuffix = `${name} ${i + 1}`;
         const existing = findExisting(nameWithSuffix);
 
+        
         const {
           armor_class,
           hit_points,
@@ -336,6 +363,10 @@ router.put('/:id', async (req, res) => {
         if (traits && /Spellcasting/.test(traits)) {
           spellSlots = extractSpellSlots(traits);
         }
+
+        
+        const calculatedLegendaryResist = extractLegendaryResistanceCount(traits);
+        const calculatedLegendaryActions = extractLegendaryActionCount(legendary_actions);
 
         fullInitiative.push({
           name: nameWithSuffix,
@@ -366,11 +397,13 @@ router.put('/:id', async (req, res) => {
             damage_vulnerabilities,
             condition_immunities,
             legendary_actions,
+            legendaryActions: existing?.statblock?.legendaryActions || {max: calculatedLegendaryActions ?? 3, used: 0},
+            legendaryResistances: existing?.statblock?.legendaryResistances || {max: calculatedLegendaryResist ?? 3, used: 0 },
             ...(spellSlots ? { spellSlots: existing?.statblock?.spellSlots || spellSlots } : {})
           },
-          naturalOne: rolled ? initiative - mod === 1 : false,
+          naturalOne: isNaturalOne,
           statusEffects: existing?.statusEffects || [],
-          concentration: existing?.concentration || false,
+          isConcentrating: existing?.isConcentrating ?? false,
           isDead: existing?.isDead || false
         });
       }
