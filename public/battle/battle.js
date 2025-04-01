@@ -51,17 +51,68 @@
     element.classList.toggle('hidden');
   }
 
+  function saveEncounterState() {
+    if (!encounterId) return;
+    fetch(`/api/encounter/${encounterId}/state`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ updatedInitiative: combatants })
+    }).catch(err => console.error('Failed to save encounter state:', err));
+  }
+
   function updateStatusEffects() {
     combatants.forEach(c => {
       if (!c.statusEffects) return;
       c.statusEffects = c.statusEffects
-        .map(e => ({
-          ...e,
-          roundsRemaining: e.roundsRemaining - 1
-        }))
+        .map(e => ({ ...e, roundsRemaining: e.roundsRemaining - 1 }))
         .filter(e => e.roundsRemaining > 0);
     });
   }
+
+  function getOrdinal(n) {
+    if (n === "1") return "st";
+    if (n === "2") return "nd";
+    if (n === "3") return "rd";
+    return "th";
+  }
+
+  function renderSpellSlots(combatant) {
+    const slots = combatant.statblock?.spellSlots;
+    if (!slots) return '';
+
+    const entries = Object.entries(slots);
+    const left = entries.slice(0, 5).map(([level, data]) => `
+      <li data-name="${combatant.name}" data-level="${level}">
+        <span>${level}${getOrdinal(level)}:</span>
+        <button class="slot-minus" aria-label="Use slot">−</button>
+        ${data.used} / ${data.max}
+        <button class="slot-plus" aria-label="Restore slot">+</button>
+      </li>
+    `).join('');
+
+    const right = entries.slice(5).map(([level, data]) => `
+      <li data-name="${combatant.name}" data-level="${level}">
+        <span>${level}${getOrdinal(level)}:</span>
+        <button class="slot-minus" aria-label="Use slot">−</button>
+        ${data.used} / ${data.max}
+        <button class="slot-plus" aria-label="Restore slot">+</button>
+      </li>
+    `).join('');
+
+    return `
+      <div class="spell-slot-wrapper">
+        <button class="toggle-spell-slots" data-name="${combatant.name}">🧙‍♂️ Spell Slots</button>
+        <div class="spell-slots hidden" id="spell-slots-${combatant.name.replace(/\s+/g, '-')}">
+          <strong>Spell Slots</strong>
+          <div class="slot-columns">
+            <ul class="slot-list left-column">${left}</ul>
+            <ul class="slot-list right-column">${right}</ul>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
 
   function renderCombatants() {
     if (!tracker) return;
@@ -83,6 +134,8 @@
             ${(c.statusEffects || []).map(e =>
               `<span class="status-badge" title="${e.description || ''}">${e.name} (${e.roundsRemaining})</span>`
             ).join('')}
+            ${renderSpellSlots(c)}
+
           </div>
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
             <div class="statblock">
@@ -112,16 +165,17 @@
     
         const value = parseInt(target.value);
         const name = target.dataset.name;
-        const combatant = combatants.find(c => c.name === name);
-        if (combatant) {
-          combatant.currentHp = value;
-          combatant.isDead = value <= 0;
-          renderCombatants(); // re-render for visual feedback
+        const c = combatants.find(x => x.name === name);
+        if (c) {
+          c.currentHp = value;
+          c.isDead = value <= 0;
+          renderCombatants();
+          saveEncounterState();
         }
       });
     });
-    
 
+  
     document.querySelectorAll('.combatant-toggle').forEach(header => {
       header.addEventListener('click', e => {
         const target = /** @type {HTMLElement} */ (e.currentTarget);
@@ -131,14 +185,63 @@
       });
     });
     
+    
+    document.querySelectorAll('.toggle-spell-slots').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const name = btn.getAttribute('data-name');
+        if (!name) return;
+        const wrapper = document.querySelector(`#spell-slots-${name.replace(/\s+/g, '-')}`);
+        if (wrapper) wrapper.classList.toggle('hidden');
+      });
+    });
+
+    document.querySelectorAll('.slot-plus').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation(); 
+        const li = btn.closest('li');
+        if (!li) return;
+        const name = li.dataset.name;
+        const level = li.dataset.level;
+        const c = combatants.find(x => x.name === name);
+        if (level && c?.statblock?.spellSlots?.[level] && c.statblock.spellSlots[level].used < c.statblock.spellSlots[level].max) {
+          c.statblock.spellSlots[level].used++;
+          renderCombatants();
+          saveEncounterState();
+        }
+      });
+    });
+
+    document.querySelectorAll('.slot-minus').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation(); 
+        const li = btn.closest('li');
+        if (!li) return;
+        const name = li.dataset.name;
+        const level = li.dataset.level;
+        const c = combatants.find(x => x.name === name);
+        if (level && c?.statblock?.spellSlots?.[level] && c.statblock.spellSlots[level].used > 0) {
+          c.statblock.spellSlots[level].used--;
+          renderCombatants();
+          saveEncounterState();
+        }
+      });
+    });
   }
+
+  function renderTracker() {
+    if (roundDisplay) roundDisplay.textContent = `Round ${round}`;
+    if (turnDisplay) turnDisplay.textContent = `Turn ${turnCounter}`;
+    renderCombatants();
+  }
+
 
   function nextTurn() {
     currentIndex++;
+    turnCounter++;
     if (currentIndex >= combatants.length) {
       currentIndex = 0;
       round++;
-      turnCounter++;
       updateStatusEffects();
     }
     renderTracker();
@@ -154,12 +257,7 @@
     renderTracker();
   }
 
-  function renderTracker() {
-    if (roundDisplay) roundDisplay.textContent = `Round ${round}`;
-    if (turnDisplay) turnDisplay.textContent = `Turn ${turnCounter}`;
-    renderCombatants();
-  }
-
+ 
   async function loadEncounterData() {
     showLoading();
     try {
@@ -169,6 +267,7 @@
 
       const res = await fetch(`/api/encounter/${encounterId}`);
       encounterData = await res.json();
+
       combatants = encounterData.initiative.map(c => {
         const sb = c.statblock || {};
         return {
@@ -177,19 +276,18 @@
           maxHp: c.maxHp ?? extractFirstNumber(sb.hit_points),
           currentHp: c.currentHp ?? extractFirstNumber(sb.hit_points) ?? 0,
           passivePerception: c.passivePerception ?? extractPassivePerception(sb.senses),
-
           statusEffects: c.statusEffects ?? [],
           isDead: c.currentHp <= 0
         };
       });
       
-      // ✅ Sort by initiative descending (highest goes first)
+      
       combatants.sort((a, b) => b.initiative - a.initiative);
       
-
       const partyRes = await fetch(`/api/party/${encounterData.party_id}`);
       const partyData = await partyRes.json();
       if (title) title.textContent = `${encounterData.name} vs ${partyData.name}`;
+
       renderTracker();
       hideLoading();
     } catch (err) {

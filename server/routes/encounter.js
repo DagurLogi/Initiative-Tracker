@@ -396,6 +396,23 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// PATCH /api/encounter/:id/state
+router.patch('/:id/state', async (req, res) => {
+  const { id } = req.params;
+  const { updatedInitiative } = req.body;
+
+  try {
+    await pool.query(
+      'UPDATE encounters SET initiative = $1 WHERE id = $2',
+      [JSON.stringify(updatedInitiative), id]
+    );
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Failed to update encounter state:', err);
+    res.status(500).json({ error: 'Failed to save encounter state' });
+  }
+});
+
 
 // DELETE encounter
 router.delete('/:id', async (req, res) => {
