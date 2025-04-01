@@ -41,7 +41,20 @@
   <footer>
     <a href="/" class="back-button">← Back to Home</a>
   </footer>
-
+    <div id="hp-popup" class="hidden">
+      <form id="hp-form">
+        <label>
+          <input type="radio" name="hpMode" value="damage" checked /> Damage
+        </label>
+        <label>
+          <input type="radio" name="hpMode" value="healing" /> Healing
+        </label>
+        <input type="number" id="hp-amount" placeholder="Amount" required />
+        <input type="hidden" id="hp-target" />
+        <button type="submit">Apply</button>
+      </form>
+    </div>
+  
   <script src="battle.js"></script>
 </body>
 </html>

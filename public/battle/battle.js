@@ -191,6 +191,65 @@
       </div>`;
     
   }
+  //Check on this Dagur!
+  function setupHpHandlers() {
+    const popup = document.getElementById('hp-popup');
+    const form = document.getElementById('hp-form');
+    const amountInput = document.getElementById('hp-amount');
+    const hiddenTarget = document.getElementById('hp-target');
+  
+    // ✅ Show popup when clicking current HP
+    document.querySelectorAll('.hp-clickable').forEach(span => {
+      span.addEventListener('click', e => {
+        const target = /** @type {HTMLElement} */ (e.currentTarget);
+        const name = target.dataset.name;
+        if (!name) return;
+  
+        // Reset popup
+        amountInput.value = '';
+        form.hpMode.value = 'damage';
+        hiddenTarget.value = name;
+  
+        // Position popup near the clicked HP
+        const rect = target.getBoundingClientRect();
+        popup.style.top = `${rect.bottom + window.scrollY}px`;
+        popup.style.left = `${rect.left + window.scrollX}px`;
+        popup.classList.remove('hidden');
+      });
+    });
+  
+    // ✅ Handle form submission
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+  
+      const amount = parseInt(amountInput.value);
+      const name = hiddenTarget.value;
+      const mode = form.hpMode.value;
+  
+      const combatant = combatants.find(c => c.name === name);
+      if (!combatant || isNaN(amount)) return;
+  
+      if (mode === 'damage') {
+        combatant.currentHp = Math.max(0, combatant.currentHp - amount);
+        if (combatant.currentHp === 0) {
+          combatant.isDead = true;
+          combatant.isConcentrating = false;
+        }
+      } else {
+        combatant.currentHp = Math.min(combatant.maxHp, combatant.currentHp + amount);
+        combatant.isDead = false;
+      }
+  
+      const uiState = rememberUIState();
+      renderCombatants();
+      saveEncounterState();
+      restoreUIState(uiState);
+  
+      popup.classList.add('hidden');
+    });
+  }
+  
+
 
   function renderCombatants() {
     if (!tracker) return;
@@ -200,12 +259,15 @@
       return `
         <div class="combatant-card ${active ? 'active' : ''} ${c.isDead ? 'dead' : ''}">
           <div class="combatant-header">
-            <h3 class="combatant-toggle" data-name="${c.name}">${c.name}</h3>
+            <h3 class="combatant-toggle" data-name="${c.name}">
+              ${c.name} ${c.isConcentrating ? '👑' : ''}
+            </h3>
+
             <span>Init: ${c.initiative}</span>
           </div>
           <div class="combatant-details">
             AC: ${c.ac ?? '?'} |
-            HP: <input type="number" value="${c.currentHp}" data-name="${c.name}" class="hp-input" /> / ${c.maxHp ?? '?'} |
+            HP: <span class="hp-clickable" data-name="${c.name}">${c.currentHp}</span> / ${c.maxHp ?? '?'} |
             PP: ${c.passivePerception ?? '?'}
           </div>
           <div class="status-effects">
@@ -213,7 +275,6 @@
               `<span class="status-badge" title="${e.description || ''}">${e.name} (${e.roundsRemaining})</span>`
             ).join('')}
             ${renderSpellSlots(c)}
-            ${c.isConcentrating ? `<span class="status-badge concentration-badge">Concentrating</span>` : ''}
               <label class="concentration-toggle">
                 <input type="checkbox" class="concentration-checkbox" data-name="${c.name}" ${c.isConcentrating ? 'checked' : ''}>
                 Concentrating
@@ -259,33 +320,16 @@
           if (value <= 0) {
             c.isConcentrating = false;
           }
-          const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-          const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-          const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-
+          const uiState = rememberUIState();
           renderCombatants();
           saveEncounterState();
-
-          // Restore spell slots
-          openPanels.forEach(id => {
-            const panel = document.getElementById(id);
-            if (panel) panel.classList.remove('hidden');
-          });
-          activeButtons.forEach(name => {
-            const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-            if (btn) btn.classList.add('active');
-          });
-
-          // ✅ Restore statblock open state
-          openStatblocks.forEach(id => {
-            const block = document.getElementById(id);
-            if (block) block.classList.remove('hidden');
-          });
+          restoreUIState(uiState);
 
         }
       });
     });
 
+    
   
     document.querySelectorAll('.combatant-toggle').forEach(header => {
       header.addEventListener('click', e => {
