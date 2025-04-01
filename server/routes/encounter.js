@@ -13,24 +13,23 @@ function extractFirstNumber(value) {
   return typeof value === 'number' ? value : null;
 }
 
+function extractLegendaryResistanceCount(traitsEncoded) {
+  const decoded = decodeURIComponent(traitsEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
+  const match = decoded.match(/Legendary Resistance \((\d+)\/Day\)/i);
+  return match ? parseInt(match[1]) : null;
+}
+
+function extractLegendaryActionCount(legendaryEncoded) {
+  const decoded = decodeURIComponent(legendaryEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
+  const match = decoded.match(/can take\s*(\d+)\s*legendary actions/i);
+  return match ? parseInt(match[1]) : null;
+}
+
 function extractSpellSlots(traitsHtmlEncoded) {
   const decoded = decodeURIComponent(
     traitsHtmlEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')
   );
 
-  function extractLegendaryResistanceCount(traitsEncoded) {
-    const decoded = decodeURIComponent(traitsEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
-    const match = decoded.match(/Legendary Resistance \((\d+)\/Day\)/i);
-    return match ? parseInt(match[1]) : null;
-  }
-  
-  function extractLegendaryActionCount(legendaryEncoded) {
-    const decoded = decodeURIComponent(legendaryEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
-    const match = decoded.match(/can take (\d+) legendary actions/i);
-    return match ? parseInt(match[1]) : null;
-  }
-
-  
   const slots = {};
   const regex = /(\d+)(?:st|nd|rd|th)\s+level\s+\((\d+)\s+slots?\)/gi;
 
@@ -43,6 +42,7 @@ function extractSpellSlots(traitsHtmlEncoded) {
 
   return slots;
 }
+
 
 
 // GET all encounters
