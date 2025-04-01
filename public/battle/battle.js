@@ -113,6 +113,33 @@
     `;
   }
 
+  function renderLegendaryTrackers(combatant) {
+    const actions = combatant.statblock?.legendaryActions;
+    const resistances = combatant.statblock?.legendaryResistances;
+    if (!actions && !resistances) return '';
+  
+    const actionHTML = actions ? `
+      <div class="legendary-actions">
+        <strong>Legendary Actions:</strong>
+        <button class="legendary-minus" data-name="${combatant.name}">−</button>
+        ${actions.used} / ${actions.max}
+        <button class="legendary-plus" data-name="${combatant.name}">+</button>
+      </div>` : '';
+  
+    const resistanceHTML = resistances ? `
+      <div class="legendary-resistances">
+        <strong>Legendary Resistances:</strong>
+        <button class="resistance-minus" data-name="${combatant.name}">−</button>
+        ${resistances.used} / ${resistances.max}
+        <button class="resistance-plus" data-name="${combatant.name}">+</button>
+      </div>` : '';
+  
+    return `
+      <div class="legendary-wrapper">
+        ${actionHTML}
+        ${resistanceHTML}
+      </div>`;
+  }
 
   function renderCombatants() {
     if (!tracker) return;
@@ -135,6 +162,13 @@
               `<span class="status-badge" title="${e.description || ''}">${e.name} (${e.roundsRemaining})</span>`
             ).join('')}
             ${renderSpellSlots(c)}
+            ${c.isConcentrating ? `<span class="status-badge concentration-badge">Concentrating</span>` : ''}
+              <label class="concentration-toggle">
+                <input type="checkbox" class="concentration-checkbox" data-name="${c.name}" ${c.isConcentrating ? 'checked' : ''}>
+                Concentrating
+              </label>
+            ${renderLegendaryTrackers(c)}
+
 
           </div>
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
@@ -169,8 +203,32 @@
         if (c) {
           c.currentHp = value;
           c.isDead = value <= 0;
+          if (value <= 0) {
+            c.isConcentrating = false;
+          }
+          const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+          const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+          const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+
           renderCombatants();
           saveEncounterState();
+
+          // Restore spell slots
+          openPanels.forEach(id => {
+            const panel = document.getElementById(id);
+            if (panel) panel.classList.remove('hidden');
+          });
+          activeButtons.forEach(name => {
+            const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+            if (btn) btn.classList.add('active');
+          });
+
+          // ✅ Restore statblock open state
+          openStatblocks.forEach(id => {
+            const block = document.getElementById(id);
+            if (block) block.classList.remove('hidden');
+          });
+
         }
       });
     });
@@ -188,45 +246,291 @@
     
     document.querySelectorAll('.toggle-spell-slots').forEach(btn => {
       btn.addEventListener('click', e => {
-        e.stopPropagation();
+        // 🛑 Prevent toggling if clicking a child like a slot button
+        if (!e.currentTarget || e.target !== e.currentTarget) return;
+    
         const name = btn.getAttribute('data-name');
         if (!name) return;
+    
         const wrapper = document.querySelector(`#spell-slots-${name.replace(/\s+/g, '-')}`);
-        if (wrapper) wrapper.classList.toggle('hidden');
+        if (wrapper) {
+          wrapper.classList.toggle('hidden');
+          btn.classList.toggle('active');
+        }
       });
     });
+    
+    
 
     document.querySelectorAll('.slot-plus').forEach(btn => {
       btn.addEventListener('click', e => {
-        e.stopPropagation(); 
+        e.stopPropagation();
+    
         const li = btn.closest('li');
         if (!li) return;
+    
         const name = li.dataset.name;
         const level = li.dataset.level;
         const c = combatants.find(x => x.name === name);
-        if (level && c?.statblock?.spellSlots?.[level] && c.statblock.spellSlots[level].used < c.statblock.spellSlots[level].max) {
-          c.statblock.spellSlots[level].used++;
+        if (!level || !c?.statblock?.spellSlots?.[level]) return;
+    
+        const spell = c.statblock.spellSlots[level];
+    
+        if (spell.used < spell.max) {
+          spell.used++;
+    
+          const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+          const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+          const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+
           renderCombatants();
           saveEncounterState();
+
+          // Restore spell slots
+          openPanels.forEach(id => {
+            const panel = document.getElementById(id);
+            if (panel) panel.classList.remove('hidden');
+          });
+          activeButtons.forEach(name => {
+            const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+            if (btn) btn.classList.add('active');
+          });
+
+          // ✅ Restore statblock open state
+          openStatblocks.forEach(id => {
+            const block = document.getElementById(id);
+            if (block) block.classList.remove('hidden');
+          });
+
         }
       });
     });
+    
 
     document.querySelectorAll('.slot-minus').forEach(btn => {
       btn.addEventListener('click', e => {
-        e.stopPropagation(); 
+        e.stopPropagation();
+    
         const li = btn.closest('li');
         if (!li) return;
+    
         const name = li.dataset.name;
         const level = li.dataset.level;
         const c = combatants.find(x => x.name === name);
-        if (level && c?.statblock?.spellSlots?.[level] && c.statblock.spellSlots[level].used > 0) {
-          c.statblock.spellSlots[level].used--;
+        if (!level || !c?.statblock?.spellSlots?.[level]) return;
+    
+        const spell = c.statblock.spellSlots[level];
+    
+        if (spell.used > 0) {
+          spell.used--;
+    
+          const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+          const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+          const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+          
           renderCombatants();
           saveEncounterState();
+          
+          // Restore spell slots
+          openPanels.forEach(id => {
+            const panel = document.getElementById(id);
+            if (panel) panel.classList.remove('hidden');
+          });
+          activeButtons.forEach(name => {
+            const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+            if (btn) btn.classList.add('active');
+          });
+          
+          // ✅ Restore statblock open state
+          openStatblocks.forEach(id => {
+            const block = document.getElementById(id);
+            if (block) block.classList.remove('hidden');
+          });
+          
         }
       });
     });
+    
+    document.querySelectorAll('.concentration-checkbox').forEach(box => {
+      box.addEventListener('change', e => {
+        const target = /** @type {HTMLInputElement} */ (e.target);
+        const name = target.dataset.name;
+        const combatant = combatants.find(c => c.name === name);
+        if (!combatant) return;
+    
+        combatant.isConcentrating = target.checked;
+    
+        const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+        const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+        const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+        
+        renderCombatants();
+        saveEncounterState();
+        
+        // Restore spell slots
+        openPanels.forEach(id => {
+          const panel = document.getElementById(id);
+          if (panel) panel.classList.remove('hidden');
+        });
+        activeButtons.forEach(name => {
+          const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+          if (btn) btn.classList.add('active');
+        });
+        
+        // ✅ Restore statblock open state
+        openStatblocks.forEach(id => {
+          const block = document.getElementById(id);
+          if (block) block.classList.remove('hidden');
+        });
+        
+      });
+    });
+    
+    
+    
+    
+// LEGENDARY ACTION TRACKERS
+document.querySelectorAll('.legendary-plus').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const btnElement = /** @type {HTMLElement} */ (btn);
+const name = btnElement.dataset.name;
+
+    const c = combatants.find(x => x.name === name);
+    if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used < c.statblock.legendaryActions.max) {
+      c.statblock.legendaryActions.used++;
+      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+      const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+      const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+      
+      renderCombatants();
+      saveEncounterState();
+      
+      // Restore spell slots
+      openPanels.forEach(id => {
+        const panel = document.getElementById(id);
+        if (panel) panel.classList.remove('hidden');
+      });
+      activeButtons.forEach(name => {
+        const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+        if (btn) btn.classList.add('active');
+      });
+      
+      // ✅ Restore statblock open state
+      openStatblocks.forEach(id => {
+        const block = document.getElementById(id);
+        if (block) block.classList.remove('hidden');
+      });
+      
+    }
+  });
+});
+
+document.querySelectorAll('.legendary-minus').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const btnElement = /** @type {HTMLElement} */ (btn);
+const name = btnElement.dataset.name;
+
+    const c = combatants.find(x => x.name === name);
+    if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used > 0) {
+      c.statblock.legendaryActions.used--;
+      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+
+renderCombatants();
+saveEncounterState();
+
+// Restore spell slots
+openPanels.forEach(id => {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.remove('hidden');
+});
+activeButtons.forEach(name => {
+  const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+  if (btn) btn.classList.add('active');
+});
+
+// ✅ Restore statblock open state
+openStatblocks.forEach(id => {
+  const block = document.getElementById(id);
+  if (block) block.classList.remove('hidden');
+});
+
+    }
+  });
+});
+
+// LEGENDARY RESISTANCE TRACKERS
+document.querySelectorAll('.resistance-plus').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const btnElement = /** @type {HTMLElement} */ (btn);
+const name = btnElement.dataset.name;
+
+    const c = combatants.find(x => x.name === name);
+    if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used < c.statblock.legendaryResistances.max) {
+      c.statblock.legendaryResistances.used++;
+      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+
+renderCombatants();
+saveEncounterState();
+
+// Restore spell slots
+openPanels.forEach(id => {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.remove('hidden');
+});
+activeButtons.forEach(name => {
+  const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+  if (btn) btn.classList.add('active');
+});
+
+// ✅ Restore statblock open state
+openStatblocks.forEach(id => {
+  const block = document.getElementById(id);
+  if (block) block.classList.remove('hidden');
+});
+
+    }
+  });
+});
+
+document.querySelectorAll('.resistance-minus').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const btnElement = /** @type {HTMLElement} */ (btn);
+const name = btnElement.dataset.name;
+
+    const c = combatants.find(x => x.name === name);
+    if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used > 0) {
+      c.statblock.legendaryResistances.used--;
+      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
+const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
+const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
+
+renderCombatants();
+saveEncounterState();
+
+// Restore spell slots
+openPanels.forEach(id => {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.remove('hidden');
+});
+activeButtons.forEach(name => {
+  const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+  if (btn) btn.classList.add('active');
+});
+
+// ✅ Restore statblock open state
+openStatblocks.forEach(id => {
+  const block = document.getElementById(id);
+  if (block) block.classList.remove('hidden');
+});
+
+    }
+  });
+});
+
   }
 
   function renderTracker() {
@@ -239,13 +543,22 @@
   function nextTurn() {
     currentIndex++;
     turnCounter++;
+  
     if (currentIndex >= combatants.length) {
       currentIndex = 0;
       round++;
       updateStatusEffects();
     }
+  
+    // ✅ Reset legendary actions for the current combatant
+    const current = combatants[currentIndex];
+    if (current?.statblock?.legendaryActions) {
+      current.statblock.legendaryActions.used = 0;
+    }
+  
     renderTracker();
   }
+  
 
   function previousTurn() {
     currentIndex--;
@@ -277,7 +590,8 @@
           currentHp: c.currentHp ?? extractFirstNumber(sb.hit_points) ?? 0,
           passivePerception: c.passivePerception ?? extractPassivePerception(sb.senses),
           statusEffects: c.statusEffects ?? [],
-          isDead: c.currentHp <= 0
+          isDead: c.currentHp <= 0,
+          isConcentrating: c.isConcentrating ?? false,
         };
       });
       
