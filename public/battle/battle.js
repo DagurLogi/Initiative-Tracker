@@ -95,9 +95,17 @@
     fetch(`/api/encounter/${encounterId}/state`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ updatedInitiative: combatants })
+      body: JSON.stringify({
+        updatedInitiative: combatants,
+        currentRound: round,
+        currentTurnIndex: currentIndex
+      })
     }).catch(err => console.error('Failed to save encounter state:', err));
   }
+  
+  
+  
+  
 
   function updateStatusEffects() {
     combatants.forEach(c => {
@@ -191,65 +199,6 @@
       </div>`;
     
   }
-  //Check on this Dagur!
-  function setupHpHandlers() {
-    const popup = document.getElementById('hp-popup');
-    const form = document.getElementById('hp-form');
-    const amountInput = document.getElementById('hp-amount');
-    const hiddenTarget = document.getElementById('hp-target');
-  
-    // ✅ Show popup when clicking current HP
-    document.querySelectorAll('.hp-clickable').forEach(span => {
-      span.addEventListener('click', e => {
-        const target = /** @type {HTMLElement} */ (e.currentTarget);
-        const name = target.dataset.name;
-        if (!name) return;
-  
-        // Reset popup
-        amountInput.value = '';
-        form.hpMode.value = 'damage';
-        hiddenTarget.value = name;
-  
-        // Position popup near the clicked HP
-        const rect = target.getBoundingClientRect();
-        popup.style.top = `${rect.bottom + window.scrollY}px`;
-        popup.style.left = `${rect.left + window.scrollX}px`;
-        popup.classList.remove('hidden');
-      });
-    });
-  
-    // ✅ Handle form submission
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-  
-      const amount = parseInt(amountInput.value);
-      const name = hiddenTarget.value;
-      const mode = form.hpMode.value;
-  
-      const combatant = combatants.find(c => c.name === name);
-      if (!combatant || isNaN(amount)) return;
-  
-      if (mode === 'damage') {
-        combatant.currentHp = Math.max(0, combatant.currentHp - amount);
-        if (combatant.currentHp === 0) {
-          combatant.isDead = true;
-          combatant.isConcentrating = false;
-        }
-      } else {
-        combatant.currentHp = Math.min(combatant.maxHp, combatant.currentHp + amount);
-        combatant.isDead = false;
-      }
-  
-      const uiState = rememberUIState();
-      renderCombatants();
-      saveEncounterState();
-      restoreUIState(uiState);
-  
-      popup.classList.add('hidden');
-    });
-  }
-  
-
 
   function renderCombatants() {
     if (!tracker) return;
@@ -267,7 +216,8 @@
           </div>
           <div class="combatant-details">
             AC: ${c.ac ?? '?'} |
-            HP: <span class="hp-clickable" data-name="${c.name}">${c.currentHp}</span> / ${c.maxHp ?? '?'} |
+            HP: <button class="hp-clickable" data-name="${c.name}" type="button">${c.currentHp}</button> / ${c.maxHp ?? '?'} |
+ |
             PP: ${c.passivePerception ?? '?'}
           </div>
           <div class="status-effects">
@@ -306,31 +256,7 @@
       `;
     }).join('');
 
-    document.querySelectorAll('.hp-input').forEach(input => {
-      input.addEventListener('change', e => {
-        const target = /** @type {HTMLInputElement} */ (e.target);
-        if (!target) return;
-    
-        const value = parseInt(target.value);
-        const name = target.dataset.name;
-        const c = combatants.find(x => x.name === name);
-        if (c) {
-          c.currentHp = value;
-          c.isDead = value <= 0;
-          if (value <= 0) {
-            c.isConcentrating = false;
-          }
-          const uiState = rememberUIState();
-          renderCombatants();
-          saveEncounterState();
-          restoreUIState(uiState);
-
-        }
-      });
-    });
-
-    
-  
+   
     document.querySelectorAll('.combatant-toggle').forEach(header => {
       header.addEventListener('click', e => {
         const target = /** @type {HTMLElement} */ (e.currentTarget);
@@ -510,8 +436,104 @@
         });
       });
 
+      setupHpHandlers();
+
   }
 
+  function setupHpHandlers() {
+    const popup = document.getElementById('hp-popup');
+    const form = document.getElementById('hp-form');
+    const amountInput = document.getElementById('hp-amount');
+    const hiddenTarget = document.getElementById('hp-target');
+    
+    // ✅ Show popup when clicking current HP
+    document.querySelectorAll('.hp-clickable').forEach(span => {
+      span.addEventListener('click', e => {
+        const target = e.currentTarget;
+        if (!(target instanceof HTMLElement)) return;
+        const name = target.dataset.name;
+        if (!name) return;
+  
+        if (amountInput instanceof HTMLInputElement) amountInput.value = '';
+        if (form instanceof HTMLFormElement) {
+          const hpModes = form.elements['hpMode'];
+          if (hpModes instanceof RadioNodeList) {
+            [...hpModes].forEach(input => {
+              if (input instanceof HTMLInputElement) {
+                input.checked = input.value === 'damage';
+              }
+              
+            });
+          }
+        }
+  
+        if (hiddenTarget instanceof HTMLInputElement) {
+          hiddenTarget.value = name;
+        }
+        // Position popup near the clicked HP
+        if (popup) {
+          const rect = target.getBoundingClientRect();
+          popup.style.top = `${rect.bottom + window.scrollY}px`;
+          popup.style.left = `${rect.left + window.scrollX}px`;
+          popup.classList.remove('hidden');
+        }
+      });
+    });
+  
+    // ✅ Handle form submission
+    if (form instanceof HTMLFormElement) {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+  
+        const amount = amountInput instanceof HTMLInputElement ? parseInt(amountInput.value) : NaN;
+        const name = hiddenTarget instanceof HTMLInputElement ? hiddenTarget.value : null;
+  
+        let mode = 'damage';
+        const hpModes = form.elements['hpMode'];
+        if (hpModes instanceof RadioNodeList) {
+          [...hpModes].forEach(input => {
+            if (input instanceof HTMLInputElement && input.checked) {
+              mode = input.value;
+            }
+          });
+        }
+  
+        const combatant = combatants.find(c => c.name === name);
+        if (!combatant || isNaN(amount)) return;
+  
+        if (mode === 'damage') {
+          combatant.currentHp = Math.max(0, combatant.currentHp - amount);
+          if (combatant.currentHp === 0) {
+            combatant.isDead = true;
+            combatant.isConcentrating = false;
+          }
+        } else {
+          combatant.currentHp = Math.min(combatant.maxHp, combatant.currentHp + amount);
+          combatant.isDead = false;
+        }
+  
+        const uiState = rememberUIState();
+        renderCombatants();
+        saveEncounterState();
+        restoreUIState(uiState);
+  
+        if (popup) popup.classList.add('hidden');
+      });
+    }
+    const closeBtn = document.getElementById('close-hp-popup');
+    if (closeBtn) {
+closeBtn.addEventListener('click', () => {
+  if (popup) popup.classList.add('hidden');
+
+  const uiState = rememberUIState();
+      renderCombatants();
+      saveEncounterState();
+      restoreUIState(uiState);
+
+});
+}
+}
+  
   function renderTracker() {
     if (roundDisplay) roundDisplay.textContent = `Round ${round}`;
     if (turnDisplay) turnDisplay.textContent = `Turn ${turnCounter}`;
@@ -537,6 +559,7 @@
     }
   
     renderTracker();
+    saveEncounterState();
     restoreUIState(uiState);
   }
   
@@ -553,8 +576,10 @@
   
     turnCounter = Math.max(1, turnCounter - 1);
     renderTracker();
+    saveEncounterState(); 
     restoreUIState(uiState);
   }
+  
   
 
   async function loadEncounterData() {
@@ -566,6 +591,10 @@
 
       const res = await fetch(`/api/encounter/${encounterId}`);
       encounterData = await res.json();
+      
+      round = encounterData.current_round ?? 1;
+      currentIndex = encounterData.current_turn_index ?? 0;
+      turnCounter = currentIndex + 1;
 
       combatants = encounterData.initiative.map(c => {
         const sb = c.statblock || {};
@@ -602,6 +631,7 @@
 
       renderTracker();
       hideLoading();
+
     } catch (err) {
       console.error(err);
       showError('Failed to load battle data');

@@ -211,9 +211,10 @@ router.post('/', async (req, res) => {
     });
 
     const result = await pool.query(
-      'INSERT INTO encounters (name, party_id, monsters, initiative) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative)]
+      'INSERT INTO encounters (name, party_id, monsters, initiative, current_round, current_turn_index) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), 1, 0] // Start at round 1, index 0
     );
+    
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -234,6 +235,11 @@ router.put('/:id', async (req, res) => {
 
     const existingEncounter = await pool.query('SELECT * FROM encounters WHERE id = $1', [id]);
     const existingInitiative = existingEncounter.rows[0]?.initiative || [];
+
+    // 🆕 Preserve round and turn state
+    const currentRound = existingEncounter.rows[0]?.current_round ?? 1;
+    const currentTurnIndex = existingEncounter.rows[0]?.current_turn_index ?? 0;
+
 
     const creatureRes = await pool.query('SELECT * FROM creatures');
     const creatureMap = new Map();
@@ -381,9 +387,10 @@ router.put('/:id', async (req, res) => {
     });
 
     const result = await pool.query(
-      'UPDATE encounters SET name = $1, party_id = $2, monsters = $3, initiative = $4 WHERE id = $5 RETURNING *',
-      [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), id]
+      'UPDATE encounters SET name = $1, party_id = $2, monsters = $3, initiative = $4, current_round = $5, current_turn_index = $6 WHERE id = $7 RETURNING *',
+      [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), currentRound, currentTurnIndex, id]
     );
+    
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Encounter not found' });
@@ -399,19 +406,25 @@ router.put('/:id', async (req, res) => {
 // PATCH /api/encounter/:id/state
 router.patch('/:id/state', async (req, res) => {
   const { id } = req.params;
-  const { updatedInitiative } = req.body;
+  const { updatedInitiative, currentRound, currentTurnIndex } = req.body;
 
   try {
     await pool.query(
-      'UPDATE encounters SET initiative = $1 WHERE id = $2',
-      [JSON.stringify(updatedInitiative), id]
+      `UPDATE encounters
+       SET initiative = $1,
+           current_round = $2,
+           current_turn_index = $3
+       WHERE id = $4`,
+      [JSON.stringify(updatedInitiative), currentRound ?? 1, currentTurnIndex ?? 0, id]
     );
+
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error('Failed to update encounter state:', err);
+    console.error('❌ Failed to update encounter state:', err);
     res.status(500).json({ error: 'Failed to save encounter state' });
   }
 });
+
 
 
 // DELETE encounter

@@ -79,3 +79,27 @@ Each entry in the initiative order should show:
  ☁️ Save/load persistent battles from server
 
  ⚙️ Settings panel (e.g., auto-round increase toggle)
+
+
+ document.querySelectorAll('.hp-input').forEach(input => {
+      input.addEventListener('change', e => {
+        const target = /** @type {HTMLInputElement} */ (e.target);
+        if (!target) return;
+    
+        const value = parseInt(target.value);
+        const name = target.dataset.name;
+        const c = combatants.find(x => x.name === name);
+        if (c) {
+          c.currentHp = value;
+          c.isDead = value <= 0;
+          if (value <= 0) {
+            c.isConcentrating = false;
+          }
+          const uiState = rememberUIState();
+          renderCombatants();
+          saveEncounterState();
+          restoreUIState(uiState);
+
+        }
+      });
+    });

@@ -343,20 +343,35 @@
 
 #hp-popup {
   position: absolute;
-  background: #fff;
+  background: white;
   border: 2px solid #4b0082;
-  padding: 0.5rem;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 2000;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
 }
 
 #hp-popup.hidden {
   display: none;
 }
 
+
 #hp-form {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+
+.hp-clickable {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline dotted;
+}
+
+.hp-clickable:hover {
+  color: #4b0082;
 }
