@@ -36,8 +36,11 @@
       openPanels: Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id),
       activeButtons: Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name')),
       openStatblocks: Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id),
+      openLegendaryPanels: Array.from(document.querySelectorAll('.legendary-description:not(.hidden)')).map(div => div.id),
+      activeLegendaryToggles: Array.from(document.querySelectorAll('.toggle-legendary-actions.active')).map(b => b.getAttribute('data-name'))
     };
   }
+  
   
   function restoreUIState(state) {
     state.openPanels.forEach(id => {
@@ -54,7 +57,18 @@
       const block = document.getElementById(id);
       if (block) block.classList.remove('hidden');
     });
+  
+    state.openLegendaryPanels.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    });
+  
+    state.activeLegendaryToggles.forEach(name => {
+      const btn = document.querySelector(`.toggle-legendary-actions[data-name="${name}"]`);
+      if (btn) btn.classList.add('active');
+    });
   }
+  
   
   function showLoading() {
     loadingDisplay?.classList.remove('hidden');
@@ -158,12 +172,24 @@
         ${resistances.used} / ${resistances.max}
         <button class="resistance-plus" data-name="${combatant.name}">+</button>
       </div>` : '';
-  
-    return `
+    
+      const legendaryDesc = combatant.statblock?.legendary_actions; // HTML string
+      const actionsDescriptionHTML = legendaryDesc ? `
+        <div class="legendary-description-toggle">
+          <button class="toggle-legendary-actions" data-name="${combatant.name}">📜 Show Actions</button>
+          <div class="legendary-description hidden" id="legendary-desc-${combatant.name.replace(/\s+/g, '-')}">
+            ${legendaryDesc}
+          </div>
+        </div>
+      ` : '';
+
+      return `
       <div class="legendary-wrapper">
         ${actionHTML}
         ${resistanceHTML}
+        ${actionsDescriptionHTML}
       </div>`;
+    
   }
 
   function renderCombatants() {
@@ -197,21 +223,23 @@
 
           </div>
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
-            <div class="statblock">
-              <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
-              <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
-              <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
-              <div class="abilities">
-                STR: ${sb.stats?.STR ?? '?'} (${sb.stats?.STR_mod ?? ''}), 
-                DEX: ${sb.stats?.DEX ?? '?'} (${sb.stats?.DEX_mod ?? ''}), 
-                CON: ${sb.stats?.CON ?? '?'} (${sb.stats?.CON_mod ?? ''}), 
-                INT: ${sb.stats?.INT ?? '?'} (${sb.stats?.INT_mod ?? ''}), 
-                WIS: ${sb.stats?.WIS ?? '?'} (${sb.stats?.WIS_mod ?? ''}), 
-                CHA: ${sb.stats?.CHA ?? '?'} (${sb.stats?.CHA_mod ?? ''})
-              </div>
-              ${sb.traits ? `<p><strong>Traits:</strong> ${sb.traits}</p>` : ''}
-              ${sb.actions ? `<p><strong>Actions:</strong> ${sb.actions}</p>` : ''}
+           <div class="statblock">
+            <p><strong>Name:</strong> ${c.name}</p>
+            <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
+            <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
+            <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
+            <p><strong>Type:</strong> ${sb.type ?? '?'} | <strong>Size:</strong> ${sb.size ?? '?'} | <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
+            <div class="abilities">
+              STR: ${sb.stats?.STR ?? '?'} (${sb.stats?.STR_mod ?? ''}),
+              DEX: ${sb.stats?.DEX ?? '?'} (${sb.stats?.DEX_mod ?? ''}),
+              CON: ${sb.stats?.CON ?? '?'} (${sb.stats?.CON_mod ?? ''}),
+              INT: ${sb.stats?.INT ?? '?'} (${sb.stats?.INT_mod ?? ''}),
+              WIS: ${sb.stats?.WIS ?? '?'} (${sb.stats?.WIS_mod ?? ''}),
+              CHA: ${sb.stats?.CHA ?? '?'} (${sb.stats?.CHA_mod ?? ''})
             </div>
+            ${sb.traits ? `<p><strong>Traits:</strong> ${sb.traits}</p>` : ''}
+            ${sb.actions ? `<p><strong>Actions:</strong> ${sb.actions}</p>` : ''}
+          </div>
           </div>
         </div>
       `;
@@ -304,29 +332,10 @@
         if (spell.used < spell.max) {
           spell.used++;
     
-          const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-          const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-          const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-
+          const uiState = rememberUIState();
           renderCombatants();
           saveEncounterState();
-
-          // Restore spell slots
-          openPanels.forEach(id => {
-            const panel = document.getElementById(id);
-            if (panel) panel.classList.remove('hidden');
-          });
-          activeButtons.forEach(name => {
-            const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-            if (btn) btn.classList.add('active');
-          });
-
-          // ✅ Restore statblock open state
-          openStatblocks.forEach(id => {
-            const block = document.getElementById(id);
-            if (block) block.classList.remove('hidden');
-          });
-
+          restoreUIState(uiState);
         }
       });
     });
@@ -349,29 +358,10 @@
         if (spell.used > 0) {
           spell.used--;
     
-          const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-          const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-          const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-          
+          const uiState = rememberUIState();
           renderCombatants();
           saveEncounterState();
-          
-          // Restore spell slots
-          openPanels.forEach(id => {
-            const panel = document.getElementById(id);
-            if (panel) panel.classList.remove('hidden');
-          });
-          activeButtons.forEach(name => {
-            const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-            if (btn) btn.classList.add('active');
-          });
-          
-          // ✅ Restore statblock open state
-          openStatblocks.forEach(id => {
-            const block = document.getElementById(id);
-            if (block) block.classList.remove('hidden');
-          });
-          
+          restoreUIState(uiState);
         }
       });
     });
@@ -385,176 +375,96 @@
     
         combatant.isConcentrating = target.checked;
     
-        const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-        const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-        const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-        
-        renderCombatants();
-        saveEncounterState();
-        
-        // Restore spell slots
-        openPanels.forEach(id => {
-          const panel = document.getElementById(id);
-          if (panel) panel.classList.remove('hidden');
-        });
-        activeButtons.forEach(name => {
-          const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-          if (btn) btn.classList.add('active');
-        });
-        
-        // ✅ Restore statblock open state
-        openStatblocks.forEach(id => {
-          const block = document.getElementById(id);
-          if (block) block.classList.remove('hidden');
-        });
-        
+        const uiState = rememberUIState();
+          renderCombatants();
+          saveEncounterState();
+          restoreUIState(uiState);
       });
     });
     
     
     
     
-// LEGENDARY ACTION TRACKERS
-document.querySelectorAll('.legendary-plus').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const btnElement = /** @type {HTMLElement} */ (btn);
-const name = btnElement.dataset.name;
+    // LEGENDARY ACTION TRACKERS
+    document.querySelectorAll('.legendary-plus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const btnElement = /** @type {HTMLElement} */ (btn);
+    const name = btnElement.dataset.name;
 
-    const c = combatants.find(x => x.name === name);
-    if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used < c.statblock.legendaryActions.max) {
-      c.statblock.legendaryActions.used++;
-      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-      const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-      const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-      
-      renderCombatants();
-      saveEncounterState();
-      
-      // Restore spell slots
-      openPanels.forEach(id => {
-        const panel = document.getElementById(id);
-        if (panel) panel.classList.remove('hidden');
+        const c = combatants.find(x => x.name === name);
+        if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used < c.statblock.legendaryActions.max) {
+          c.statblock.legendaryActions.used++;
+          const uiState = rememberUIState();
+          renderCombatants();
+          saveEncounterState();
+          restoreUIState(uiState);
+        }
       });
-      activeButtons.forEach(name => {
-        const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-        if (btn) btn.classList.add('active');
+    });
+
+      document.querySelectorAll('.legendary-minus').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const btnElement = /** @type {HTMLElement} */ (btn);
+      const name = btnElement.dataset.name;
+
+          const c = combatants.find(x => x.name === name);
+          if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used > 0) {
+            c.statblock.legendaryActions.used--;
+            const uiState = rememberUIState();
+            renderCombatants();
+            saveEncounterState();
+            restoreUIState(uiState);
+          }
+        });
       });
-      
-      // ✅ Restore statblock open state
-      openStatblocks.forEach(id => {
-        const block = document.getElementById(id);
-        if (block) block.classList.remove('hidden');
-      });
-      
-    }
-  });
-});
-
-document.querySelectorAll('.legendary-minus').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const btnElement = /** @type {HTMLElement} */ (btn);
-const name = btnElement.dataset.name;
-
-    const c = combatants.find(x => x.name === name);
-    if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used > 0) {
-      c.statblock.legendaryActions.used--;
-      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-
-renderCombatants();
-saveEncounterState();
-
-// Restore spell slots
-openPanels.forEach(id => {
-  const panel = document.getElementById(id);
-  if (panel) panel.classList.remove('hidden');
-});
-activeButtons.forEach(name => {
-  const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-  if (btn) btn.classList.add('active');
-});
-
-// ✅ Restore statblock open state
-openStatblocks.forEach(id => {
-  const block = document.getElementById(id);
-  if (block) block.classList.remove('hidden');
-});
-
-    }
-  });
-});
 
 // LEGENDARY RESISTANCE TRACKERS
-document.querySelectorAll('.resistance-plus').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const btnElement = /** @type {HTMLElement} */ (btn);
-const name = btnElement.dataset.name;
+      document.querySelectorAll('.resistance-plus').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const btnElement = /** @type {HTMLElement} */ (btn);
+      const name = btnElement.dataset.name;
 
-    const c = combatants.find(x => x.name === name);
-    if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used < c.statblock.legendaryResistances.max) {
-      c.statblock.legendaryResistances.used++;
-      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-
-renderCombatants();
-saveEncounterState();
-
-// Restore spell slots
-openPanels.forEach(id => {
-  const panel = document.getElementById(id);
-  if (panel) panel.classList.remove('hidden');
-});
-activeButtons.forEach(name => {
-  const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-  if (btn) btn.classList.add('active');
-});
-
-// ✅ Restore statblock open state
-openStatblocks.forEach(id => {
-  const block = document.getElementById(id);
-  if (block) block.classList.remove('hidden');
-});
+          const c = combatants.find(x => x.name === name);
+          if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used < c.statblock.legendaryResistances.max) {
+            c.statblock.legendaryResistances.used++;
+            const uiState = rememberUIState();
+            renderCombatants();
+            saveEncounterState();
+            restoreUIState(uiState);
 
     }
   });
 });
 
-document.querySelectorAll('.resistance-minus').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const btnElement = /** @type {HTMLElement} */ (btn);
-const name = btnElement.dataset.name;
+    document.querySelectorAll('.resistance-minus').forEach(btn => {
+      btn.addEventListener('click', () => {
+          const btnElement = /** @type {HTMLElement} */ (btn);
+      const name = btnElement.dataset.name;
 
-    const c = combatants.find(x => x.name === name);
-    if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used > 0) {
-      c.statblock.legendaryResistances.used--;
-      const openPanels = Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id);
-const activeButtons = Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name'));
-const openStatblocks = Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id);
-
-renderCombatants();
-saveEncounterState();
-
-// Restore spell slots
-openPanels.forEach(id => {
-  const panel = document.getElementById(id);
-  if (panel) panel.classList.remove('hidden');
-});
-activeButtons.forEach(name => {
-  const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
-  if (btn) btn.classList.add('active');
-});
-
-// ✅ Restore statblock open state
-openStatblocks.forEach(id => {
-  const block = document.getElementById(id);
-  if (block) block.classList.remove('hidden');
-});
-
+          const c = combatants.find(x => x.name === name);
+          if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used > 0) {
+            c.statblock.legendaryResistances.used--;
+            const uiState = rememberUIState();
+            renderCombatants();
+            saveEncounterState();
+            restoreUIState(uiState);
     }
   });
 });
+
+      document.querySelectorAll('.toggle-legendary-actions').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const btnElement = /** @type {HTMLElement} */ (btn);
+            const name = btnElement.dataset.name;
+          const desc = document.getElementById(`legendary-desc-${(name ?? '').replace(/\s+/g, '-')}`);
+          if (desc) desc.classList.toggle('hidden');
+          const uiState = rememberUIState();
+          renderCombatants();
+          saveEncounterState();
+          restoreUIState(uiState);
+
+        });
+      });
 
   }
 
