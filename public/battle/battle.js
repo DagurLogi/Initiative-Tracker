@@ -31,6 +31,31 @@
     return null;
   }
 
+  function rememberUIState() {
+    return {
+      openPanels: Array.from(document.querySelectorAll('.spell-slots:not(.hidden)')).map(p => p.id),
+      activeButtons: Array.from(document.querySelectorAll('.toggle-spell-slots.active')).map(b => b.getAttribute('data-name')),
+      openStatblocks: Array.from(document.querySelectorAll('.statblock-section:not(.hidden)')).map(sb => sb.id),
+    };
+  }
+  
+  function restoreUIState(state) {
+    state.openPanels.forEach(id => {
+      const panel = document.getElementById(id);
+      if (panel) panel.classList.remove('hidden');
+    });
+  
+    state.activeButtons.forEach(name => {
+      const btn = document.querySelector(`.toggle-spell-slots[data-name="${name}"]`);
+      if (btn) btn.classList.add('active');
+    });
+  
+    state.openStatblocks.forEach(id => {
+      const block = document.getElementById(id);
+      if (block) block.classList.remove('hidden');
+    });
+  }
+  
   function showLoading() {
     loadingDisplay?.classList.remove('hidden');
     errorDisplay?.classList.add('hidden');
@@ -541,6 +566,8 @@ openStatblocks.forEach(id => {
 
 
   function nextTurn() {
+    const uiState = rememberUIState();
+  
     currentIndex++;
     turnCounter++;
   
@@ -550,27 +577,32 @@ openStatblocks.forEach(id => {
       updateStatusEffects();
     }
   
-    // ✅ Reset legendary actions for the current combatant
     const current = combatants[currentIndex];
     if (current?.statblock?.legendaryActions) {
       current.statblock.legendaryActions.used = 0;
     }
   
     renderTracker();
+    restoreUIState(uiState);
   }
+  
   
 
   function previousTurn() {
+    const uiState = rememberUIState();
+  
     currentIndex--;
     if (currentIndex < 0) {
       currentIndex = combatants.length - 1;
       round = Math.max(1, round - 1);
     }
+  
     turnCounter = Math.max(1, turnCounter - 1);
     renderTracker();
+    restoreUIState(uiState);
   }
+  
 
- 
   async function loadEncounterData() {
     showLoading();
     try {
@@ -583,6 +615,17 @@ openStatblocks.forEach(id => {
 
       combatants = encounterData.initiative.map(c => {
         const sb = c.statblock || {};
+        if (sb.legendary_actions && !sb.legendaryActions) {
+          const match = sb.legendary_actions.match(/take\s+(\d+)/i);
+          const max = match ? parseInt(match[1]) : 3;
+          sb.legendaryActions = { max, used: 0 };
+        }
+      
+        if (sb.traits?.includes('Legendary Resistance') && !sb.legendaryResistances) {
+          const match = sb.traits.match(/Legendary Resistance \((\d+)/i);
+          const max = match ? parseInt(match[1]) : 3;
+          sb.legendaryResistances = { max, used: 0 };
+        }
         return {
           ...c,
           ac: c.ac ?? extractFirstNumber(sb.armor_class),
@@ -592,6 +635,7 @@ openStatblocks.forEach(id => {
           statusEffects: c.statusEffects ?? [],
           isDead: c.currentHp <= 0,
           isConcentrating: c.isConcentrating ?? false,
+          statblock: sb
         };
       });
       
