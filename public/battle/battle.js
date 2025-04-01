@@ -98,7 +98,8 @@
       body: JSON.stringify({
         updatedInitiative: combatants,
         currentRound: round,
-        currentTurnIndex: currentIndex
+        currentTurnIndex: currentIndex,
+        totalTurns: turnCounter
       })
     }).catch(err => console.error('Failed to save encounter state:', err));
   }
@@ -595,6 +596,7 @@ closeBtn.addEventListener('click', () => {
       round = encounterData.current_round ?? 1;
       currentIndex = encounterData.current_turn_index ?? 0;
       turnCounter = currentIndex + 1;
+      turnCounter = encounterData.total_turns ?? (encounterData.current_turn_index + 1);
 
       combatants = encounterData.initiative.map(c => {
         const sb = c.statblock || {};

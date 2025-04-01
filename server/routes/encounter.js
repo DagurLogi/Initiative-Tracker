@@ -406,16 +406,17 @@ router.put('/:id', async (req, res) => {
 // PATCH /api/encounter/:id/state
 router.patch('/:id/state', async (req, res) => {
   const { id } = req.params;
-  const { updatedInitiative, currentRound, currentTurnIndex } = req.body;
+  const { updatedInitiative, currentRound, currentTurnIndex, totalTurns } = req.body;
 
   try {
     await pool.query(
       `UPDATE encounters
        SET initiative = $1,
            current_round = $2,
-           current_turn_index = $3
-       WHERE id = $4`,
-      [JSON.stringify(updatedInitiative), currentRound ?? 1, currentTurnIndex ?? 0, id]
+           current_turn_index = $3,
+           total_turns = $4
+       WHERE id = $5`,
+      [JSON.stringify(updatedInitiative), currentRound ?? 1, currentTurnIndex ?? 0, totalTurns ?? 1, id]
     );
 
     res.status(200).json({ success: true });
@@ -424,7 +425,6 @@ router.patch('/:id/state', async (req, res) => {
     res.status(500).json({ error: 'Failed to save encounter state' });
   }
 });
-
 
 
 // DELETE encounter
