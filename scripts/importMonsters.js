@@ -1,10 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import pool from '../server/db.js';
+import xss from 'xss';
 
 const filePath = path.resolve('monster-stats', 'srd_5e_monsters.json');
 const rawData = fs.readFileSync(filePath, 'utf-8');
 const monsters = JSON.parse(rawData);
+
+function sanitize(value) {
+  return typeof value === 'string' ? xss(value) : value;
+}
 
 async function importMonsters() {
   for (const monster of monsters) {
@@ -23,11 +28,11 @@ async function importMonsters() {
           $16, $17, $18, $19, $20
         )`,
         [
-          monster.name || null,
-          monster.meta || null,
-          monster["Armor Class"] || null,
-          monster["Hit Points"] || null,
-          monster["Speed"] || null,
+          sanitize(monster.name),
+          sanitize(monster.meta),
+          sanitize(monster["Armor Class"]),
+          sanitize(monster["Hit Points"]),
+          sanitize(monster["Speed"]),
           JSON.stringify({
             STR: monster.STR,
             DEX: monster.DEX,
@@ -42,20 +47,20 @@ async function importMonsters() {
             WIS_mod: monster.WIS_mod,
             CHA_mod: monster.CHA_mod,
           }),
-          monster["Saving Throws"] || null,
-          monster["Skills"] || null,
-          monster["Senses"] || null,
-          monster["Languages"] || null,
-          monster["Challenge"] || null,
-          monster["Traits"] || null,
-          monster["Actions"] || null,
-          monster["Reactions"] || null,
-          monster["Legendary Actions"] || null,
-          monster["Damage Immunities"] || null,
-          monster["Damage Resistances"] || null,
-          monster["Damage Vulnerabilities"] || null,
-          monster["Condition Immunities"] || null,
-          monster["img_url"] || null
+          sanitize(monster["Saving Throws"]),
+          sanitize(monster["Skills"]),
+          sanitize(monster["Senses"]),
+          sanitize(monster["Languages"]),
+          sanitize(monster["Challenge"]),
+          sanitize(monster["Traits"]),
+          sanitize(monster["Actions"]),
+          sanitize(monster["Reactions"]),
+          sanitize(monster["Legendary Actions"]),
+          sanitize(monster["Damage Immunities"]),
+          sanitize(monster["Damage Resistances"]),
+          sanitize(monster["Damage Vulnerabilities"]),
+          sanitize(monster["Condition Immunities"]),
+          sanitize(monster["img_url"])
         ]
       );
     } catch (error) {

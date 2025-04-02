@@ -24,7 +24,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "initiative-tracker": "file:",
-    "pg": "^8.14.1"
+    "pg": "^8.14.1",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

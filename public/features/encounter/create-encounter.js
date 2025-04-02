@@ -1,4 +1,6 @@
 // public/create-encounter.js
+// @ts-ignore
+const DOMPurify = window.DOMPurify;
 
 const partySelect = /** @type {HTMLSelectElement} */ (document.getElementById('partySelect'));
 const monsterList = /** @type {HTMLDivElement} */ (document.getElementById('monsterList'));
@@ -32,7 +34,7 @@ async function fetchCreatures() {
     creatures.forEach(creature => {
       const div = document.createElement('div');
       div.className = 'monster-preview';
-      div.textContent = `${creature.name} (${creature.meta})`;
+      div.innerHTML = DOMPurify.sanitize(`${creature.name} (${creature.meta})`);
       div.addEventListener('click', () => addMonsterToEncounter(creature));
       monsterList.appendChild(div);
     });
@@ -58,7 +60,7 @@ function renderSelectedMonsters() {
     const div = document.createElement('div');
     div.className = 'selected-monster';
     div.innerHTML = `
-      <span>${monster.name}</span>
+      <span>${DOMPurify.sanitize(monster.name)}</span>
       <label>Qty: 
         <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
       </label>
@@ -127,7 +129,7 @@ partySelect.addEventListener('change', async () => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const name = /** @type {HTMLInputElement} */ (encounterNameInput).value.trim();
+  const name = DOMPurify.sanitize(/** @type {HTMLInputElement} */ (encounterNameInput).value.trim());
   const partyId = /** @type {HTMLSelectElement} */ (partySelect).value;
 
   if (!name || !partyId) {

@@ -1,4 +1,6 @@
 // public/edit-encounter.js
+// @ts-ignore
+const DOMPurify = window.DOMPurify;
 
 (() => {
   const partySelect = /** @type {HTMLSelectElement|null} */ (document.getElementById('partySelect'));
@@ -61,7 +63,7 @@
       ).join('') || '';
       
 
-      div.innerHTML = `
+      div.innerHTML = DOMPurify.sanitize(`
         <span>${monster.name}</span>
         <label>Qty: 
           <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
@@ -71,7 +73,7 @@
         </label>
         <div>Initiatives: ${inputs}</div>
         <button class="remove-monster" data-id="${monster.id}">X</button>
-      `;
+      `);
       selectedMonstersDiv?.appendChild(div);
     });
 
@@ -149,11 +151,11 @@
       loadedParty.members.forEach((member, index) => {
         const init = data.initiative.find(i => i.name === member.name);
         const div = document.createElement('div');
-        div.innerHTML = `
+        div.innerHTML = DOMPurify.sanitize(`
           <label>${member.name} (Init):
             <input type="number" name="initiative-${index}" data-name="${member.name}" value="${init?.initiative || ''}" />
           </label>
-        `;
+        `);
         initiativeInputsDiv.appendChild(div);
       });
     }
@@ -189,7 +191,7 @@
     e.preventDefault();
     if (!encounterId) return;
 
-    const name = encounterNameInput?.value.trim() || '';
+    const name = DOMPurify.sanitize(encounterNameInput?.value.trim() || '');
     const partyId = partySelect ? parseInt(partySelect.value) : 0;
 
     const monsters = Array.from(selectedMonstersMap.values());

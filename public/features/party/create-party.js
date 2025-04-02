@@ -1,4 +1,6 @@
 // @ts-check
+// @ts-ignore
+const DOMPurify = window.DOMPurify;
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('createPartyForm');
@@ -43,7 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const groupName = /** @type {HTMLInputElement} */ (groupNameInput).value.trim();
+    const groupName = DOMPurify.sanitize(
+      /** @type {HTMLInputElement} */ (groupNameInput).value.trim()
+    );
+    
     if (!groupName) {
       alert('Group name is required!');
       return;
@@ -53,7 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const members = [];
 
     memberRows.forEach(row => {
-      const getVal = (selector) => row.querySelector(selector)?.value.trim();
+      const getVal = (selector) => {
+        const value = row.querySelector(selector)?.value.trim() || '';
+        return DOMPurify.sanitize(value);
+      };
+      
       const getNum = (selector) => Number(row.querySelector(selector)?.value || 0);
 
       members.push({

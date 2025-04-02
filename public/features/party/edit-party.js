@@ -1,5 +1,6 @@
 // @ts-check
-
+// @ts-ignore
+const DOMPurify = window.DOMPurify;
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const partyId = urlParams.get('id');
@@ -17,17 +18,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       const row = document.createElement('tr');
       row.className = 'member-row';
       row.innerHTML = `
-        <td><input type="text" placeholder="Name" class="name responsive-input" value="${existing.name || ''}" required /></td>
-        <td><input type="text" placeholder="Class" class="class responsive-input" value="${existing.class || ''}" required /></td>
+        <td><input type="text" placeholder="Name" class="name responsive-input" value="${DOMPurify.sanitize(existing.name || '')}" required /></td>
+        <td><input type="text" placeholder="Class" class="class responsive-input" value="${DOMPurify.sanitize(existing.class || '')}" required /></td>
         <td><input type="number" placeholder="Level" class="level responsive-input" value="${existing.level || ''}" required /></td>
         <td><input type="number" placeholder="Max HP" class="hp responsive-input" value="${existing.hp || ''}" required /></td>
         <td><input type="number" placeholder="AC" class="ac responsive-input" value="${existing.ac || ''}" required /></td>
         <td><input type="number" placeholder="Dex" class="dex responsive-input" value="${existing.dex || ''}" required /></td>
         <td><input type="number" placeholder="Passive Perception" class="pp responsive-input" value="${existing.passivePerception || ''}" required /></td>
-        <td><input type="text" placeholder="Fire, Cold..." class="resistances responsive-input" value="${(existing.resistances || []).join(', ')}" /></td>
-        <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities responsive-input" value="${(existing.immunities || []).join(', ')}" /></td>
+        <td><input type="text" placeholder="Fire, Cold..." class="resistances responsive-input" value="${DOMPurify.sanitize((existing.resistances || []).join(', '))}" /></td>
+        <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities responsive-input" value="${DOMPurify.sanitize((existing.immunities || []).join(', '))}" /></td>
         <td><button type="button" class="remove">Remove</button></td>
       `;
+    
       if (memberList) {
         memberList.appendChild(row);
       } else {
@@ -37,8 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       row.querySelector('.remove')?.addEventListener('click', () => {
         row.remove();
       });
-    
     }
+    
   
     addMemberBtn.addEventListener('click', () => addMemberRow());
   

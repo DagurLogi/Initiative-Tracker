@@ -2,6 +2,7 @@
 
 import express from 'express';
 import pool from '../db.js';
+import xss from 'xss';
 
 const router = express.Router();
 
@@ -13,23 +14,34 @@ function extractFirstNumber(value) {
   return typeof value === 'number' ? value : null;
 }
 
-function extractLegendaryResistanceCount(traitsEncoded) {
-  const decoded = decodeURIComponent(traitsEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
+function decodeIfEncoded(str) {
+  if (typeof str !== 'string') return '';
+  try {
+    return str.includes('\\u003C') || str.includes('%3C')
+      ? decodeURIComponent(str.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'))
+      : str;
+  } catch {
+    return str;
+  }
+}
+
+function extractLegendaryResistanceCount(traits) {
+  const decoded = decodeIfEncoded(traits);
   const match = decoded.match(/Legendary Resistance \((\d+)\/Day\)/i);
   return match ? parseInt(match[1]) : null;
 }
 
-function extractLegendaryActionCount(legendaryEncoded) {
-  const decoded = decodeURIComponent(legendaryEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>'));
+function extractLegendaryActionCount(legendary) {
+  const decoded = decodeIfEncoded(legendary);
   const match = decoded.match(/can take\s*(\d+)\s*legendary actions/i);
   return match ? parseInt(match[1]) : null;
 }
+
 
 function extractSpellSlots(traitsHtmlEncoded) {
   const decoded = decodeURIComponent(
     traitsHtmlEncoded.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')
   );
-
   const slots = {};
   const regex = /(\d+)(?:st|nd|rd|th)\s+level\s+\((\d+)\s+slots?\)/gi;
 
@@ -42,8 +54,6 @@ function extractSpellSlots(traitsHtmlEncoded) {
 
   return slots;
 }
-
-
 
 // GET all encounters
 router.get('/', async (req, res) => {
@@ -71,7 +81,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST create a new encounter
+// POST create new encounter
 router.post('/', async (req, res) => {
   const { name, partyId, monsters, initiatives } = req.body;
 
@@ -79,6 +89,7 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Invalid request data' });
   }
 
+  const sanitizedName = xss(name);
   try {
     const fullInitiative = [];
     const partyRes = await pool.query('SELECT * FROM parties WHERE id = $1', [partyId]);
@@ -107,7 +118,7 @@ router.post('/', async (req, res) => {
         immunities: match?.immunities || []
       };
       fullInitiative.push({
-        name: player.name,
+        name: xss(player.name),
         initiative: player.initiative,
         dex: match?.dex || player.dex || 0,
         type: 'player',
@@ -120,20 +131,17 @@ router.post('/', async (req, res) => {
         statusEffects: [],
         isConcentrating: false,
         isDead: false,
-        deathSaves: {
-          successes: 0,
-          failures: 0
-        }
+        deathSaves: { successes: 0, failures: 0 }
       });
-      
-      
     }
 
     for (const monster of monsters) {
       const { id, name, count = 1, groupSize = 1 } = monster;
+      const sanitizedMonsterName = xss(name);
       const stat = creatureMap.get(id);
       const dex = stat?.dex || 0;
       const mod = stat?.mod || 0;
+
       const numGroups = Math.ceil(count / groupSize);
       const groupRolls = Array.from({ length: numGroups }, () => {
         const roll = Math.floor(Math.random() * 20 + 1);
@@ -145,43 +153,25 @@ router.post('/', async (req, res) => {
       for (let i = 0; i < count; i++) {
         const groupIndex = Math.floor(i / groupSize);
         const { final, roll, naturalOne } = groupRolls[groupIndex];
-      
+        const nameWithSuffix = `${sanitizedMonsterName} ${i + 1}`;
         const {
-          armor_class,
-          hit_points,
-          senses,
-          stats,
-          meta,
-          speed,
-          skills,
-          traits,
-          actions,
-          img_url,
-          challenge,
-          languages,
-          reactions,
-          saving_throws,
-          damage_immunities,
-          damage_resistances,
-          damage_vulnerabilities,
-          condition_immunities,
-          legendary_actions
+          armor_class, hit_points, senses, stats, meta, speed, skills,
+          traits, actions, img_url, challenge, languages, reactions,
+          saving_throws, damage_immunities, damage_resistances,
+          damage_vulnerabilities, condition_immunities, legendary_actions
         } = stat.fullStatblock;
-      
-        let spellSlots = null;
 
+        let spellSlots = null;
         if (traits && /Spellcasting/.test(traits)) {
           spellSlots = extractSpellSlots(traits);
         }
-        
-        const resistMatch = traits?.match(/Legendary Resistance\s*\((\d+)\/Day/i);
-        const derivedMaxResist = resistMatch ? parseInt(resistMatch[1], 10) : 3;
 
-        const actionMatch = legendary_actions?.match(/can take\s*(\d+)\s*legendary actions/i);
-        const derivedMaxActions = actionMatch ? parseInt(actionMatch[1], 10) : 3;
+        const derivedMaxResist = extractLegendaryResistanceCount(traits);
+        const derivedMaxActions = extractLegendaryActionCount(legendary_actions);
+
 
         fullInitiative.push({
-          name: `${name} ${i + 1}`,
+          name: nameWithSuffix,
           initiative: final,
           rawInitiative: roll,
           dex,
@@ -192,25 +182,12 @@ router.post('/', async (req, res) => {
           currentHp: extractFirstNumber(hit_points),
           passivePerception: extractFirstNumber(senses),
           statblock: {
-            meta,
-            speed,
-            stats,
-            senses,
-            skills,
-            traits,
-            actions,
-            img_url,
-            challenge,
-            languages,
-            reactions,
-            saving_throws,
-            damage_immunities,
-            damage_resistances,
-            damage_vulnerabilities,
-            condition_immunities,
+            meta, speed, stats, senses, skills, traits, actions, img_url, challenge,
+            languages, reactions, saving_throws, damage_immunities,
+            damage_resistances, damage_vulnerabilities, condition_immunities,
             legendary_actions,
-            legendaryActions: { max: derivedMaxActions, used: 0 },
-            legendaryResistances: { max: derivedMaxResist, used: 0 },
+            ...(derivedMaxActions !== null ? { legendaryActions: { max: derivedMaxActions, used: 0 } } : {}),
+            ...(derivedMaxResist !== null ? { legendaryResistances: { max: derivedMaxResist, used: 0 } } : {}),
             ...(spellSlots ? { spellSlots } : {})
           },
           naturalOne,
@@ -218,10 +195,7 @@ router.post('/', async (req, res) => {
           isConcentrating: false,
           isDead: false
         });
-        
-
       }
-      
     }
 
     fullInitiative.sort((a, b) => {
@@ -236,9 +210,8 @@ router.post('/', async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO encounters (name, party_id, monsters, initiative, current_round, current_turn_index) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), 1, 0] // Start at round 1, index 0
+      [sanitizedName, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), 1, 0]
     );
-    
 
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -247,10 +220,12 @@ router.post('/', async (req, res) => {
   }
 });
 
+
 // PUT update encounter
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { name, partyId, monsters, initiatives } = req.body;
+  const sanitizedName = xss(name);
 
   try {
     const fullInitiative = [];
@@ -260,10 +235,8 @@ router.put('/:id', async (req, res) => {
     const existingEncounter = await pool.query('SELECT * FROM encounters WHERE id = $1', [id]);
     const existingInitiative = existingEncounter.rows[0]?.initiative || [];
 
-    // 🆕 Preserve round and turn state
     const currentRound = existingEncounter.rows[0]?.current_round ?? 1;
     const currentTurnIndex = existingEncounter.rows[0]?.current_turn_index ?? 0;
-
 
     const creatureRes = await pool.query('SELECT * FROM creatures');
     const creatureMap = new Map();
@@ -286,8 +259,9 @@ router.put('/:id', async (req, res) => {
     for (const player of initiatives) {
       if (player.type !== 'player') continue;
 
+      const sanitizedPlayerName = xss(player.name);
       const match = partyMembers.find(m => m.name === player.name);
-      const existing = findExisting(player.name);
+      const existing = findExisting(sanitizedPlayerName);
 
       const cleanedStatblock = {
         class: match?.class || null,
@@ -297,7 +271,7 @@ router.put('/:id', async (req, res) => {
       };
 
       fullInitiative.push({
-        name: player.name,
+        name: sanitizedPlayerName,
         initiative: player.initiative,
         dex: match?.dex || player.dex || 0,
         type: 'player',
@@ -316,6 +290,7 @@ router.put('/:id', async (req, res) => {
 
     for (const monster of monsters) {
       const { id: monsterId, name, count = 1, groupSize = 1, initiatives: groupInitiatives = [] } = monster;
+      const sanitizedMonsterName = xss(name);
       const stat = creatureMap.get(monsterId);
       const dex = stat?.dex || 0;
       const mod = stat?.mod || 0;
@@ -333,10 +308,9 @@ router.put('/:id', async (req, res) => {
           rolled = true;
         }
 
-        const nameWithSuffix = `${name} ${i + 1}`;
+        const nameWithSuffix = `${sanitizedMonsterName} ${i + 1}`;
         const existing = findExisting(nameWithSuffix);
 
-        
         const {
           armor_class,
           hit_points,
@@ -364,9 +338,13 @@ router.put('/:id', async (req, res) => {
           spellSlots = extractSpellSlots(traits);
         }
 
-        
+        // Only decode if it's actually encoded (defensive)
+        const decodedTraits = typeof traits === 'string' ? decodeURIComponent(traits.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')) : '';
+        const decodedLegendary = typeof legendary_actions === 'string' ? decodeURIComponent(legendary_actions.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')) : '';
+
         const calculatedLegendaryResist = extractLegendaryResistanceCount(traits);
         const calculatedLegendaryActions = extractLegendaryActionCount(legendary_actions);
+
 
         fullInitiative.push({
           name: nameWithSuffix,
@@ -397,10 +375,29 @@ router.put('/:id', async (req, res) => {
             damage_vulnerabilities,
             condition_immunities,
             legendary_actions,
-            legendaryActions: existing?.statblock?.legendaryActions || {max: calculatedLegendaryActions ?? 3, used: 0},
-            legendaryResistances: existing?.statblock?.legendaryResistances || {max: calculatedLegendaryResist ?? 3, used: 0 },
-            ...(spellSlots ? { spellSlots: existing?.statblock?.spellSlots || spellSlots } : {})
+            ...(calculatedLegendaryActions !== null
+              ? {
+                  legendaryActions:
+                    existing?.statblock?.legendaryActions || {
+                      max: calculatedLegendaryActions,
+                      used: 0
+                    }
+                }
+              : {}),
+            ...(calculatedLegendaryResist !== null
+              ? {
+                  legendaryResistances:
+                    existing?.statblock?.legendaryResistances || {
+                      max: calculatedLegendaryResist,
+                      used: 0
+                    }
+                }
+              : {}),
+            ...(spellSlots
+              ? { spellSlots: existing?.statblock?.spellSlots || spellSlots }
+              : {})
           },
+     
           naturalOne: isNaturalOne,
           statusEffects: existing?.statusEffects || [],
           isConcentrating: existing?.isConcentrating ?? false,
@@ -421,9 +418,8 @@ router.put('/:id', async (req, res) => {
 
     const result = await pool.query(
       'UPDATE encounters SET name = $1, party_id = $2, monsters = $3, initiative = $4, current_round = $5, current_turn_index = $6 WHERE id = $7 RETURNING *',
-      [name, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), currentRound, currentTurnIndex, id]
+      [sanitizedName, partyId, JSON.stringify(monsters), JSON.stringify(fullInitiative), currentRound, currentTurnIndex, id]
     );
-    
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Encounter not found' });
@@ -436,12 +432,25 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+
 // PATCH /api/encounter/:id/state
 router.patch('/:id/state', async (req, res) => {
   const { id } = req.params;
   const { updatedInitiative, currentRound, currentTurnIndex, totalTurns } = req.body;
 
   try {
+    // Sanitize all string-based user inputs within updatedInitiative
+    const sanitizedInitiative = Array.isArray(updatedInitiative)
+      ? updatedInitiative.map(entry => ({
+          ...entry,
+          name: xss(entry.name),
+          statusEffects: Array.isArray(entry.statusEffects)
+            ? entry.statusEffects.map(effect => xss(effect))
+            : [],
+          statblock: entry.statblock || {},
+        }))
+      : [];
+
     await pool.query(
       `UPDATE encounters
        SET initiative = $1,
@@ -449,7 +458,13 @@ router.patch('/:id/state', async (req, res) => {
            current_turn_index = $3,
            total_turns = $4
        WHERE id = $5`,
-      [JSON.stringify(updatedInitiative), currentRound ?? 1, currentTurnIndex ?? 0, totalTurns ?? 1, id]
+      [
+        JSON.stringify(sanitizedInitiative),
+        currentRound ?? 1,
+        currentTurnIndex ?? 0,
+        totalTurns ?? 1,
+        id
+      ]
     );
 
     res.status(200).json({ success: true });
@@ -458,6 +473,7 @@ router.patch('/:id/state', async (req, res) => {
     res.status(500).json({ error: 'Failed to save encounter state' });
   }
 });
+
 
 
 // DELETE encounter

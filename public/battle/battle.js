@@ -1,3 +1,6 @@
+// @ts-ignore
+const DOMPurify = window.DOMPurify;
+
 (function () {
   const tracker = document.getElementById('initiativeList');
   const title = document.getElementById('encounterTitle')?.querySelector('span');
@@ -187,7 +190,8 @@
         <div class="legendary-description-toggle">
           <button class="toggle-legendary-actions" data-name="${combatant.name}">📜 Show Actions</button>
           <div class="legendary-description hidden" id="legendary-desc-${combatant.name.replace(/\s+/g, '-')}">
-            ${legendaryDesc}
+          ${DOMPurify.sanitize(legendaryDesc)}
+
           </div>
         </div>
       ` : '';
@@ -616,20 +620,9 @@
       currentIndex = encounterData.current_turn_index ?? 0;
       turnCounter = currentIndex + 1;
       turnCounter = encounterData.total_turns ?? (encounterData.current_turn_index + 1);
-
+      
       combatants = encounterData.initiative.map(c => {
         const sb = c.statblock || {};
-        if (sb.legendary_actions && !sb.legendaryActions) {
-          const match = sb.legendary_actions.match(/take\s+(\d+)/i);
-          const max = match ? parseInt(match[1]) : 3;
-          sb.legendaryActions = { max, used: 0 };
-        }
-      
-        if (sb.traits?.includes('Legendary Resistance') && !sb.legendaryResistances) {
-          const match = sb.traits.match(/Legendary Resistance \((\d+)/i);
-          const max = match ? parseInt(match[1]) : 3;
-          sb.legendaryResistances = { max, used: 0 };
-        }
         return {
           ...c,
           ac: c.ac ?? extractFirstNumber(sb.armor_class),
@@ -642,7 +635,6 @@
           statblock: sb
         };
       });
-      
       
       combatants.sort((a, b) => b.initiative - a.initiative);
       

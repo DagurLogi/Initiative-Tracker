@@ -1,4 +1,6 @@
 // @ts-nocheck
+// @ts-ignore
+const DOMPurify = window.DOMPurify;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('encountersContainer');
@@ -18,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = document.createElement('div');
       card.className = 'party-card';
 
-      card.innerHTML = `
+      const rawHTML = `
         <h2>${encounter.name}</h2>
         <button class="toggle-details">Show Details</button>
         <button class="enter-battle" data-id="${encounter.id}">Enter Battle</button>
@@ -26,6 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         <button class="delete-encounter" data-id="${encounter.id}">Delete</button>
         <div class="details hidden"></div>
       `;
+
+      card.innerHTML = DOMPurify.sanitize(rawHTML);
 
       const detailsDiv = card.querySelector('.details');
       const toggleBtn = card.querySelector('.toggle-details');
@@ -56,13 +60,15 @@ document.addEventListener('DOMContentLoaded', async () => {
               return `<li>${label} (Initiative: ${i.initiative})${spellcasterTag}${deadTag}</li>`;
             }).join('');
 
-            detailsDiv.innerHTML = `
+            const detailsHTML = `
               <p><strong>Party ID:</strong> ${data.party_id}</p>
               <p><strong>Monsters:</strong></p>
               <ul>${data.monsters.map(m => `<li>${m.name} x${m.count}</li>`).join('')}</ul>
               <p><strong>Initiative Order:</strong></p>
               <ul>${partyMembers}</ul>
             `;
+
+            detailsDiv.innerHTML = DOMPurify.sanitize(detailsHTML);
             detailsDiv.classList.remove('hidden');
             toggleBtn.textContent = 'Hide Details';
           } else {

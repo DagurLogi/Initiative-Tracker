@@ -2,9 +2,11 @@
 
 import express from 'express';
 import pool from '../db.js';
+import xss from 'xss';
 
 const router = express.Router();
 
+// GET all creatures
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM creatures');
@@ -15,6 +17,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET creature by ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -34,28 +37,12 @@ router.get('/:id', async (req, res) => {
 // Create a new creature
 router.post('/', async (req, res) => {
   const {
-    name,
-    meta,
-    armor_class,
-    hit_points,
-    speed,
-    stats,
-    saving_throws,
-    skills,
-    senses,
-    languages,
-    challenge,
-    traits,
-    actions,
-    reactions,              
-    legendary_actions,
-    damage_immunities,      
-    damage_resistances,     
-    damage_vulnerabilities, 
-    condition_immunities,   
-    img_url
+    name, meta, armor_class, hit_points, speed, stats,
+    saving_throws, skills, senses, languages, challenge,
+    traits, actions, reactions, legendary_actions,
+    damage_immunities, damage_resistances, damage_vulnerabilities,
+    condition_immunities, img_url
   } = req.body;
-  
 
   try {
     const result = await pool.query(
@@ -73,14 +60,13 @@ router.post('/', async (req, res) => {
         $20
       ) RETURNING *`,
       [
-        name, meta, armor_class, hit_points, speed, stats,
-        saving_throws, skills, senses, languages, challenge,
-        traits, actions, reactions, legendary_actions,
-        damage_immunities, damage_resistances, damage_vulnerabilities, condition_immunities,
-        img_url
+        xss(name), xss(meta), xss(armor_class), xss(hit_points), xss(speed), stats,
+        saving_throws, skills, xss(senses), xss(languages), xss(challenge),
+        xss(traits), xss(actions), xss(reactions), xss(legendary_actions),
+        xss(damage_immunities), xss(damage_resistances), xss(damage_vulnerabilities), xss(condition_immunities),
+        xss(img_url)
       ]
     );
-    
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -89,30 +75,15 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/creatures/:id
+// Update a creature
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const {
-    name,
-    meta,
-    armor_class,
-    hit_points,
-    speed,
-    stats,
-    saving_throws,
-    skills,
-    senses,
-    languages,
-    challenge,
-    traits,
-    actions,
-    reactions,
-    legendary_actions,
-    damage_immunities,
-    damage_resistances,
-    damage_vulnerabilities,
-    condition_immunities,
-    img_url
+    name, meta, armor_class, hit_points, speed, stats,
+    saving_throws, skills, senses, languages, challenge,
+    traits, actions, reactions, legendary_actions,
+    damage_immunities, damage_resistances, damage_vulnerabilities,
+    condition_immunities, img_url
   } = req.body;
 
   try {
@@ -141,12 +112,12 @@ router.put('/:id', async (req, res) => {
       WHERE id = $21
       RETURNING *`,
       [
-        name, meta, armor_class, hit_points, speed, stats,
-        saving_throws, skills, senses, languages, challenge,
-        traits, actions, reactions, legendary_actions,
-        damage_immunities, damage_resistances, damage_vulnerabilities, condition_immunities,
-        img_url,
-        id // This is $21
+        xss(name), xss(meta), xss(armor_class), xss(hit_points), xss(speed), stats,
+        saving_throws, skills, xss(senses), xss(languages), xss(challenge),
+        xss(traits), xss(actions), xss(reactions), xss(legendary_actions),
+        xss(damage_immunities), xss(damage_resistances), xss(damage_vulnerabilities), xss(condition_immunities),
+        xss(img_url),
+        id
       ]
     );
 
@@ -161,8 +132,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-
-// DELETE /api/creatures/:id
+// DELETE a creature
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -178,7 +148,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-
 
 export default router;
