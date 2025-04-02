@@ -5,7 +5,7 @@
 -- Dumped from database version 17.4
 -- Dumped by pg_dump version 17.4
 
--- Started on 2025-04-02 01:54:00
+-- Started on 2025-04-02 02:12:42
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,6 +18,207 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- TOC entry 4821 (class 1262 OID 24759)
+-- Name: initiative_tracker; Type: DATABASE; Schema: -; Owner: postgres
+--
+
+CREATE DATABASE initiative_tracker WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en-US';
+
+
+ALTER DATABASE initiative_tracker OWNER TO postgres;
+
+\connect initiative_tracker
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 4822 (class 0 OID 0)
+-- Dependencies: 4821
+-- Name: DATABASE initiative_tracker; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON DATABASE initiative_tracker IS 'A database for the initiative tracker for vefforritun 2. Might become something more in time but now its just this.';
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 224 (class 1259 OID 24913)
+-- Name: creatures; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.creatures (
+    id integer NOT NULL,
+    name text NOT NULL,
+    meta text,
+    armor_class text,
+    hit_points text,
+    speed text,
+    stats jsonb,
+    saving_throws text,
+    skills text,
+    senses text,
+    languages text,
+    challenge text,
+    traits text,
+    actions text,
+    reactions text,
+    legendary_actions text,
+    damage_immunities text,
+    damage_resistances text,
+    damage_vulnerabilities text,
+    condition_immunities text,
+    img_url text
+);
+
+
+ALTER TABLE public.creatures OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 24912)
+-- Name: creatures_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.creatures_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.creatures_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 4823 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: creatures_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.creatures_id_seq OWNED BY public.creatures.id;
+
+
+--
+-- TOC entry 220 (class 1259 OID 24859)
+-- Name: encounters; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.encounters (
+    id integer NOT NULL,
+    name text NOT NULL,
+    party_id integer,
+    monsters jsonb NOT NULL,
+    initiative jsonb NOT NULL,
+    current_round integer DEFAULT 1,
+    current_turn_index integer DEFAULT 0,
+    total_turns integer DEFAULT 1
+);
+
+
+ALTER TABLE public.encounters OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 24858)
+-- Name: encounters_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.encounters_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.encounters_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 4824 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: encounters_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.encounters_id_seq OWNED BY public.encounters.id;
+
+
+--
+-- TOC entry 218 (class 1259 OID 24850)
+-- Name: parties; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.parties (
+    id integer NOT NULL,
+    name text NOT NULL,
+    members jsonb NOT NULL
+);
+
+
+ALTER TABLE public.parties OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 24849)
+-- Name: parties_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.parties_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.parties_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 4825 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: parties_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.parties_id_seq OWNED BY public.parties.id;
+
+
+--
+-- TOC entry 4657 (class 2604 OID 24916)
+-- Name: creatures id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.creatures ALTER COLUMN id SET DEFAULT nextval('public.creatures_id_seq'::regclass);
+
+
+--
+-- TOC entry 4653 (class 2604 OID 24862)
+-- Name: encounters id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.encounters ALTER COLUMN id SET DEFAULT nextval('public.encounters_id_seq'::regclass);
+
+
+--
+-- TOC entry 4652 (class 2604 OID 24853)
+-- Name: parties id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.parties ALTER COLUMN id SET DEFAULT nextval('public.parties_id_seq'::regclass);
+
 
 --
 -- TOC entry 4815 (class 0 OID 24913)
@@ -388,7 +589,7 @@ INSERT INTO public.parties VALUES (23, 'Karry and Larry', '[{"ac": 15, "hp": 10,
 
 
 --
--- TOC entry 4824 (class 0 OID 0)
+-- TOC entry 4826 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: creatures_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -397,7 +598,7 @@ SELECT pg_catalog.setval('public.creatures_id_seq', 327, true);
 
 
 --
--- TOC entry 4825 (class 0 OID 0)
+-- TOC entry 4827 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: encounters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -406,7 +607,7 @@ SELECT pg_catalog.setval('public.encounters_id_seq', 103, true);
 
 
 --
--- TOC entry 4826 (class 0 OID 0)
+-- TOC entry 4828 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: parties_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -414,7 +615,43 @@ SELECT pg_catalog.setval('public.encounters_id_seq', 103, true);
 SELECT pg_catalog.setval('public.parties_id_seq', 23, true);
 
 
--- Completed on 2025-04-02 01:54:01
+--
+-- TOC entry 4663 (class 2606 OID 24920)
+-- Name: creatures creatures_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.creatures
+    ADD CONSTRAINT creatures_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4661 (class 2606 OID 24866)
+-- Name: encounters encounters_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.encounters
+    ADD CONSTRAINT encounters_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4659 (class 2606 OID 24857)
+-- Name: parties parties_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.parties
+    ADD CONSTRAINT parties_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4664 (class 2606 OID 24867)
+-- Name: encounters encounters_party_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.encounters
+    ADD CONSTRAINT encounters_party_id_fkey FOREIGN KEY (party_id) REFERENCES public.parties(id);
+
+
+-- Completed on 2025-04-02 02:12:42
 
 --
 -- PostgreSQL database dump complete
