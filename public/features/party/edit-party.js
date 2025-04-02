@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
     
-  
     addMemberBtn.addEventListener('click', () => addMemberRow());
   
     form.addEventListener('submit', async (e) => {

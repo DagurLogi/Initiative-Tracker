@@ -35,7 +35,7 @@ Todo listi
  * Optional * 
  Nicknames fyrir monsters í bardaga. 
 
- Bannerinn er alltaf visible svo hægt sé að navigate-a from og til baka
+ Bannerinn er alltaf visible svo hægt sé að navigate-a fram og til baka
  Sameinga view party/create party
  Sameina view encounter og create encounter
 
@@ -44,3 +44,5 @@ Todo listi
 
 Create-custom monsters í browse
     - Allow editing of monster in mid combat. ***
+
+
