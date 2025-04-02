@@ -1,81 +1,48 @@
--- db/schema.sql
+-- Drop tables if they exist (to avoid conflicts when re-running)
+DROP TABLE IF EXISTS encounters;
+DROP TABLE IF EXISTS parties;
+DROP TABLE IF EXISTS creatures;
 
--- Table: public.creatures
-
--- DROP TABLE IF EXISTS public.creatures;
-
-CREATE TABLE IF NOT EXISTS public.creatures
-(
-    id integer NOT NULL DEFAULT nextval('creatures_id_seq'::regclass),
-    name text COLLATE pg_catalog."default" NOT NULL,
-    meta text COLLATE pg_catalog."default",
-    armor_class text COLLATE pg_catalog."default",
-    hit_points text COLLATE pg_catalog."default",
-    speed text COLLATE pg_catalog."default",
-    stats jsonb,
-    saving_throws text COLLATE pg_catalog."default",
-    skills text COLLATE pg_catalog."default",
-    senses text COLLATE pg_catalog."default",
-    languages text COLLATE pg_catalog."default",
-    challenge text COLLATE pg_catalog."default",
-    traits text COLLATE pg_catalog."default",
-    actions text COLLATE pg_catalog."default",
-    reactions text COLLATE pg_catalog."default",
-    legendary_actions text COLLATE pg_catalog."default",
-    damage_immunities text COLLATE pg_catalog."default",
-    damage_resistances text COLLATE pg_catalog."default",
-    damage_vulnerabilities text COLLATE pg_catalog."default",
-    condition_immunities text COLLATE pg_catalog."default",
-    img_url text COLLATE pg_catalog."default",
-    CONSTRAINT creatures_pkey PRIMARY KEY (id)
+-- Create creatures table
+CREATE TABLE creatures (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    meta TEXT,
+    armor_class TEXT,
+    hit_points TEXT,
+    speed TEXT,
+    stats JSONB,
+    saving_throws TEXT,
+    skills TEXT,
+    senses TEXT,
+    languages TEXT,
+    challenge TEXT,
+    traits TEXT,
+    actions TEXT,
+    reactions TEXT,
+    legendary_actions TEXT,
+    damage_immunities TEXT,
+    damage_resistances TEXT,
+    damage_vulnerabilities TEXT,
+    condition_immunities TEXT,
+    img_url TEXT
 );
 
+-- Create parties table
+CREATE TABLE parties (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    members JSONB NOT NULL
+);
 
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.creatures
-    OWNER to postgres;
-
--- Table: public.encounters
-
--- DROP TABLE IF EXISTS public.encounters;
-
-CREATE TABLE IF NOT EXISTS public.encounters
-(
-    id integer NOT NULL DEFAULT nextval('encounters_id_seq'::regclass),
-    name text COLLATE pg_catalog."default" NOT NULL,
-    party_id integer,
-    monsters jsonb NOT NULL,
-    initiative jsonb NOT NULL,
-    current_round integer DEFAULT 1,
-    current_turn_index integer DEFAULT 0,
-    total_turns integer DEFAULT 1,
-    CONSTRAINT encounters_pkey PRIMARY KEY (id),
-    CONSTRAINT encounters_party_id_fkey FOREIGN KEY (party_id)
-        REFERENCES public.parties (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.encounters
-    OWNER to postgres;
-
-
--- Table: public.parties
-
--- DROP TABLE IF EXISTS public.parties;
-
-CREATE TABLE IF NOT EXISTS public.parties
-(
-    id integer NOT NULL DEFAULT nextval('parties_id_seq'::regclass),
-    name text COLLATE pg_catalog."default" NOT NULL,
-    members jsonb NOT NULL,
-    CONSTRAINT parties_pkey PRIMARY KEY (id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.parties
-    OWNER to postgres;
+-- Create encounters table
+CREATE TABLE encounters (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    party_id INTEGER REFERENCES parties(id),
+    monsters JSONB NOT NULL,
+    initiative JSONB NOT NULL,
+    current_round INTEGER DEFAULT 1,
+    current_turn_index INTEGER DEFAULT 0,
+    total_turns INTEGER DEFAULT 1
+);
