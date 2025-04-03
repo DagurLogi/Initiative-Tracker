@@ -12,7 +12,9 @@ yarn-error.log*
 # Logs and DB
 *.log
 *.sqlite
-
+*.db
+db/
++ !db/backup_tracker.sql
 
 # VSCode + OS junk
 .vscode/
