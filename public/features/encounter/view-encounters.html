@@ -2,13 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>View Encounters</title>
   <link rel="stylesheet" href="../../styles/styles.css" />
 </head>
 <body>
+   <!-- Navigation -->
+   <div class="navbar">
+    <div class="logo">🎲 D&D Tracker</div>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  
+  </div>
+
+  <div id="sideMenu" class="side-menu">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Monster Manual</a>
+    <a href="features/encounter/view-encounters.html">Encounters</a>
+  </div>
+
+
   <h1>⚔️ View Encounters</h1>
   <div id="encountersContainer"></div>
   <a href="/" class="back-button">← Back to Home</a>
+  <script>
+    function toggleMenu() {
+      document.getElementById('sideMenu').classList.toggle('open');
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
   <script src="view-encounters.js"></script>
 </body>

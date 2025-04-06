@@ -1,0 +1,51 @@
+.split-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .encounter-left,
+  .encounter-right {
+    flex: 1;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  
+  .encounter-left {
+    background-color: #e8f4fb; /* Light sky blue */
+    overflow-y: auto;
+  }
+  
+  .encounter-right {
+    background-color: #f0faff; /* Very pale blue */
+    border-left: 1px solid #a0c4e4; /* Soft border */
+    overflow-y: auto;
+  }
+  
+  .monster-preview {
+    border: 1px solid #a0c4e4;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .monster-preview:hover {
+    background-color: #cce7f6; /* Slight hover highlight */
+  }
+  
+  .selected-monster {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .remove-monster {
+    background: #d9534f;
+    color: white;
+    border: none;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  

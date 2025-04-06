@@ -1,6 +1,12 @@
 /* =================
    BASE & RESET
    ================= */
+   * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
   :root {
     /* Color palette */
     --primary-color: #4b0082;
@@ -44,9 +50,8 @@
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--background-page);
-    padding-bottom: 5rem; 
+    padding-bottom: 5rem; /* Space for fixed buttons */
   }
-
   
   /* =================
      TYPOGRAPHY
@@ -65,10 +70,16 @@
     margin-bottom: var(--space-md);
   }
   
-  /*Default: Hide desktop nav */
-  .navbar .desktop-nav {
-    display: none; 
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
   }
+  
+  a:hover {
+    color: var(--primary-hover);
+  }
+  
   /* =================
      LAYOUT & CONTAINERS
      ================= */
@@ -378,30 +389,7 @@
     html {
       font-size: 17px;
     }
-
-    .navbar .desktop-nav {
-      display: flex;
-      gap: 1.5rem;
-    }
     
-    .navbar .desktop-nav a {
-      color: var(--accent-gold);
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.2s;
-      font-family: 'MedievalSharp', cursive;
-      
-      letter-spacing: 1px;
-      color: var(--accent-gold);
-    }
-    
-    .navbar .desktop-nav a:hover {
-      color: var(--accent-gold);
-    }
-    
-    .menu-toggle {
-      display: none; /* Hide hamburger on desktop */
-    }
     .container {
       padding: 0 var(--space-lg);
     }
@@ -479,194 +467,4 @@
       border-top: 1px solid var(--border-color);
     }
   }
-  
-  /* ========================
-   MONSTER MANUAL STYLES
-   ======================== */
-   body {
-    min-width: 320px;
-  }
-  
-  #creature-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    padding: var(--space-md);
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  
-  .creature-card {
-    background: var(--background-light);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: var(--space-md);
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .creature-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-  
-  .creature-title {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: var(--primary-color);
-  }
-  
-  .creature-meta {
-    font-style: italic;
-    color: var(--text-light);
-  }
-
-  .creature-button {
-    align-self: start;
-    padding: 0.4rem 0.75rem;
-    font-size: 0.95rem;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-
-  .creature-button:hover {
-    background-color: var(--primary-hover);
-  }
-
-  .creature-challenge {
-    color: var(--text-light);
-    font-size: 0.95rem;
-  }
-  
-  /* Modal styling */
-  .hidden {
-    display: none !important;
-  }
-  
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    display: none; /* hidden by default */
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-md);
-    overflow-y: auto;
-    z-index: 1000;
-  }
-  
-  .modal:not(.hidden) {
-    display: flex;
-  }
-  
-  .modal-content {
-    background: #fff;
-    max-width: 800px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: var(--space-lg);
-    border-radius: var(--radius-lg);
-    position: relative;
-    box-shadow: var(--shadow-lg);
-    transform: translateY(0); 
-    animation: fadeInUp 0.3s ease;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .close {
-    position: absolute;
-    top: var(--space-sm);
-    right: var(--space-md);
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #aaa;
-    transition: color 0.2s ease;
-  }
-  
-  .close:hover {
-    color: var(--text-color);
-  }
-  
-  /* Responsive text & card layout */
-  @media screen and (max-width: 600px) {
-    .modal-content {
-      padding: var(--space-md);
-    }
-  
-    .creature-card {
-      font-size: 0.9rem;
-    }
-  }
-  
-  /* Statblock layout inside modal */
-  #statblockContent p {
-    margin-bottom: var(--space-sm);
-  }
-  
-  #statblockContent img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: var(--space-md) auto 0 auto;
-  }
-  
-  #statblockContent hr {
-    margin: var(--space-md) 0;
-  }
-  
-  #statblockContent div {
-    margin-bottom: var(--space-sm);
-  }
-  
-  #statblockContent strong {
-    color: var(--primary-color);
-  }
-  
-  /* Typography tweaks */
-  h1 {
-    text-align: center;
-    margin: var(--space-lg) 0;
-  }
-  
-  .back-button {
-    display: block;
-    text-align: center;
-    margin: var(--space-xl) auto;
-    padding: var(--space-sm) var(--space-md);
-    background-color: var(--background-light);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: var(--text-color);
-    font-size: 1rem;
-    max-width: 200px;
-    transition: all 0.3s ease;
-  }
-  
-  .back-button:hover {
-    background-color: #ffeeba;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-  }
-  
   

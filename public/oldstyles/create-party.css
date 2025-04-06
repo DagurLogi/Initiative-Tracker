@@ -1,0 +1,57 @@
+
+    .party-form-container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 1rem;
+      background: #fdf6e3;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    #memberTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    #memberTable th, #memberTable td {
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    #memberTable th {
+      background-color: #e0eaff;
+      text-align: left;
+    }
+
+    .multi-select {
+      width: 100%;
+      min-width: 120px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        width: 100%;
+      }
+      
+      .table-wrapper {
+        overflow-x: auto;
+        width: 100%;
+      }
+
+      #memberTable {
+        min-width: 900px; /* ensures scrolling when screen is narrow */
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      
+      .back-left {
+        left: 1rem;
+        right: auto;
+        position: fixed;
+        bottom: 1rem;
+        z-index: 1000;
+      }
+      
+      

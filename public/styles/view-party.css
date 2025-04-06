@@ -1,72 +1,396 @@
-.party-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
+/* ========================
+   NAVBAR STYLES
+   ======================== */
+   /*Default: Hide desktop nav */
+   .navbar .desktop-nav {
+    display: none; 
   }
   
+  /* Show desktop nav on monitor (769px and up) */
+  @media (min-width: 769px) { 
+    .navbar .desktop-nav {
+      display: flex;
+      gap: 1.5rem;
+      font-family: 'MedievalSharp', cursive;
+      
+      letter-spacing: 1px;
+      color: var(--accent-gold);
+    }
+    
+    .navbar .desktop-nav a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .navbar .desktop-nav a:hover {
+      color: var(--accent-gold);
+    }
+    
+    .menu-toggle {
+      display: none; /* Hide hamburger on desktop */
+    }
+  }
+
+
+/* ========================
+   PARTY VIEW STYLES
+   ======================== */
+   
+  
+  h1.text-center {
+    font-family: 'MedievalSharp', cursive;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .text-center {
+    text-align: center;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+  }
+  
+  .create-party-button {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-weight: bold;
+    margin: 2rem auto; /* Centered with margin */
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--accent-gold);
+    max-width: fit-content; /* Prevents stretching */
+    margin-bottom: 2rem;
+  }
+  
+  .create-party-button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+ 
+  
+  /* ========================
+   PARTY CARD STYLES
+   ======================== */
+
+   .party-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    width: 100%;
+    max-width: 1200px; /* Maximum card width */
+    margin: 0 auto; /* Centered */
+    padding: 0 1rem; /* Prevents edge touching */
+  }
+
   .party-card {
     background: var(--background-light);
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border-color);
-    margin-bottom: var(--space-lg);
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--primary-color);
+    width: 100%; /* Full width of container */
+    box-sizing: border-box; /* Includes padding in width */
+    margin-bottom: 1.25rem;
+  }
+
+
+  .party-card > *:not(:last-child) {
+    margin-bottom: 1.25rem;
+  }
+  
+  .party-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
   }
   
   .party-card h2 {
+    font-family: 'MedievalSharp', cursive;
     color: var(--primary-color);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+    font-size: 1.5rem;
+  }
+  
+  /* ========================
+   BUTTON ROW STYLES
+   ======================== */
+   .button-row {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    margin-bottom: var(--space-md);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+  }
+  
+  .button-row::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .button-row::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 2px;
   }
 
   .button-row button,
-.button-row a.menu-link {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: unset;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-
-.button-row {
-    display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
+  .button-row a.menu-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    display: inline-flex;
     align-items: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    white-space: nowrap; /* Prevent text wrapping */
+    flex-shrink: 0; /* Prevent buttons from shrinking */
   }
   
-  .button-row .button-secondary svg,
-.button-row .menu-link svg {
-  width: 1rem;
-  height: 1rem;
+  .button-row .button-secondary {
+    background-color: var(--background-light);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  .button-row .button-secondary:hover {
+    background-color: #e7d4ff;
+  }
+  
+  .button-row .delete-party {
+    background-color: #ffebee;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+  }
+  
+  .button-row .delete-party:hover {
+    background-color: #ffcdd2;
+  }
+  
+  /* Specific button styles */
+
+  .toggle-members {
+    position: relative;
+    padding-right: 2.25rem; /* Space for icon */
+    transition: all 0.2s ease;
+  }
+
+  .toggle-members::after {
+    content: "▼";
+    position: absolute;
+    right: 1rem;
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+  }
+
+
+.button-row .toggle-members {
+  background-color: var(--background-light);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  position: relative;
+  padding-right: 2.5rem; /* Space for icon */
 }
+
+.button-row .toggle-members::after {
+  content: "▼";
+  position: absolute;
+  right: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.button-row .menu-link {
+  background-color: var(--primary-color);
+  color: white;
+  border: 1px solid var(--primary-color);
+}
+
+.button-row .delete-party {
+  background-color: #ffebee;
+  border: 1px solid #d32f2f;
+  color: #d32f2f;
+}
+
+  /* Members Table */
+  .members {
+    transition: all 0.4s ease;
+  }
+  
+  .members.hidden {
+    display: none;
+  }
+
+  /* Smooth height transition */
+.members:not(.hidden) {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+  
 
   .party-members {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 0.5rem;
+    background-color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .party-members th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+  }
+  
+  .party-members td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .party-members tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  .party-members tr:hover {
+    background-color: rgba(75, 0, 130, 0.05);
+  }
+  
+  /* Hover states */
+.button-row .toggle-members:hover {
+  background-color: #e7d4ff;
+}
+
+.button-row .menu-link:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.button-row .delete-party:hover {
+  background-color: #ffcdd2;
+}
+
+/* Responsive adjustments - Between mobile and Tablet */
+@media (max-width: 768px) { 
+  .party-card {
+    padding: 1.25rem;
+  }
+  
+    .members {
+      overflow-x: auto;
+      width: 100%;
+    }
+  
+    .party-members {
+      min-width: 600px; /* Prevents cramping the table too much */
+    }
+  
+    .party-members thead {
+      white-space: nowrap;
+    }
+  
+
+  .members::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .members::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+  }
+  
+  .menu-toggle {
+    display: block;
+    cursor: pointer;
+    padding: 1rem;
+  }
+
+  .menu-toggle div {
+    width: 25px;
+    height: 3px;
+    background-color: var(--accent-gold);
+    margin: 4px 0;
+    transition: 0.4s;
+  }
+
+  .navbar .desktop-nav {
+    display: none;
+  }
+
+  .party-members {
+    font-size: 0.9rem;
   }
   
   .party-members th,
   .party-members td {
-    border: 1px solid var(--border-color);
     padding: 0.5rem;
-    text-align: left;
   }
   
-  .party-members th {
-    background-color: #e0eaff;
+  /* Remove the flex-direction: column rule to maintain horizontal layout */
+  /* Optional: Make buttons slightly smaller on mobile */
+  .button-row button,
+  .button-row a.menu-link {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
   }
-  
+}
 
-  /* Responsive scroll */
-  @media (max-width: 768px) {
-    .party-members {
-      display: block;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+@media (max-width: 576px) { /* Mobile */
+  .party-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
   }
   
+  .create-party-button {
+    margin: 1.5rem auto;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) { /* Mobile */
+  .button-row {
+    gap: 0.3rem;
+  }
+  
+  .button-row button,
+  .button-row a.menu-link {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+  
+  /* Empty State */
+  #partiesContainer:empty::before {
+    content: "No parties found. Create your first party to get started!";
+    display: block;
+    text-align: center;
+    color: var(--text-light);
+    padding: 2rem;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .party-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }

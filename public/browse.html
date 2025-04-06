@@ -9,30 +9,35 @@
   <link rel="stylesheet" href="styles/styles.css" />
   <!-- Page-Specific Styles -->
   <link rel="stylesheet" href="styles/monsterManual.css" />
-  
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
 <body>
-  <nav class="navbar">
-    <div class="nav-brand">
-      <a href="/">🎲 D&D Tracker</a>
+   <!-- Navigation -->
+   <div class="navbar">
+    <div class="logo">🎲 D&D Tracker</div>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
-    <div class="nav-links">
-      <a href="browse.html">Monsters</a>
+     <!-- Desktop Navigation -->
+    <div class="desktop-nav">
+      <a href="index.html">Home</a>
       <a href="features/party/view-parties.html">Party</a>
       <a href="features/encounter/view-encounters.html">Encounters</a>
     </div>
-    <button class="mobile-menu-toggle">☰</button>
-  </nav>
 
-  <aside class="mobile-sidebar hidden">
-    <a href="/">🏠 Home</a>
-    <a href="browse.html">Monsters</a>
-    <a href="features/party/view-parties.html">Party</a>
-    <a href="features/encounter/view-encounters.html">Encounters</a>
-  </aside>
-  
+    <!-- Mobile Navigation -->
+    <div id="sideMenu" class="side-menu">
+      <a href="index.html">Home</a>
+      <a href="features/party/view-parties.html">Party</a>
+      <a href="features/encounter/view-encounters.html">Encounters</a>
+    </div>
 
+  </div>
+</div>
   <main>
     <h1 class="text-center">🐲 Welcome to the Monster Manual</h1>
     <div id="creature-list" class="monster-grid"></div>
@@ -58,7 +63,11 @@
       }
     });
   </script>
-  
+  <script>
+    function toggleMenu() {
+      document.getElementById('sideMenu').classList.toggle('open');
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
   <script src="scripts/script.js"></script>
 </body>
