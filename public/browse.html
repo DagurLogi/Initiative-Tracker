@@ -13,8 +13,30 @@
 
 </head>
 <body>
-  <h1 style="text-align: center;">🐲 Welcome to the Monster Manual</h1>
-  <div id="creature-list"></div>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <a href="/">🎲 D&D Tracker</a>
+    </div>
+    <div class="nav-links">
+      <a href="browse.html">Monsters</a>
+      <a href="features/party/view-parties.html">Party</a>
+      <a href="features/encounter/view-encounters.html">Encounters</a>
+    </div>
+    <button class="mobile-menu-toggle">☰</button>
+  </nav>
+
+  <aside class="mobile-sidebar hidden">
+    <a href="/">🏠 Home</a>
+    <a href="browse.html">Monsters</a>
+    <a href="features/party/view-parties.html">Party</a>
+    <a href="features/encounter/view-encounters.html">Encounters</a>
+  </aside>
+  
+
+  <main>
+    <h1 class="text-center">🐲 Welcome to the Monster Manual</h1>
+    <div id="creature-list" class="monster-grid"></div>
+  </main>
 
   <!-- Modal -->
   <div id="modal" class="modal hidden">
@@ -23,13 +45,22 @@
       <div id="statblockContent"></div>
     </div>
   </div>
+  <script>
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('modal').classList.add('hidden');
+    });
   
-  <div style="text-align: center; margin: 2rem 0;">
-    <a href="/" class="back-button">← Back to Home</a>
-  </div>
+    // Optional: close modal when clicking outside content
+    window.addEventListener('click', (e) => {
+      const modal = document.getElementById('modal');
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
+    });
+  </script>
   
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
   <script src="scripts/script.js"></script>
-  
 </body>
+
 </html>

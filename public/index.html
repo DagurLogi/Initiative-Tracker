@@ -1,18 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Initiative Tracker</title>
-  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="stylesheet" href="styles/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>🧙 Welcome to the Initiative Tracker</h1>
-  <div class="menu">
-    <a href="browse.html" class="menu-link">🐉 Browse Monsters</a>
-    <a href="features/party/create-party.html" class="menu-link">🧑‍🤝‍🧑 Create Party</a>
-    <a href="features/party/view-parties.html" class="menu-link">📋 View Parties</a>
-    <a href="features/encounter/create-encounter.html" class="menu-link">⚔️ Create Encounter</a>
-    <a href="features/encounter/view-encounters.html" class="menu-link">🧮 View Encounters</a>
+  <!-- Navigation -->
+  <div class="navbar">
+    <div class="logo">🎲 D&D Tracker</div>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  
   </div>
+
+  <div id="sideMenu" class="side-menu">
+    <a href="browse.html">Monsters</a>
+    <a href="features/party/view-parties.html">Party</a>
+    <a href="features/encounter/view-encounters.html">Encounters</a>
+  </div>
+
+  <!-- Hero Section -->
+  <main class="hero">
+    <h1 class="hero-title">⚔️ Dungeons & Dragons In Your Hands</h1>
+    <p class="hero-subtitle">Track initiative, build encounters, and master your tabletop battles with ease.</p>
+
+    <div class="menu-grid">
+      <a href="browse.html" class="menu-card">🐉 Monster Manual</a>
+      <a href="features/party/view-parties.html" class="menu-card">🧑‍🤝‍🧑 Party</a>
+      <a href="features/encounter/view-encounters.html" class="menu-card">⚔️ Encounters</a>
+    </div>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('sideMenu').classList.toggle('open');
+    }
+  </script>
 </body>
 </html>

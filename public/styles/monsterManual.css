@@ -2,15 +2,51 @@
    MONSTER MANUAL STYLES
    ======================== */
    body {
+    background-color: var(--background-page);
+    padding: 80px 20px 40px; /* accommodate top nav + breathing room */
     min-width: 320px;
+  }
+  
+  .monster-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .creature-card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .creature-card h3 {
+    margin-bottom: 4px;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+  }
+  
+  .creature-card p {
+    margin: 0;
+    color: var(--text-light);
+  }
+  
+  .creature-card .button {
+    align-self: flex-start;
   }
   
   #creature-list {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    padding: var(--space-md);
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
   }
   
@@ -41,9 +77,9 @@
     font-style: italic;
     color: var(--text-light);
   }
-
+  
   .creature-button {
-    align-self: start;
+    align-self: flex-start;
     padding: 0.4rem 0.75rem;
     font-size: 0.95rem;
     background-color: var(--primary-color);
@@ -53,52 +89,48 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
-
+  
   .creature-button:hover {
     background-color: var(--primary-hover);
   }
-
+  
   .creature-challenge {
     color: var(--text-light);
     font-size: 0.95rem;
   }
   
-  /* Modal styling */
-  .hidden {
-    display: none !important;
-  }
-  
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    display: none; /* hidden by default */
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-md);
-    overflow-y: auto;
-    z-index: 1000;
-  }
+  /* ========================
+     MODAL STYLING
+     ======================== */
+     .modal {
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    .modal {
+      display: none;
+    }
+    
   
   .modal:not(.hidden) {
     display: flex;
   }
   
   .modal-content {
-    background: #fff;
-    max-width: 800px;
-    width: 100%;
+    background-color: #fefefe;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    width: 90%;
+    max-width: 700px;
     max-height: 90vh;
     overflow-y: auto;
-    padding: var(--space-lg);
-    border-radius: var(--radius-lg);
     position: relative;
     box-shadow: var(--shadow-lg);
-    transform: translateY(0); 
-    animation: fadeInUp 0.3s ease;
   }
   
   @keyframes fadeInUp {
@@ -111,6 +143,7 @@
       transform: translateY(0);
     }
   }
+  
   .close {
     position: absolute;
     top: var(--space-sm);
@@ -125,18 +158,9 @@
     color: var(--text-color);
   }
   
-  /* Responsive text & card layout */
-  @media screen and (max-width: 600px) {
-    .modal-content {
-      padding: var(--space-md);
-    }
-  
-    .creature-card {
-      font-size: 0.9rem;
-    }
-  }
-  
-  /* Statblock layout inside modal */
+  /* ========================
+     STATBLOCK INSIDE MODAL
+     ======================== */
   #statblockContent p {
     margin-bottom: var(--space-sm);
   }
@@ -160,12 +184,9 @@
     color: var(--primary-color);
   }
   
-  /* Typography tweaks */
-  h1 {
-    text-align: center;
-    margin: var(--space-lg) 0;
-  }
-  
+  /* ========================
+     BACK BUTTON
+     ======================== */
   .back-button {
     display: block;
     text-align: center;
@@ -187,3 +208,163 @@
     box-shadow: var(--shadow-sm);
   }
   
+  /* ========================
+     RESPONSIVENESS (PIXEL BREAKPOINTS)
+     ======================== */
+  @media only screen and (max-width: 600px) {
+    .creature-card {
+      font-size: 14px;
+    }
+  
+    .modal-content {
+      padding: 16px;
+    }
+  
+    .back-button {
+      font-size: 0.9rem;
+      max-width: 90%;
+    }
+  }
+  
+  @media only screen and (min-width: 600px) {
+    .modal-content {
+      padding: 24px;
+    }
+  
+    .creature-card {
+      font-size: 15px;
+    }
+  }
+  
+  @media only screen and (min-width: 768px) {
+    .modal-content {
+      padding: 32px;
+    }
+  
+    .creature-card {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    .creature-button {
+      margin-left: auto;
+    }
+  }
+  
+  @media only screen and (min-width: 992px) {
+    .modal-content {
+      padding: 40px;
+    }
+  
+    .creature-title {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media only screen and (min-width: 1200px) {
+    #creature-list {
+      max-width: 1000px;
+    }
+  
+    .modal-content {
+      max-width: 900px;
+    }
+  }
+  
+  .monster-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 20px;
+  }
+  
+  .monster-card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+  }
+  
+  .monster-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+  }
+  
+  .monster-card .monster-meta {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+  }
+  
+  .view-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  
+  .view-button:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  /* Base style for monster card container */
+.monster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Monster card */
+.monster-card {
+  background-color: var(--background-light);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Monster name and CR (XP) */
+.monster-card h3 {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.monster-card .meta {
+  font-style: italic;
+  color: var(--text-light);
+}
+
+/* View Statblock Button */
+.monster-card .view-statblock {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.monster-card .view-statblock:hover {
+  background-color: var(--primary-hover);
+}
