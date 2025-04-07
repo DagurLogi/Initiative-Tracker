@@ -1,57 +1,251 @@
+/* ========================
+   NAVBAR STYLES
+   ======================== */
 
-    .party-form-container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 1rem;
-      background: #fdf6e3;
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
-    }
+/* Default: Hide desktop nav */
+.navbar .desktop-nav {
+  display: none;
+}
 
-    #memberTable {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
+/* Show desktop nav on monitor (769px and up) */
+@media (min-width: 769px) {
+  .navbar .desktop-nav {
+    display: flex;
+    gap: 1.5rem;
+    font-family: 'MedievalSharp', cursive;
+    letter-spacing: 1px;
+    color: var(--accent-gold);
+  }
 
-    #memberTable th, #memberTable td {
-      padding: 0.5rem;
-      border: 1px solid var(--border-color);
-    }
+  .navbar .desktop-nav a {
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
 
-    #memberTable th {
-      background-color: #e0eaff;
-      text-align: left;
-    }
+  .navbar .desktop-nav a:hover {
+    color: var(--accent-gold);
+  }
 
-    .multi-select {
-      width: 100%;
-      min-width: 120px;
-    }
+  .menu-toggle {
+    display: none;
+  }
+}
 
-    .table-container {
-        overflow-x: auto;
-        width: 100%;
-      }
-      
-      .table-wrapper {
-        overflow-x: auto;
-        width: 100%;
-      }
 
-      #memberTable {
-        min-width: 900px; /* ensures scrolling when screen is narrow */
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-      }
-      
-      .back-left {
-        left: 1rem;
-        right: auto;
-        position: fixed;
-        bottom: 1rem;
-        z-index: 1000;
-      }
-      
-      
+/* ========================
+   PARTY FORM STYLES
+   ======================== */
+
+.party-form-container {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: var(--background-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.party-form-container h1 {
+  font-family: 'MedievalSharp', cursive;
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+}
+
+/* === Form Input Styles === */
+label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+input.form-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+}
+
+/* === Table Styles === */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+#memberTable {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+#memberTable th {
+  background-color: var(--primary-color);
+  color: white;
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+#memberTable td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#memberTable tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 4px;
+}
+/* === Buttons === */
+.mt-3 {
+  margin-top: 2rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.button:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.button-secondary {
+  background-color: white;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.button-secondary:hover {
+  background-color: #f0e6ff;
+}
+
+/* === Back Button === */
+.back-button {
+  display: block;
+  text-align: center;
+  margin: 2rem auto;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--background-light);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--radius-md);
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #ffeeba;
+  transform: translateY(-2px);
+}
+
+/* === Hamburger menu toggle === */
+.menu-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+    cursor: pointer;
+    padding: 1rem;
+  }
+
+  .party-form-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .menu-toggle div {
+    width: 25px;
+    height: 3px;
+    background-color: var(--accent-gold);
+    margin: 4px 0;
+    transition: 0.4s;
+  }
+
+  .navbar .desktop-nav {
+    display: none;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  #memberTable {
+    min-width: 900px; /* keeps columns readable instead of shrinking */
+    width: max-content;
+    font-size: 0.9rem;
+  }
+
+  #memberTable th,
+  #memberTable td {
+    padding: 0.5rem;
+  }
+
+  .button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .party-form-container input.form-input {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .party-form-container {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .button {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.7rem;
+  }
+
+  #memberTable {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .button {
+    font-size: 0.8rem;
+  }
+
+  .mt-3 {
+    gap: 0.3rem;
+  }
+}

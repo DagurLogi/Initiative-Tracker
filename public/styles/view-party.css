@@ -125,7 +125,7 @@
    ======================== */
    .button-row {
     display: flex;
-    gap: var(--space-sm);
+    gap: 0.5rem;
     align-items: center;
     margin-bottom: var(--space-md);
     flex-wrap: nowrap;
@@ -180,6 +180,7 @@
   /* Specific button styles */
 
   .toggle-members {
+  
     position: relative;
     padding-right: 2.25rem; /* Space for icon */
     transition: all 0.2s ease;
@@ -203,7 +204,7 @@
 }
 
 .button-row .toggle-members::after {
-  content: "▼";
+  content: "▲";
   position: absolute;
   right: 1rem;
   transition: transform 0.3s ease;

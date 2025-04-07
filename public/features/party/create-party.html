@@ -2,14 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🛡️Create Party</title>
 
       <!-- Global Styles -->
       <link rel="stylesheet" href="../../styles/styles.css" />
       <!-- Page-Specific Styles -->
-     <link rel="stylesheet" href="../../styles/create-party.css" />
+      <link rel="stylesheet" href="../../styles/create-party.css" />
+     
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Navigation -->
+  <div class="navbar">
+    <div class="logo">🎲 D&D Tracker</div>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <!-- Desktop Navigation -->
+    <div class="desktop-nav">
+      <a href="../../index.html">Home</a>
+      <a href="../../browse.html">Monster Manual</a>
+      <a href="../encounter/view-encounters.html">Encounters</a>
+      <a href="../party/view-parties.html">Party</a>
+    </div>
+  </div>
+
+  <div id="sideMenu" class="side-menu">
+    <a href="../../index.html">Home</a>
+    <a href="../../browse.html">Monster Manual</a>
+    <a href="../encounter/view-encounters.html">Encounters</a>
+    <a href="../party/view-parties.html">Party</a>
+  </div>
   <div class="party-form-container">
     <h1>🛡️ Create a New Party</h1>
  
@@ -46,6 +74,11 @@
       </div>
     </form>
   </div>
+  <script>
+    function toggleMenu() {
+      document.getElementById('sideMenu').classList.toggle('open');
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
   <a href="/" class="back-button" style="bottom: 3.5rem;">← Back to Home</a>
   <script src="create-party.js"></script>
