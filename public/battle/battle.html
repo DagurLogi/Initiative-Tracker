@@ -23,23 +23,25 @@
     </div>
     <!-- Desktop Navigation -->
     <div class="desktop-nav">
-      <a href="../../index.html">Home</a>
-      <a href="../../browse.html">Monster Manual</a>
-      <a href="../party/view-parties.html">Party</a>
-      <a href="../encounter/view-encounters.html">Encounters</a>
+      <a href="../index.html">Home</a>
+      <a href="../browse.html">Monster Manual</a>
+      <a href="../features/party/view-parties.html">Party</a>
+      <a href="../features/encounter/view-encounters.html">Encounters</a>
     </div>
   </div>
 
+  <!-- Mobile Navigation -->
   <div id="sideMenu" class="side-menu">
-    <a href="../../index.html">Home</a>
-    <a href="../../browse.html">Monster Manual</a>
-    <a href="../party/view-parties.html">Party</a>
-    <a href="../encounter/view-encounters.html">Encounters</a>
+    <a href="../index.html">Home</a>
+      <a href="../browse.html">Monster Manual</a>
+      <a href="../features/party/view-parties.html">Party</a>
+      <a href="../features/encounter/view-encounters.html">Encounters</a>
   </div>
+
   <div id="loading">
     <p>Loading battle data...</p>
   </div>
-  
+
   <div id="error"></div>
 
   <header>
@@ -61,12 +63,13 @@
       </div>
       <button id="nextBtn" aria-label="Next turn">⏩ Next</button>
     </div>
-    
   </main>
 
   <footer>
     <a href="/" class="back-button">← Back to Home</a>
   </footer>
+
+  <!-- HP Adjustment Popup -->
   <div id="hp-popup" class="hidden">
     <form id="hp-form" autocomplete="off" novalidate>
       <div style="text-align: right;">
@@ -83,6 +86,8 @@
       <button type="submit">OK</button>
     </form>
   </div>
+
+  <!-- Script Logic -->
   <script>
     function toggleMenu() {
       document.getElementById('sideMenu').classList.toggle('open');

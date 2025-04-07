@@ -60,3 +60,6 @@ Create-custom monsters í browse
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {...}
+
+name opens up too many issues.
+Can click anywhere and it still is on the name editing. Check into it

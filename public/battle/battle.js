@@ -44,6 +44,13 @@ const DOMPurify = window.DOMPurify;
     };
   }
   
+  function getCardClass(c) {
+    let cardClass = '';
+    if (c.isPlayer) cardClass += 'player-card ';
+    if (c.statblock?.legendaryActions || c.statblock?.legendaryResistances) cardClass += 'legendary-card ';
+    if (c.isSpecial) cardClass += 'special-card ';
+    return cardClass.trim();
+  }
   
   function restoreUIState(state) {
     state.openPanels.forEach(id => {
@@ -205,64 +212,111 @@ const DOMPurify = window.DOMPurify;
     
   }
 
+  function getCardClass(c) {
+    let cardClass = '';
+    if (c.isPlayer) cardClass += 'player-card ';
+    if (c.statblock?.legendaryActions || c.statblock?.legendaryResistances) cardClass += 'legendary-card ';
+    if (c.isSpecial) cardClass += 'special-card ';
+    return cardClass.trim();
+  }
+
   function renderCombatants() {
     if (!tracker) return;
     tracker.innerHTML = combatants.map((c, index) => {
       const active = index === currentIndex;
       const sb = c.statblock || {};
+      const cardClass = getCardClass(c);
       return `
-        <div class="combatant-card ${active ? 'active' : ''} ${c.isDead ? 'dead' : ''}">
+        <div class="combatant-card ${cardClass} ${active ? 'active' : ''} ${c.isDead ? 'dead' : ''}">
           <div class="combatant-header">
             <h3 class="combatant-toggle" data-name="${c.name}">
-              ${c.name} ${c.isConcentrating ? '👑' : ''}
+              <span class="editable-name" data-name="${c.name}" style="background-color: transparent;">${c.name}</span>
+              <button class="edit-name-btn" title="Edit name" data-name="${c.name}">✏️</button>
+              ${c.isConcentrating ? '👑' : ''}
             </h3>
-
             <span>Init: ${c.naturalOne ? 'Natural 1' : c.initiative}</span>
-
           </div>
           <div class="combatant-details">
             AC: ${c.ac ?? '?'} |
             HP: <button class="hp-clickable" data-name="${c.name}" type="button">${c.currentHp}</button> / ${c.maxHp ?? '?'} |
- |
             PP: ${c.passivePerception ?? '?'}
           </div>
           <div class="status-effects">
             ${(c.statusEffects || []).map(e =>
               `<span class="status-badge" title="${e.description || ''}">${e.name} (${e.roundsRemaining})</span>`
             ).join('')}
+            <button class="mark-special-btn" data-name="${c.name}">${c.isSpecial ? 'Unmark Special' : 'Mark Special'}</button>
             ${renderSpellSlots(c)}
-              <label class="concentration-toggle">
-                <input type="checkbox" class="concentration-checkbox" data-name="${c.name}" ${c.isConcentrating ? 'checked' : ''}>
-                Concentrating
-              </label>
+            <label class="concentration-toggle">
+              <input type="checkbox" class="concentration-checkbox" data-name="${c.name}" ${c.isConcentrating ? 'checked' : ''}>
+              Concentrating
+            </label>
             ${renderLegendaryTrackers(c)}
-
-
           </div>
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
-           <div class="statblock">
-            <p><strong>Name:</strong> ${c.name}</p>
-            <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
-            <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
-            <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
-            <p><strong>Type:</strong> ${sb.type ?? '?'} | <strong>Size:</strong> ${sb.size ?? '?'} | <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
-            <div class="abilities">
-              STR: ${sb.stats?.STR ?? '?'} (${sb.stats?.STR_mod ?? ''}),
-              DEX: ${sb.stats?.DEX ?? '?'} (${sb.stats?.DEX_mod ?? ''}),
-              CON: ${sb.stats?.CON ?? '?'} (${sb.stats?.CON_mod ?? ''}),
-              INT: ${sb.stats?.INT ?? '?'} (${sb.stats?.INT_mod ?? ''}),
-              WIS: ${sb.stats?.WIS ?? '?'} (${sb.stats?.WIS_mod ?? ''}),
-              CHA: ${sb.stats?.CHA ?? '?'} (${sb.stats?.CHA_mod ?? ''})
+            <div class="statblock">
+              <p><strong>Name:</strong> ${c.name}</p>
+              <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
+              <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
+              <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
+              <p><strong>Type:</strong> ${sb.type ?? '?'} | <strong>Size:</strong> ${sb.size ?? '?'} | <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
+              <div class="abilities">
+                STR: ${sb.stats?.STR ?? '?'} (${sb.stats?.STR_mod ?? ''}),
+                DEX: ${sb.stats?.DEX ?? '?'} (${sb.stats?.DEX_mod ?? ''}),
+                CON: ${sb.stats?.CON ?? '?'} (${sb.stats?.CON_mod ?? ''}),
+                INT: ${sb.stats?.INT ?? '?'} (${sb.stats?.INT_mod ?? ''}),
+                WIS: ${sb.stats?.WIS ?? '?'} (${sb.stats?.WIS_mod ?? ''}),
+                CHA: ${sb.stats?.CHA ?? '?'} (${sb.stats?.CHA_mod ?? ''})
+              </div>
+              ${sb.traits ? `<p><strong>Traits:</strong> ${sb.traits}</p>` : ''}
+              ${sb.actions ? `<p><strong>Actions:</strong> ${sb.actions}</p>` : ''}
             </div>
-            ${sb.traits ? `<p><strong>Traits:</strong> ${sb.traits}</p>` : ''}
-            ${sb.actions ? `<p><strong>Actions:</strong> ${sb.actions}</p>` : ''}
-          </div>
           </div>
         </div>
       `;
     }).join('');
 
-   
+     // Editing name behavior
+     document.querySelectorAll('.edit-name-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const name = btn.dataset.name;
+        const span = document.querySelector(`.editable-name[data-name="${name}"]`);
+        if (span) {
+          span.setAttribute('contenteditable', 'true');
+          span.style.backgroundColor = 'white';
+          span.focus();
+        }
+      });
+    });
+
+    document.querySelectorAll('.editable-name').forEach(span => {
+      span.addEventListener('blur', e => {
+        span.setAttribute('contenteditable', 'false');
+        span.style.backgroundColor = 'transparent';
+        const newName = span.textContent.trim();
+        const oldName = span.dataset.name;
+        const combatant = combatants.find(c => c.name === oldName);
+        if (combatant && newName) {
+          combatant.name = newName;
+          renderCombatants();
+          saveEncounterState();
+        }
+      });
+    });
+
+     document.querySelectorAll('.mark-special-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.getAttribute('data-name');
+        const c = combatants.find(c => c.name === name);
+        if (c) {
+          c.isSpecial = !c.isSpecial;
+          renderCombatants();
+          saveEncounterState();
+        }
+      });
+    });
+  
+
     document.querySelectorAll('.combatant-toggle').forEach(header => {
       header.addEventListener('click', e => {
         const target = /** @type {HTMLElement} */ (e.currentTarget);
@@ -558,11 +612,11 @@ const DOMPurify = window.DOMPurify;
     }
 }
   
-  function renderTracker() {
-    if (roundDisplay) roundDisplay.textContent = `Round ${round}`;
-    if (turnDisplay) turnDisplay.textContent = `Turn ${turnCounter}`;
-    renderCombatants();
-  }
+function renderTracker() {
+  if (roundDisplay) roundDisplay.textContent = `Round ${round}`;
+  if (turnDisplay) turnDisplay.textContent = `Turn ${turnCounter}`;
+  renderCombatants();
+}
 
 
   function nextTurn() {
@@ -655,9 +709,18 @@ const DOMPurify = window.DOMPurify;
     nextBtn?.addEventListener('click', nextTurn);
     prevBtn?.addEventListener('click', previousTurn);
     document.addEventListener('keydown', e => {
-      if (e.code === 'Space') nextTurn();
+      const activeElement = document.activeElement;
+      const isTyping = activeElement?.isContentEditable || ['INPUT', 'TEXTAREA'].includes(activeElement?.tagName);
+    
+      if (isTyping) return; // Skip shortcuts if typing or editing name
+    
+      if (e.code === 'Space') {
+        e.preventDefault(); // prevent scroll
+        nextTurn();
+      }
       if (e.code === 'ArrowLeft') previousTurn();
     });
+    
     loadEncounterData();
   });
 })();
