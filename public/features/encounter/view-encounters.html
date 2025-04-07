@@ -4,28 +4,41 @@
   <meta charset="UTF-8" />
    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>View Encounters</title>
+
   <link rel="stylesheet" href="../../styles/styles.css" />
+  <link rel="stylesheet" href="../../styles/view-encounter.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
 <body>
-   <!-- Navigation -->
-   <div class="navbar">
+  <!-- Navigation -->
+  <div class="navbar">
     <div class="logo">🎲 D&D Tracker</div>
     <div class="menu-toggle" onclick="toggleMenu()">
       <div></div>
       <div></div>
       <div></div>
     </div>
-  
+    <!-- Desktop Navigation -->
+    <div class="desktop-nav">
+      <a href="../../index.html">Home</a>
+      <a href="../../browse.html">Monster Manual</a>
+      <a href="../party/view-parties.html">Party</a>
+    </div>
   </div>
 
   <div id="sideMenu" class="side-menu">
-    <a href="index.html">Home</a>
-    <a href="browse.html">Monster Manual</a>
-    <a href="features/encounter/view-encounters.html">Encounters</a>
+    <a href="../../index.html">Home</a>
+    <a href="../../browse.html">Monster Manual</a>
+    <a href="../party/view-parties.html">Party</a>
   </div>
 
-
-  <h1>⚔️ View Encounters</h1>
+  <div class="encounter-header">
+    <h1>⚔️ View Encounters</h1>
+    <a href="create-encounter.html" class="create-encounter-button">➕ Create New Encounter</a>
+  </div>
+  
   <div id="encountersContainer"></div>
   <a href="/" class="back-button">← Back to Home</a>
   <script>

@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             toggleBtn.textContent = 'Show Details';
           }
-        });
+        }); 
       }
 
       card.querySelector('.edit-encounter')?.addEventListener('click', () => {

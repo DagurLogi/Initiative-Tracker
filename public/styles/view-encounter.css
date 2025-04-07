@@ -1,0 +1,391 @@
+/* ========================
+   NAVBAR STYLES
+   ======================== */
+
+   .navbar .desktop-nav {
+    display: none;
+  }
+  
+  @media (min-width: 769px) {
+    .navbar .desktop-nav {
+      display: flex;
+      gap: 1.5rem;
+      font-family: 'MedievalSharp', cursive;
+      letter-spacing: 1px;
+      color: var(--accent-gold);
+    }
+  
+    .navbar .desktop-nav a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+  
+    .navbar .desktop-nav a:hover {
+      color: var(--accent-gold);
+    }
+  
+    .menu-toggle {
+      display: none;
+    }
+    .encounter-header {
+        flex-direction: row;
+        justify-content: space-between;
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+    
+      .encounter-header h1 {
+        margin: 0;
+      }
+    
+      .create-encounter-button {
+        margin: 0;
+      }
+  }
+  
+  /* ========================
+     ENCOUNTER PAGE STYLES
+     ======================== */
+     .hidden {
+        display: none;
+      }
+
+      
+  h1 {
+    font-family: 'MedievalSharp', cursive;
+    text-align: center;
+    color: var(--primary-color);
+    margin: 2rem auto 1.5rem;
+  }
+  
+  #encountersContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  /* Encounter Card Styling */
+  .encounter-card {
+    background: var(--background-light);
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s ease;
+  }
+  
+  .encounter-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .encounter-card h2 {
+    font-family: 'MedievalSharp', cursive;
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Button Layout */
+  .encounter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .encounter-buttons button,
+  .encounter-buttons a {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  
+  /* Primary & Secondary Buttons */
+  .encounter-buttons .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: 1px solid var(--primary-color);
+  }
+  
+  .encounter-buttons .btn-primary:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .encounter-buttons .btn-secondary {
+    background-color: white;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+  }
+  
+  .encounter-buttons .btn-secondary:hover {
+    background-color: #f0e6ff;
+  }
+  
+  /* Delete */
+  .encounter-buttons .btn-danger,
+  .encounter-buttons .delete-btn {
+    background-color: #ffebee;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+  }
+  
+  .encounter-buttons .btn-danger:hover,
+  .encounter-buttons .delete-btn:hover {
+    background-color: #ffcdd2;
+  }
+  
+  /* Raw button fallback */
+  .encounter-card button {
+    margin: 0.25rem 0.4rem 1rem 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--primary-color);
+    background-color: white;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .encounter-card button:hover {
+    background-color: var(--primary-hover);
+    color: white;
+  }
+  
+  /* Encounter Details */
+  .details {
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    color: var(--text-dark);
+  }
+  
+  .details b {
+    color: var(--primary-color);
+  }
+  
+  .details ul {
+    padding-left: 1.25rem;
+    margin-top: 0.25rem;
+  }
+  
+  .details li {
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Polish .party-card for Encounters */
+.party-card {
+    background: var(--background-light);
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--primary-color);
+    transition: transform 0.2s ease;
+  }
+  
+  .party-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .party-card h2 {
+    font-family: 'MedievalSharp', cursive;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+  .create-encounter-button {
+    display: block;
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    max-width: 300px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .create-encounter-button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .encounter-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  /* ========================
+     Button Group
+     ======================== */
+  .party-card .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .party-card .button-group button {
+    font-size: 0.85rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--primary-color);
+    background-color: white;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .party-card .button-group button:hover {
+    background-color: var(--primary-hover);
+    color: white;
+  }
+  
+  .party-card .button-group .enter-battle {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .party-card .button-group .enter-battle:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .party-card .button-group .delete-encounter {
+    background-color: #ffebee;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+  }
+  
+  .party-card .button-group .delete-encounter:hover {
+    background-color: #ffcdd2;
+  }
+  
+  /* ========================
+     Details Layout
+     ======================== */
+  .party-card .details {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    margin-top: 0.75rem;
+  }
+  
+  .party-card .details b {
+    display: block;
+    margin-top: 0.75rem;
+    color: var(--primary-color);
+  }
+  
+  .party-card .details ul {
+    margin: 0.5rem 0 0 1.25rem;
+    padding: 0;
+    list-style: disc;
+  }
+  
+  .party-card .details li {
+    margin-bottom: 0.35rem;
+    line-height: 1.4;
+  }
+  
+  .party-card .details .initiative-icon {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  
+  
+  /* Back Button */
+  .back-button {
+    display: block;
+    text-align: center;
+    margin: 2rem auto;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--background-light);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    max-width: 250px;
+  }
+  
+  .back-button:hover {
+    background-color: #ffeeba;
+    transform: translateY(-2px);
+  }
+  
+  /* Hamburger for mobile */
+  .menu-toggle {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: block;
+      cursor: pointer;
+      padding: 1rem;
+    }
+  
+    .menu-toggle div {
+      width: 25px;
+      height: 3px;
+      background-color: var(--accent-gold);
+      margin: 4px 0;
+      transition: 0.4s;
+    }
+  
+    .navbar .desktop-nav {
+      display: none;
+    }
+  
+    .encounter-buttons button,
+    .encounter-buttons a {
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .encounter-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .encounter-buttons button,
+    .encounter-buttons a {
+      width: 100%;
+      text-align: center;
+    }
+  
+    .encounter-card h2 {
+      font-size: 1.2rem;
+    }
+  
+    .encounter-card button {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+    }
+  }
+  

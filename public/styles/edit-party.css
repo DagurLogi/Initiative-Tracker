@@ -1,0 +1,80 @@
+/* ========================
+   EDIT PARTY PAGE OVERRIDES
+   ======================== */
+
+/* Improve table scroll behavior for mobile */
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+  
+  #memberTable {
+    min-width: 900px;
+    width: max-content;
+  }
+  
+  /* Space the dual back buttons */
+  .back-button.back-left {
+    margin-bottom: 1rem;
+  }
+  /* === Adjust spacing for Group Name === */
+.party-form-container label[for="groupName"] {
+    margin-bottom: 0.5rem;
+    display: inline-block;
+  }
+  
+  #groupName.form-input {
+    margin-bottom: 1rem;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+  }
+  
+  
+  /* Make the back buttons visually stack and center on mobile */
+  @media (max-width: 768px) {
+    .back-button {
+      max-width: 90%;
+    }
+  
+    .back-button.back-left {
+      margin-bottom: 1.5rem;
+    }
+  
+    .party-form-container {
+      padding: 1.25rem;
+    }
+  }
+  
+  /* Adjust font sizes and paddings for the Edit Party form */
+  @media (max-width: 576px) {
+    .party-form-container {
+      padding: 1rem;
+    }
+  
+    #memberTable {
+      font-size: 0.85rem;
+    }
+  
+    .button {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.7rem;
+    }
+  
+    .mt-3 {
+      gap: 0.4rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .mt-3 {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .button {
+      width: 100%;
+      max-width: 250px;
+      text-align: center;
+    }
+  }
+  
