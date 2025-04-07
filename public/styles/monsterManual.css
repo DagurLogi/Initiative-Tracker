@@ -669,4 +669,29 @@
     box-shadow: var(--shadow-sm);
   }
   
+  .monster-search-container {
+    padding: 1rem;
+    margin: 0 auto 1.5rem auto;
+    max-width: 600px;
+  }
+  
+  .monster-search-container label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-family: 'MedievalSharp', cursive;
+    font-size: 1.1rem;
+  }
+  
+  #monsterSearch {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: white;
+    font-family: inherit;
+    box-shadow: var(--shadow-sm);
+  }
   
