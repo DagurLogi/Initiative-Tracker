@@ -40,6 +40,11 @@
 </div>
   <main>
     <h1 class="text-center">🐲 Welcome to the Monster Manual</h1>
+    <div class="monster-search-container" style="max-width:600px;margin:0 auto 2rem;">
+      <label for="monsterSearch" style="display:block;font-weight:bold;margin-bottom:0.5rem;">Search Monsters</label>
+      <input type="text" id="monsterSearch" placeholder="Search by name or meta..." class="search-input form-input" />
+    </div>
+    
     <div id="creature-list" class="monster-grid"></div>
   </main>
 
@@ -70,6 +75,25 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
   <script src="scripts/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('monsterSearch');
+      const creatureList = document.getElementById('creature-list');
+    
+      searchInput?.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        const creatures = creatureList.querySelectorAll('.creature-card');
+    
+        creatures.forEach(card => {
+          const name = card.querySelector('.creature-title')?.textContent?.toLowerCase() || '';
+          const meta = card.querySelector('.creature-meta')?.textContent?.toLowerCase() || '';
+          const match = name.includes(query) || meta.includes(query);
+          card.style.display = match ? 'flex' : 'none';
+        });
+      });
+    });
+    </script>
+    
 </body>
 
 </html>
