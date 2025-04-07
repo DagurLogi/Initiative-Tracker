@@ -196,6 +196,7 @@
     box-shadow: var(--shadow-md);
     border: 2px solid var(--primary-color);
     transition: transform 0.2s ease;
+    margin-bottom: 1rem;
   }
   
   .party-card:hover {

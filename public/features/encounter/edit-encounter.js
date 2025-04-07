@@ -59,21 +59,30 @@ const DOMPurify = window.DOMPurify;
       div.className = 'selected-monster';
 
       const inputs = monster.initiatives?.map((val, i) => 
-        `<input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val ?? ''}" />`
+        `<input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val === 0 ? '' : (val ?? '')}" />`
       ).join('') || '';
       
-
+    
       div.innerHTML = DOMPurify.sanitize(`
-        <span>${monster.name}</span>
-        <label>Qty: 
-          <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
-        </label>
-        <label>Group size: 
-          <input type="number" value="${monster.groupSize || 1}" data-id="${monster.id}" class="group-size" min="1" max="10" />
-        </label>
-        <div>Initiatives: ${inputs}</div>
-        <button class="remove-monster" data-id="${monster.id}">X</button>
+        <div class="monster-header">
+          <span>${monster.name}</span>
+          <button class="remove-monster" data-id="${monster.id}">X</button>
+        </div>
+        <div class="monster-controls">
+          <label>Qty:
+            <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
+          </label>
+          <label>Group size:
+            <input type="number" value="${monster.groupSize || 1}" data-id="${monster.id}" class="group-size" min="1" max="10" />
+          </label>
+        </div>
+        <div class="initiative-inputs">
+          ${monster.initiatives?.map((val, i) => `
+            <input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val ?? ''}" />
+          `).join('') || ''}
+        </div>
       `);
+      
       selectedMonstersDiv?.appendChild(div);
     });
 
@@ -124,7 +133,7 @@ const DOMPurify = window.DOMPurify;
   function updateMonsterInitiatives(id) {
     const monster = selectedMonstersMap.get(id);
     const totalGroups = Math.ceil((monster.count || 1) / (monster.groupSize || 1));
-    monster.initiatives = Array.from({ length: totalGroups }, (_, i) => monster.initiatives?.[i] ?? 0);
+    monster.initiatives = Array.from({ length: totalGroups }, (_, i) => monster.initiatives?.[i] ?? null);
     renderSelectedMonsters();
   }
 
@@ -267,4 +276,16 @@ const DOMPurify = window.DOMPurify;
     await fetchCreatures();
     await loadEncounter();
   })();
+  const searchInput = document.getElementById('monsterSearch');
+
+searchInput?.addEventListener('input', () => {
+  const searchValue = (/** @type {HTMLInputElement} */ (searchInput)).value.toLowerCase();
+  const allMonsters = monsterList ? monsterList.querySelectorAll('.monster-preview') : [];
+
+  allMonsters.forEach(monster => {
+    const name = monster.textContent ? monster.textContent.toLowerCase() : '';
+    /** @type {HTMLElement} */ (monster).style.display = name.includes(searchValue) ? 'block' : 'none';
+  });
+});
+
 })();

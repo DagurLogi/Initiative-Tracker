@@ -1,6 +1,63 @@
-.split-container {
+/* ========================
+   NAVBAR STYLES
+   ======================== */
+
+/* Default: Hide desktop nav */
+.navbar .desktop-nav {
+  display: none;
+}
+
+/* Show desktop nav on monitor (769px and up) */
+@media (min-width: 769px) {
+  .navbar .desktop-nav {
     display: flex;
-    height: 100vh;
+    gap: 1.5rem;
+    font-family: 'MedievalSharp', cursive;
+    letter-spacing: 1px;
+    color: var(--accent-gold);
+  }
+
+  .navbar .desktop-nav a {
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .navbar .desktop-nav a:hover {
+    color: var(--accent-gold);
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* ========================
+   PAGE STRUCTURE
+   ======================== */
+
+   h1 {
+    font-family: 'MedievalSharp', cursive;
+    text-align: center;
+    color: #005b96; /* Deep blue for header */
+    margin: 2rem auto 1.5rem;
+  }
+  
+  .split-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .split-container {
+      flex-direction: row;
+      height: calc(100vh - 140px);
+    }
   }
   
   .encounter-left,
@@ -8,44 +65,270 @@
     flex: 1;
     padding: 1rem;
     box-sizing: border-box;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    overflow-y: auto;
+    border: 2px solid #a0c4e4;
   }
   
   .encounter-left {
-    background-color: #e8f4fb; /* Light sky blue */
-    overflow-y: auto;
+    background: #e8f4fb;
   }
   
   .encounter-right {
-    background-color: #f0faff; /* Very pale blue */
-    border-left: 1px solid #a0c4e4; /* Soft border */
-    overflow-y: auto;
+    background: #f0faff;
+    border-left: none;
   }
   
+  /* ========================
+     MONSTER LIST + SEARCH
+     ======================== */
+  
   .monster-preview {
-    border: 1px solid #a0c4e4;
+    border: 1px solid #0077b6;
     padding: 0.5rem;
     margin-bottom: 0.5rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    border-radius: var(--radius-md);
+    background: white;
   }
   
   .monster-preview:hover {
-    background-color: #cce7f6; /* Slight hover highlight */
+    background-color: #caf0f8;
   }
+  
+  /* ========================
+     SELECTED MONSTER BOX
+     ======================== */
   
   .selected-monster {
     display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    background: #dff0fb;
+    border: 1px solid #2980b9;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .monster-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
+    font-weight: bold;
+    font-size: 1rem;
     margin-bottom: 0.5rem;
   }
   
-  .remove-monster {
-    background: #d9534f;
-    color: white;
-    border: none;
-    padding: 0.2rem 0.5rem;
-    cursor: pointer;
-    border-radius: 4px;
+  .monster-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    
   }
   
+  .monster-controls label {
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #1b4f72;
+    flex: 1 1 40%;
+  }
+
+  .initiative-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.25rem;
+  }
+
+  .initiative-inputs input {
+    width: 60px;
+    padding: 0.4rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+  }
+  
+  .remove-monster {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+  
+  .remove-monster:hover {
+    background-color: #c9302c;
+  }
+  
+  /*=========================
+      Search Functionality
+      ========================*/
+      .monster-search-container {
+        border: 2px solid var(--primary-color);
+        background-color: var(--background-light);
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+      }
+      
+      .monster-search-container label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        font-family: 'MedievalSharp', cursive;
+      }
+      
+      .search-input {
+        display: block;
+        width: 100%;
+        padding: 0.5rem;
+        border: 2px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        background-color: white;
+      }
+      
+  /* ========================
+     FORM
+     ======================== */
+  
+  form label {
+    display: block;
+    margin: 1rem 0 0.25rem;
+    font-weight: bold;
+    color: #005b96;
+  }
+  
+  form input,
+  form select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid #90caf9;
+    font-size: 1rem;
+  }
+  
+  form h3 {
+    color: #005b96;
+    margin-top: 2rem;
+    font-size: 1.2rem;
+  }
+  
+  form button[type="submit"] {
+    margin-top: 2rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #0077b6;
+    color: white;
+    border: 2px solid #0077b6;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  form button[type="submit"]:hover {
+    background-color: #005b96;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* ========================
+     REMOVE BUTTON
+     ======================== */
+  
+  .remove-monster {
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+  
+  .remove-monster:hover {
+    background-color: #b71c1c;
+  }
+  
+  /* ========================
+     RESPONSIVE
+     ======================== */
+  
+  @media (max-width: 768px) {
+    .split-container {
+      flex-direction: column;
+      height: auto !important;
+      overflow: visible !important;
+    }
+  
+    .encounter-left,
+    .encounter-right {
+      height: auto;
+      max-height: none;
+    }
+  
+    .encounter-right {
+      display: block;
+      margin-top: 1rem;
+    }
+  
+    .selected-monster {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      gap: 0.25rem;
+    }
+  
+    .monster-header {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+  
+    .monster-controls label {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+  
+    .monster-controls input {
+      font-size: 0.9rem;
+      padding: 0.4rem;
+    }
+  
+    .remove-monster {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+  
+  /* Back Button */
+  .back-button {
+    display: block;
+    text-align: center;
+    margin: 2rem auto;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--background-light);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    max-width: 250px;
+  }
+  
+  .back-button:hover {
+    background-color: #ffeeba;
+    transform: translateY(-2px);
+  }
