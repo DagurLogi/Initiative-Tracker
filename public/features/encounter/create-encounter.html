@@ -42,39 +42,45 @@
   </div>
 
   <h1>Create an Encounter</h1>
+  <!-- Split container (desktop layout) -->
   <div class="split-container">
     <!-- Left side: Encounter Info -->
     <div class="encounter-left">
       <form id="encounterForm">
         <label for="encounterName">Encounter Name:</label>
         <input type="text" id="encounterName" name="encounterName" required />
-
+  
         <label for="partySelect">Select Party:</label>
         <select id="partySelect" required>
           <option disabled selected value="">-- Choose party --</option>
-          <!-- Party options will be populated here -->
         </select>
-
+  
         <h3>Selected Monsters</h3>
         <p style="font-size: 0.9rem; color: #555;">
           💡 <strong>Tip:</strong> Group size determines how many monsters share the same initiative. 
           For example, if you select 6 Goblins and set Group size to 2, you'll get 3 groups of 2 Goblins sharing the same initiative.
         </p>        
         <div id="selectedMonsters"></div>
-
+  
         <h3>Initiative Input</h3>
         <div id="initiativeInputs"></div>
-
+  
         <button type="submit">Create Encounter</button>
       </form>
     </div>
-
-    <!-- Right side: Monster list -->
+  
+    <!-- Right side: Monster list with search -->
     <div class="encounter-right">
       <h3>Available Monsters</h3>
+      <div class="monster-search-container">
+        <label for="monsterSearch">Search</label>
+        <input type="text" id="monsterSearch" placeholder="Search monsters..." class="search-input" />
+      </div>
+      
       <div id="monsterList"></div>
     </div>
   </div>
+  
   <a href="../encounter/view-encounters.html" class="back-button">←  Back to Encounters</a>
   <a href="/" class="back-button">← Back to Home</a>
   <script>

@@ -60,15 +60,20 @@ function renderSelectedMonsters() {
     const div = document.createElement('div');
     div.className = 'selected-monster';
     div.innerHTML = `
-      <span>${DOMPurify.sanitize(monster.name)}</span>
-      <label>Qty: 
-        <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
-      </label>
-      <label>Group size: 
-        <input type="number" value="${monster.groupSize || 1}" data-id="${monster.id}" class="group-size" min="1" max="10" />
-      </label>
-      <button class="remove-monster" data-id="${monster.id}">X</button>
+      <div class="monster-header">
+        <span>${DOMPurify.sanitize(monster.name)}</span>
+        <button class="remove-monster" data-id="${monster.id}">X</button>
+      </div>
+      <div class="monster-controls">
+        <label>Qty: 
+          <input type="number" value="${monster.count}" data-id="${monster.id}" class="monster-count" min="1" />
+        </label>
+        <label>Group size: 
+          <input type="number" value="${monster.groupSize || 1}" data-id="${monster.id}" class="group-size" min="1" max="10" />
+        </label>
+      </div>
     `;
+
     selectedMonstersDiv.appendChild(div);
   });
 
@@ -194,3 +199,21 @@ form.addEventListener('submit', async (e) => {
 
 fetchParties();
 fetchCreatures();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('monsterSearch');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const query = /** @type {HTMLInputElement} */ (searchInput).value.toLowerCase();
+      const monsterCards = monsterList.querySelectorAll('.monster-preview');
+
+      monsterCards.forEach(card => {
+        const text = card.textContent?.toLowerCase() || '';
+        (/** @type {HTMLElement} */ (card)).style.display = text.includes(query) ? 'block' : 'none';
+      });
+    });
+  }
+});
+
+

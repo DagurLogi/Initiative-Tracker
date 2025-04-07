@@ -2,7 +2,11 @@
    NAVBAR STYLES
    ======================== */
 
-   .navbar .desktop-nav {
+   .hidden {
+    display: none !important;
+  }
+  
+  .navbar .desktop-nav {
     display: none;
   }
   
@@ -32,7 +36,7 @@
   }
   
   /* ========================
-     ENCOUNTER CREATION LAYOUT
+     PAGE STRUCTURE
      ======================== */
   
   h1 {
@@ -77,8 +81,19 @@
   }
   
   /* ========================
-     MONSTER SELECTION STYLES
+     MONSTER SEARCH + LIST
      ======================== */
+  
+  .search-input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    background-color: white;
+  }
   
   .monster-preview {
     border: 1px solid var(--primary-color);
@@ -94,30 +109,58 @@
     background-color: #ffeeba;
   }
   
-  .selected-monster {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    border: 1px solid var(--primary-color);
-    border-radius: var(--radius-md);
-    background: #f8f4ff;
-  }
+  /* ========================
+     SELECTED MONSTER BOXES
+     ======================== */
   
-  .remove-monster {
-    background-color: #d32f2f;
-    color: white;
-    border: none;
-    padding: 0.3rem 0.6rem;
-    cursor: pointer;
-    border-radius: var(--radius-md);
-    font-weight: bold;
-  }
+     .selected-monster {
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem;
+      background: #f8f4ff;
+      border: 1px solid var(--primary-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+    }
   
-  .remove-monster:hover {
-    background-color: #b71c1c;
-  }
+    .monster-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 0;
+    }
+
+    .monster-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .monster-controls label {
+      display: flex;
+      flex-direction: column;
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: var(--primary-color);
+      flex: 1;
+    }
+
+    .remove-monster {
+      background-color: #d32f2f;
+      color: white;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    
+    .remove-monster:hover {
+      background-color: #b71c1c;
+    }
   
   /* ========================
      FORM ELEMENTS
@@ -137,7 +180,7 @@
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     font-size: 1rem;
-    margin-bottom: 0.5rem;
+  
   }
   
   form h3 {
@@ -188,6 +231,22 @@
     background-color: #ffeeba;
     transform: translateY(-2px);
   }
+  .monster-search-container {
+    border: 2px solid var(--primary-color);
+    background-color: var(--background-light);
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .monster-search-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    font-family: 'MedievalSharp', cursive;
+  }
   
   /* ========================
      RESPONSIVE
@@ -224,6 +283,77 @@
     form button[type="submit"] {
       font-size: 0.9rem;
     }
+  
+    .split-container {
+      flex-direction: column;
+      height: auto !important;
+      overflow: visible !important;
+    }
+  
+    .split-container {
+      flex-direction: column;
+      height: auto !important;
+      overflow: visible !important;
+    }
+  
+    .encounter-left,
+    .encounter-right {
+      height: auto;
+      max-height: none;
+    }
+  
+    .encounter-right {
+      display: block;
+      margin-top: 1rem;
+    }
+  
+    .selected-monster {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      gap: 0.25rem;
+    }
+  
+  
+    .selected-monster span {
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+  
+    .selected-monster .monster-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      
+    }
+
+    .selected-monster label {
+      font-size: 0.85rem;
+      margin: 0.25rem 0;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .selected-monster .monster-controls label {
+      flex: 1;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .selected-monster input {
+      font-size: 0.9rem;
+      padding: 0.4rem;
+      width: 100%;
+    }
+  
+    .selected-monster .remove-monster {
+      align-self: flex-start;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+      margin-top: 0.5rem;
+    }
   }
   
   @media (max-width: 480px) {
@@ -234,10 +364,9 @@
     form h3 {
       font-size: 1.1rem;
     }
+  }
   
-    .selected-monster {
-      flex-direction: column;
-      align-items: flex-start;
-    }
+  #monsterList {
+    padding-right: 0.5rem;
   }
   
