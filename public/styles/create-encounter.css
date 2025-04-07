@@ -1,54 +1,243 @@
+/* ========================
+   NAVBAR STYLES
+   ======================== */
 
-
-.split-container {
-    display: flex;
-    height: 100vh;
+   .navbar .desktop-nav {
+    display: none;
   }
-
+  
+  @media (min-width: 769px) {
+    .navbar .desktop-nav {
+      display: flex;
+      gap: 1.5rem;
+      font-family: 'MedievalSharp', cursive;
+      letter-spacing: 1px;
+      color: var(--accent-gold);
+    }
+  
+    .navbar .desktop-nav a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+  
+    .navbar .desktop-nav a:hover {
+      color: var(--accent-gold);
+    }
+  
+    .menu-toggle {
+      display: none;
+    }
+  }
+  
+  /* ========================
+     ENCOUNTER CREATION LAYOUT
+     ======================== */
+  
+  h1 {
+    font-family: 'MedievalSharp', cursive;
+    text-align: center;
+    color: var(--primary-color);
+    margin: 2rem auto 1.5rem;
+  }
+  
+  .split-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .split-container {
+      flex-direction: row;
+      height: calc(100vh - 140px);
+    }
+  }
+  
   .encounter-left,
   .encounter-right {
     flex: 1;
     padding: 1rem;
     box-sizing: border-box;
-  }
-
-  .encounter-left {
-    background-color: #fdf6e3;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    background: var(--background-light);
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
     overflow-y: auto;
+    border: 2px solid var(--primary-color);
   }
-
+  
   .encounter-right {
-    background-color: #fff;
-    border-left: 1px solid #ccc;
-    overflow-y: auto;
+    background: white;
+    border-left: none;
   }
-
+  
+  /* ========================
+     MONSTER SELECTION STYLES
+     ======================== */
+  
   .monster-preview {
-    border: 1px solid #ccc;
+    border: 1px solid var(--primary-color);
     padding: 0.5rem;
     margin-bottom: 0.5rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    border-radius: var(--radius-md);
+    background: #fff;
   }
-
+  
   .monster-preview:hover {
     background-color: #ffeeba;
   }
-
+  
   .selected-monster {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    background: #f8f4ff;
   }
-
+  
   .remove-monster {
-    background: red;
+    background-color: #d32f2f;
     color: white;
     border: none;
-    padding: 0.2rem 0.5rem;
+    padding: 0.3rem 0.6rem;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
+    font-weight: bold;
   }
-
+  
+  .remove-monster:hover {
+    background-color: #b71c1c;
+  }
+  
+  /* ========================
+     FORM ELEMENTS
+     ======================== */
+  
+  form label {
+    display: block;
+    margin: 1rem 0 0.25rem;
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+  
+  form input,
+  form select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  form h3 {
+    color: var(--primary-color);
+    margin-top: 2rem;
+    font-size: 1.2rem;
+  }
+  
+  form button[type="submit"] {
+    margin-top: 2rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  form button[type="submit"]:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* ========================
+     BACK BUTTON
+     ======================== */
+  
+  .back-button {
+    display: block;
+    text-align: center;
+    margin: 1rem auto;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--background-light);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    max-width: 250px;
+  }
+  
+  .back-button:hover {
+    background-color: #ffeeba;
+    transform: translateY(-2px);
+  }
+  
+  /* ========================
+     RESPONSIVE
+     ======================== */
+  
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: block;
+      cursor: pointer;
+      padding: 1rem;
+    }
+  
+    .menu-toggle div {
+      width: 25px;
+      height: 3px;
+      background-color: var(--accent-gold);
+      margin: 4px 0;
+      transition: 0.4s;
+    }
+  
+    .navbar .desktop-nav {
+      display: none;
+    }
+  
+    .monster-preview {
+      font-size: 0.9rem;
+    }
+  
+    form input,
+    form select {
+      font-size: 0.9rem;
+    }
+  
+    form button[type="submit"] {
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .split-container {
+      padding: 0.5rem;
+    }
+  
+    form h3 {
+      font-size: 1.1rem;
+    }
+  
+    .selected-monster {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
   
