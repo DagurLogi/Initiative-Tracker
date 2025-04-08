@@ -79,9 +79,14 @@
 }
 
 .combatant-card.active {
-  border-color: var(--primary-color);
-  background-color: #efeaff;
-  transform: scale(1.02);
+  border-left: 6px solid #ffcc00;
+  box-shadow: 0 0 8px #ffcc00;
+  animation: pulse-highlight 1.5s infinite;
+}
+
+@keyframes pulse-highlight {
+  0%, 100% { box-shadow: 0 0 8px #ffcc00; }
+  50% { box-shadow: 0 0 16px #ffd700; }
 }
 
 .combatant-card.dead {
@@ -154,9 +159,7 @@
   color: var(--primary-color);
 }
 
-.combatant-header h3:hover {
-  text-decoration: underline;
-}
+
 
 /* Combatant Details */
 .combatant-details {
@@ -426,13 +429,31 @@
     height: 10px;
     background-color: #ddd;
     border-radius: 5px;
-    overflow: hidden;
+    overflow: visible;
     margin-top: 0.5rem;
   }
   
   .health-bar {
     height: 100%;
     transition: width 0.3s ease;
+    border-radius: 5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .health-bar.critical-glow {
+    animation: red-glow 2s infinite;
+    box-shadow: 0 0 6px 3px red;
+    z-index: 2;
+  }
+  
+  @keyframes red-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px 2px red;
+    }
+    50% {
+      box-shadow: 0 0 10px 4px crimson;
+    }
   }
 
   /* ====================

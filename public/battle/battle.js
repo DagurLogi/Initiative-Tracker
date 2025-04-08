@@ -263,6 +263,7 @@ const DOMPurify = window.DOMPurify;
       const healthColor = getHealthBarColor(currentHp, maxHp);
       const isDying = c.isPlayer && currentHp === 0 && !c.isDead && !c.deathSaves?.stable;
       const cardClass = `${getCardClass(c)} ${isDying ? 'dying-card' : ''}`;
+      const isCritical = currentHp > 0 && (currentHp / maxHp) <= 0.1;
   
       
 
@@ -293,7 +294,7 @@ const DOMPurify = window.DOMPurify;
           </div>
           
           <div class="health-bar-container">
-            <div class="health-bar" style="width: ${percent}%; background-color: ${healthColor};"></div>
+            <div class="health-bar ${isCritical ? 'critical-glow' : ''}" style="width: ${percent}%; background-color: ${healthColor};"></div>
           </div>
 
           ${renderDeathSaves(c)}
@@ -303,7 +304,6 @@ const DOMPurify = window.DOMPurify;
               `<span class="status-badge" title="${e.description || ''}">${e.name} (${e.roundsRemaining})</span>`
             ).join('')}
             <button class="mark-special-btn" data-name="${c.name}">${c.isSpecial ? 'Unmark Special' : 'Mark Special'}</button>
-            ${renderSpellSlots(c)}
             <label class="concentration-toggle">
               <input 
                 type="checkbox" 
@@ -314,6 +314,8 @@ const DOMPurify = window.DOMPurify;
               >
               Concentrating
             </label>
+            ${renderSpellSlots(c)}
+
             ${renderLegendaryTrackers(c)}
           </div>
 
