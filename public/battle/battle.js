@@ -52,6 +52,38 @@ const DOMPurify = window.DOMPurify;
     return cardClass.trim();
   }
   
+  function getHealthBarColor(current, max) {
+    const percent = (current / max) * 100;
+    if (percent >= 76) return 'green';
+    if (percent >= 51) return 'yellow';
+    if (percent >= 26) return 'orange';
+    if (percent >= 1) return 'red';
+    return 'gray';
+  }
+
+  function renderDeathSaves(c) {
+    const isDying = c.isPlayer && c.currentHp === 0 && !c.isDead && !c.deathSaves?.stable;
+    if (!isDying) return '';
+  
+    const renderBoxes = (type, filledCount, symbol, color) => {
+      return `
+        <div><strong>${type}:</strong> ${[...Array(3)].map((_, i) => `
+          <span class="death-box ${type.toLowerCase()}-box ${i < filledCount ? 'filled' : ''}" data-name="${c.name}" data-type="${type.toLowerCase()}" data-index="${i}" style="color: ${i < filledCount ? color : 'inherit'}">
+            ${i < filledCount ? symbol : '[ ]'}
+          </span>
+        `).join('')}</div>
+      `;
+    };
+  
+    return `
+      <div class="death-saves">
+        ${renderBoxes('Success', c.deathSaves.successes, '✔️', 'green')}
+        ${renderBoxes('Failures', c.deathSaves.failures, '❌', 'red')}
+      </div>
+    `;
+  }
+  
+  
   function restoreUIState(state) {
     state.openPanels.forEach(id => {
       const panel = document.getElementById(id);
@@ -225,22 +257,47 @@ const DOMPurify = window.DOMPurify;
     tracker.innerHTML = combatants.map((c, index) => {
       const active = index === currentIndex;
       const sb = c.statblock || {};
-      const cardClass = getCardClass(c);
+      const maxHp = c.maxHp || 1;
+      const currentHp = Math.max(0, c.currentHp);
+      const percent = Math.min(100, (currentHp / maxHp) * 100);
+      const healthColor = getHealthBarColor(currentHp, maxHp);
+      const isDying = c.isPlayer && currentHp === 0 && !c.isDead && !c.deathSaves?.stable;
+      const cardClass = `${getCardClass(c)} ${isDying ? 'dying-card' : ''}`;
+  
+      
+
       return `
         <div class="combatant-card ${cardClass} ${active ? 'active' : ''} ${c.isDead ? 'dead' : ''}">
           <div class="combatant-header">
-            <h3 class="combatant-toggle" data-name="${c.name}">
-              <span class="editable-name" data-name="${c.name}" style="background-color: transparent;">${c.name}</span>
-              <button class="edit-name-btn" title="Edit name" data-name="${c.name}">✏️</button>
+            <div class="header-left">
+              <h3>
+                <span class="editable-name" data-name="${c.name}" style="background-color: transparent;">
+                  ${c.name}
+                </span>
+                <button class="edit-name-btn" title="Edit name" data-name="${c.name}">✏️</button>
+                <button class="toggle-statblock-btn" data-name="${c.name}">📖</button>
+                ${isDying ? '<span class="heartbeat-icon">💓</span>' : ''}
+              </h3>
+              <div class="initiative">Init: ${c.naturalOne ? 'Natural 1' : c.initiative}</div>
+            </div>
+            <div class="header-right">
               ${c.isConcentrating ? '👑' : ''}
-            </h3>
-            <span>Init: ${c.naturalOne ? 'Natural 1' : c.initiative}</span>
+              ${c.deathSaves?.stable ? '🛌' : ''}
+            </div>
           </div>
+
           <div class="combatant-details">
             AC: ${c.ac ?? '?'} |
-            HP: <button class="hp-clickable" data-name="${c.name}" type="button">${c.currentHp}</button> / ${c.maxHp ?? '?'} |
+            HP: <button class="hp-clickable" data-name="${c.name}" type="button">${currentHp}</button> / ${maxHp ?? '?'} |
             PP: ${c.passivePerception ?? '?'}
           </div>
+          
+          <div class="health-bar-container">
+            <div class="health-bar" style="width: ${percent}%; background-color: ${healthColor};"></div>
+          </div>
+
+          ${renderDeathSaves(c)}
+
           <div class="status-effects">
             ${(c.statusEffects || []).map(e =>
               `<span class="status-badge" title="${e.description || ''}">${e.name} (${e.roundsRemaining})</span>`
@@ -248,18 +305,27 @@ const DOMPurify = window.DOMPurify;
             <button class="mark-special-btn" data-name="${c.name}">${c.isSpecial ? 'Unmark Special' : 'Mark Special'}</button>
             ${renderSpellSlots(c)}
             <label class="concentration-toggle">
-              <input type="checkbox" class="concentration-checkbox" data-name="${c.name}" ${c.isConcentrating ? 'checked' : ''}>
+              <input 
+                type="checkbox" 
+                class="concentration-checkbox" 
+                data-name="${c.name}" 
+                ${c.isConcentrating ? 'checked' : ''}
+                ${isDying ? 'disabled' : ''}
+              >
               Concentrating
             </label>
             ${renderLegendaryTrackers(c)}
           </div>
+
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
             <div class="statblock">
               <p><strong>Name:</strong> ${c.name}</p>
               <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
               <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
               <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
-              <p><strong>Type:</strong> ${sb.type ?? '?'} | <strong>Size:</strong> ${sb.size ?? '?'} | <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
+              <p><strong>Type:</strong> ${sb.type ?? '?'} | 
+                <strong>Size:</strong> ${sb.size ?? '?'} | 
+                <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
               <div class="abilities">
                 STR: ${sb.stats?.STR ?? '?'} (${sb.stats?.STR_mod ?? ''}),
                 DEX: ${sb.stats?.DEX ?? '?'} (${sb.stats?.DEX_mod ?? ''}),
@@ -274,6 +340,7 @@ const DOMPurify = window.DOMPurify;
           </div>
         </div>
       `;
+
     }).join('');
 
      // Editing name behavior
@@ -291,40 +358,86 @@ const DOMPurify = window.DOMPurify;
 
     document.querySelectorAll('.editable-name').forEach(span => {
       span.addEventListener('blur', e => {
-        span.setAttribute('contenteditable', 'false');
-        span.style.backgroundColor = 'transparent';
-        const newName = span.textContent.trim();
-        const oldName = span.dataset.name;
-        const combatant = combatants.find(c => c.name === oldName);
-        if (combatant && newName) {
-          combatant.name = newName;
-          renderCombatants();
-          saveEncounterState();
+        finishEditing(span);
+      });
+    
+      span.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault(); // Prevent line break
+          span.blur(); // Triggers the blur event which saves and exits editing
         }
       });
     });
+    
+    function finishEditing(span) {
+      span.setAttribute('contenteditable', 'false');
+      span.style.backgroundColor = 'transparent';
+      const newName = span.textContent.trim();
+      const oldName = span.dataset.name;
+      const combatant = combatants.find(c => c.name === oldName);
+      if (combatant && newName) {
+        combatant.name = newName;
+        renderCombatants();
+        saveEncounterState();
+      }
+    }
+    
 
-     document.querySelectorAll('.mark-special-btn').forEach(btn => {
+    document.querySelectorAll('.toggle-statblock-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation(); // Prevent bubbling if needed
+        const name = btn.dataset.name;
+        const block = document.getElementById(`statblock-${(name ?? '').replace(/\s+/g, '-')}`);
+        if (block) toggleStatblock(block);
+      });
+    });
+    
+    document.querySelectorAll('.mark-special-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const name = btn.getAttribute('data-name');
         const c = combatants.find(c => c.name === name);
         if (c) {
           c.isSpecial = !c.isSpecial;
+          const uiState = rememberUIState();
           renderCombatants();
           saveEncounterState();
+          restoreUIState(uiState);
         }
       });
     });
+    
   
+    document.querySelectorAll('.death-box').forEach(box => {
+      box.addEventListener('click', () => {
+        const name = box.dataset.name;
+        const type = box.dataset.type;
+        const index = parseInt(box.dataset.index);
+        const c = combatants.find(x => x.name === name);
+        if (!c || !c.deathSaves) return;
 
-    document.querySelectorAll('.combatant-toggle').forEach(header => {
-      header.addEventListener('click', e => {
-        const target = /** @type {HTMLElement} */ (e.currentTarget);
-        const name = target.dataset.name;
-        const block = document.getElementById(`statblock-${(name ?? '').replace(/\s+/g, '-')}`);
-        if (block) toggleStatblock(block);
+        const key = type === 'success' ? 'successes' : 'failures';
+        const count = c.deathSaves[key];
+
+        if (box.classList.contains('filled')) {
+          c.deathSaves[key] = index;
+        } else {
+          c.deathSaves[key] = index + 1;
+        }
+        
+
+        if (c.deathSaves.successes >= 3) {
+          c.deathSaves.stable = true;
+        } else if (c.deathSaves.failures >= 3) {
+          c.isDead = true;
+        }
+
+        renderCombatants();
+        saveEncounterState();
       });
     });
+
+    
+
     
     
     document.querySelectorAll('.toggle-spell-slots').forEach(btn => {
@@ -417,7 +530,7 @@ const DOMPurify = window.DOMPurify;
     document.querySelectorAll('.legendary-plus').forEach(btn => {
       btn.addEventListener('click', () => {
         const btnElement = /** @type {HTMLElement} */ (btn);
-    const name = btnElement.dataset.name;
+        const name = btnElement.dataset.name;
 
         const c = combatants.find(x => x.name === name);
         if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used < c.statblock.legendaryActions.max) {
@@ -433,7 +546,7 @@ const DOMPurify = window.DOMPurify;
       document.querySelectorAll('.legendary-minus').forEach(btn => {
         btn.addEventListener('click', () => {
           const btnElement = /** @type {HTMLElement} */ (btn);
-      const name = btnElement.dataset.name;
+          const name = btnElement.dataset.name;
 
           const c = combatants.find(x => x.name === name);
           if (c?.statblock?.legendaryActions && c.statblock.legendaryActions.used > 0) {
@@ -450,7 +563,7 @@ const DOMPurify = window.DOMPurify;
       document.querySelectorAll('.resistance-plus').forEach(btn => {
         btn.addEventListener('click', () => {
           const btnElement = /** @type {HTMLElement} */ (btn);
-      const name = btnElement.dataset.name;
+          const name = btnElement.dataset.name;
 
           const c = combatants.find(x => x.name === name);
           if (c?.statblock?.legendaryResistances && c.statblock.legendaryResistances.used < c.statblock.legendaryResistances.max) {
@@ -460,9 +573,9 @@ const DOMPurify = window.DOMPurify;
             saveEncounterState();
             restoreUIState(uiState);
 
-    }
-  });
-});
+            }
+          });
+        });
 
     document.querySelectorAll('.resistance-minus').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -494,6 +607,7 @@ const DOMPurify = window.DOMPurify;
         });
       });
 
+      
       setupHpHandlers();
   }
 
@@ -544,8 +658,6 @@ const DOMPurify = window.DOMPurify;
     });
     
     
-  
-    // ✅ Handle form submission
     // ✅ Handle form submission — only once!
     if (form instanceof HTMLFormElement && !form.classList.contains('submit-handler-attached')) {
       form.classList.add('submit-handler-attached');
@@ -576,16 +688,43 @@ const DOMPurify = window.DOMPurify;
 
         if (mode === 'damage') {
           newHp = Math.max(0, currentHp - amount);
+        
           if (newHp === 0) {
-            combatant.isDead = true;
+            if (combatant.isPlayer) {
+              if (!combatant.deathSaves) {
+                combatant.deathSaves = {
+                  successes: 0,
+                  failures: 0,
+                  stable: false
+                };
+              }
+              // Don't mark as dead — they're in the dying state
+            } else {
+              combatant.isDead = true;
+            }
+        
             combatant.isConcentrating = false;
           }
         } else {
           newHp = Math.min(maxHp, currentHp + amount);
           combatant.isDead = false;
+        
+          // ✅ Clear death save progress on heal
+          if (combatant.deathSaves) {
+            combatant.deathSaves = {
+              successes: 0,
+              failures: 0,
+              stable: false
+            };
+          }
         }
+        
+        
 
         combatant.currentHp = newHp;
+        if (combatant.currentHp === 0) {
+          combatant.isConcentrating = false;
+        }
         console.log(`[HP Update] ${combatant.name}: ${currentHp} → ${combatant.currentHp}`);
 
         const uiState = rememberUIState();
@@ -684,11 +823,13 @@ function renderTracker() {
           currentHp: c.currentHp ?? extractFirstNumber(sb.hit_points) ?? 0,
           passivePerception: c.passivePerception ?? extractPassivePerception(sb.senses),
           statusEffects: c.statusEffects ?? [],
-          isDead: c.currentHp <= 0,
+          isDead: c.isDead ?? false,
           isConcentrating: c.isConcentrating ?? false,
+          isPlayer: c.type === 'player', // ✅ add this line
           statblock: sb
         };
       });
+      
       
       combatants.sort((a, b) => b.initiative - a.initiative);
       

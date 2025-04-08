@@ -187,7 +187,7 @@ form.addEventListener('submit', async (e) => {
 
     if (res.ok) {
       alert('✅ Encounter saved!');
-      window.location.href = '/';
+      window.location.href = '../encounter/view-encounters.html'; 
     } else {
       const errMsg = await res.json();
       alert(`❌ ${errMsg.error || 'Failed to save encounter.'}`);

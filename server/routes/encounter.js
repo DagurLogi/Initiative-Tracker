@@ -122,6 +122,7 @@ router.post('/', async (req, res) => {
         initiative: player.initiative,
         dex: match?.dex || player.dex || 0,
         type: 'player',
+        isPlayer: true,
         ac: match?.ac || null,
         hp: match?.hp || null,
         maxHp: match?.hp || null,
