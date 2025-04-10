@@ -348,28 +348,32 @@ const DOMPurify = window.DOMPurify;
      // Editing name behavior
      document.querySelectorAll('.edit-name-btn').forEach(btn => {
       btn.addEventListener('click', e => {
-        const name = btn.dataset.name;
+        const name = /** @type {HTMLElement} */ (btn).dataset.name;
         const span = document.querySelector(`.editable-name[data-name="${name}"]`);
         if (span) {
           span.setAttribute('contenteditable', 'true');
-          span.style.backgroundColor = 'white';
-          span.focus();
+          /** @type {HTMLElement} */ (span).style.backgroundColor = 'white';
+          /** @type {HTMLElement} */ (span).focus();
         }
       });
     });
 
     document.querySelectorAll('.editable-name').forEach(span => {
       span.addEventListener('blur', e => {
-        finishEditing(span);
+        finishEditing(/** @type {HTMLElement} */ (span));
       });
     
       span.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault(); // Prevent line break
-          span.blur(); // Triggers the blur event which saves and exits editing
+        const ke = /** @type {KeyboardEvent} */ (e);
+        const el = /** @type {HTMLElement} */ (span);
+    
+        if (ke.key === 'Enter') {
+          ke.preventDefault(); // Prevent line break
+          el.blur(); // Triggers the blur event which saves and exits editing
         }
       });
     });
+    
     
     function finishEditing(span) {
       span.setAttribute('contenteditable', 'false');
@@ -388,7 +392,7 @@ const DOMPurify = window.DOMPurify;
     document.querySelectorAll('.toggle-statblock-btn').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation(); // Prevent bubbling if needed
-        const name = btn.dataset.name;
+        const name = /** @type {HTMLElement} */ (btn).dataset.name;
         const block = document.getElementById(`statblock-${(name ?? '').replace(/\s+/g, '-')}`);
         if (block) toggleStatblock(block);
       });
@@ -411,32 +415,34 @@ const DOMPurify = window.DOMPurify;
   
     document.querySelectorAll('.death-box').forEach(box => {
       box.addEventListener('click', () => {
-        const name = box.dataset.name;
-        const type = box.dataset.type;
-        const index = parseInt(box.dataset.index);
+        const element = /** @type {HTMLElement} */ (box);
+        const name = element.dataset.name;
+        const type = element.dataset.type;
+        const index = parseInt(element.dataset.index || '0');
+    
         const c = combatants.find(x => x.name === name);
         if (!c || !c.deathSaves) return;
-
+    
         const key = type === 'success' ? 'successes' : 'failures';
         const count = c.deathSaves[key];
-
-        if (box.classList.contains('filled')) {
+    
+        if (element.classList.contains('filled')) {
           c.deathSaves[key] = index;
         } else {
           c.deathSaves[key] = index + 1;
         }
-        
-
+    
         if (c.deathSaves.successes >= 3) {
           c.deathSaves.stable = true;
         } else if (c.deathSaves.failures >= 3) {
           c.isDead = true;
         }
-
+    
         renderCombatants();
         saveEncounterState();
       });
     });
+    
 
     
 
@@ -851,19 +857,28 @@ function renderTracker() {
   document.addEventListener('DOMContentLoaded', () => {
     nextBtn?.addEventListener('click', nextTurn);
     prevBtn?.addEventListener('click', previousTurn);
+  
     document.addEventListener('keydown', e => {
       const activeElement = document.activeElement;
-      const isTyping = activeElement?.isContentEditable || ['INPUT', 'TEXTAREA'].includes(activeElement?.tagName);
-    
-      if (isTyping) return; // Skip shortcuts if typing or editing name
-    
+  
+      const isTyping =
+        activeElement instanceof HTMLElement &&
+        (activeElement.isContentEditable ||
+         ['INPUT', 'TEXTAREA'].includes(activeElement.tagName));
+  
+      if (isTyping) return;
+  
       if (e.code === 'Space') {
         e.preventDefault(); // prevent scroll
         nextTurn();
       }
-      if (e.code === 'ArrowLeft') previousTurn();
+  
+      if (e.code === 'ArrowLeft') {
+        previousTurn();
+      }
     });
-    
+  
     loadEncounterData();
   });
+  
 })();
