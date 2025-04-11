@@ -14,24 +14,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add new member row
   addMemberBtn.addEventListener('click', () => {
-    const row = document.createElement('tr');
-    row.className = 'member-row';
-    row.innerHTML = `
-      <td><input type="text" placeholder="Name" class="name responsive-input" required style="width: 100%;" /></td>
-      <td><input type="text" placeholder="Class" class="class responsive-input" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Level" class="level responsive-input" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Max HP" class="hp responsive-input" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="AC" class="ac responsive-input" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Dex" class="dex responsive-input" required style="width: 100%;" /></td>
-      <td><input type="number" placeholder="Passive Perception" class="pp responsive-input" required style="width: 100%;" /></td>
-      <td><input type="text" placeholder="Fire, Cold..." class="resistances responsive-input" style="width: 100%;" /></td>
-      <td><input type="text" placeholder="Charmed, Poisoned..." class="immunities responsive-input" style="width: 100%;" /></td>
-      <td><button type="button" class="remove">Remove</button></td>
-    `;
-    memberList.appendChild(row);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'collapsible-member';
 
-    row.querySelector('.remove')?.addEventListener('click', () => {
-      row.remove();
+    const header = document.createElement('div');
+    header.className = 'member-header';
+    header.innerHTML = `<span class="arrow">▶</span> <strong>Party Member ${memberList.children.length + 1}</strong>`;
+
+    const content = document.createElement('div');
+    content.className = 'member-content';
+    content.innerHTML = `
+      <div class="member-row">
+        <label>Name <input type="text" class="name responsive-input" placeholder="Name" required /></label>
+        <label>Class <input type="text" class="class responsive-input" placeholder="Class" required /></label>
+        <label>Level <input type="number" class="level responsive-input" placeholder="Level" required /></label>
+        <label>Max HP <input type="number" class="hp responsive-input" placeholder="Max HP" required /></label>
+        <label>AC <input type="number" class="ac responsive-input" placeholder="AC" required /></label>
+        <label>Dex <input type="number" class="dex responsive-input" placeholder="Dex" required /></label>
+        <label>Passive Perception <input type="number" class="pp responsive-input" placeholder="Passive Perception" required /></label>
+        <label>Resistances <input type="text" class="resistances responsive-input" placeholder="Fire, Cold..." /></label>
+        <label>Immunities <input type="text" class="immunities responsive-input" placeholder="Charmed, Poisoned..." /></label>
+        <button type="button" class="remove">Remove</button>
+      </div>
+    `;
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(content);
+    memberList.appendChild(wrapper);
+
+    document.getElementById('memberSection').style.display = 'block';
+
+    header.addEventListener('click', () => {
+      content.classList.toggle('collapsed');
+      header.querySelector('.arrow').classList.toggle('rotated');
+    });
+
+    content.querySelector('.remove')?.addEventListener('click', () => {
+      wrapper.remove();
+      if (memberList.children.length === 0) {
+        document.getElementById('memberSection').style.display = 'none';
+      }
     });
   });
 
@@ -48,21 +70,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const groupName = DOMPurify.sanitize(
       /** @type {HTMLInputElement} */ (groupNameInput).value.trim()
     );
-    
+
     if (!groupName) {
       alert('Group name is required!');
       return;
     }
 
-    const memberRows = memberList.querySelectorAll('.member-row');
+    const memberWrappers = memberList.querySelectorAll('.collapsible-member');
     const members = [];
 
-    memberRows.forEach(row => {
+    memberWrappers.forEach(wrapper => {
+      const row = wrapper.querySelector('.member-row');
+      if (!row) return;
+
       const getVal = (selector) => {
         const value = row.querySelector(selector)?.value.trim() || '';
         return DOMPurify.sanitize(value);
       };
-      
+
       const getNum = (selector) => Number(row.querySelector(selector)?.value || 0);
 
       members.push({
@@ -93,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.ok) {
-        window.location.href = '../party/view-parties.html'; // Redirect to view-party page
+        window.location.href = '../party/view-parties.html';
       } else {
         const errorData = await res.json();
         console.error('❌ Server error:', errorData);

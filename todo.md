@@ -63,3 +63,26 @@ Create-custom monsters í browse
 
 name opens up too many issues.
 Can click anywhere and it still is on the name editing. Check into it
+
+
+Nyr todo
+- Encounter Tab
+-- Move delete button as trashcan to top right corner
+-- Click on the card to show details
+-- Have edit button show up after clicking on the banner
+-- Bigger "Enter Battle" button as the center piece
+-- Remove Party ID on the card detail.
+
+- Battle Tab
+-- Make Hp changes more clickable
+-- Fix hp, ac, type, size and alignment issues in statblock
+-- Fix (()) in statblock
+-- Fix player statblocks
+
+- Create Party view
+-- Make the view better for mobile and monitor
+-- Names appear as "Party member 1"
+-- Fix the view for monitor and tablet view.
+
+- Edit Party view
+-- Make it look the same as Create - Party view
