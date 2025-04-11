@@ -19,7 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const header = document.createElement('div');
     header.className = 'member-header';
-    header.innerHTML = `<span class="arrow">▶</span> <strong>Party Member ${memberList.children.length + 1}</strong>`;
+    header.innerHTML = `
+      <strong class="member-label">Party Member ${memberList.children.length + 1}</strong>
+      <span class="toggle-icon">-</span>
+    `;
+
 
     const content = document.createElement('div');
     content.className = 'member-content';
@@ -42,12 +46,27 @@ document.addEventListener('DOMContentLoaded', () => {
     wrapper.appendChild(content);
     memberList.appendChild(wrapper);
 
+    const nameInput = content.querySelector('.name');
+    const headerText = header.querySelector('strong');
+
+    nameInput.addEventListener('blur', () => {
+      const name = nameInput.value.trim();
+      if (name) {
+        headerText.textContent = name;
+      } else {
+      // Revert to default if the field is empty
+      headerText.textContent = `Party Member ${[...memberList.children].indexOf(wrapper) + 1}`;
+        }
+      });
+
     document.getElementById('memberSection').style.display = 'block';
 
     header.addEventListener('click', () => {
       content.classList.toggle('collapsed');
-      header.querySelector('.arrow').classList.toggle('rotated');
+      const icon = header.querySelector('.toggle-icon');
+      icon.textContent = content.classList.contains('collapsed') ? '＋' : '−';
     });
+    
 
     content.querySelector('.remove')?.addEventListener('click', () => {
       wrapper.remove();
