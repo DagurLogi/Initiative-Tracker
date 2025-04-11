@@ -1,10 +1,8 @@
-Todo listi
-- Create monster tab inside of Monster manual
+
 
 
 
 🧪 Live Status Effects
- Round Counters
 
 🧾 Export / Save Battle Logs (for nerdy glory)
 
@@ -28,16 +26,6 @@ Todo listi
 
 💾 FUTURE FEATURES (Optional)
  📝 Notes per combatant
-
- ⚙️ Settings panel (e.g., auto-round increase toggle)
-
-
- * Optional * 
- Nicknames fyrir monsters í bardaga. 
-
- Bannerinn er alltaf visible svo hægt sé að navigate-a fram og til baka
- Sameinga view party/create party
- Sameina view encounter og create encounter
 
  Hafa edit takka available í encounter
     Takki in battle til að fara á encounter screen. 
@@ -79,10 +67,6 @@ Nyr todo
 -- Fix (()) in statblock
 -- Fix player statblocks
 
-- Create Party view
--- Make the view better for mobile and monitor
--- Names appear as "Party member 1"
--- Fix the view for monitor and tablet view.
-
-- Edit Party view
--- Make it look the same as Create - Party view
+Future Updates
+- Create monster tab inside of Monster manual
+- Edit monsters in battle (Max Hp, Ac and more)

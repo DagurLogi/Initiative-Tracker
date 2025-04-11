@@ -76,7 +76,8 @@ async function fetchParties() {
           if (delRes.ok) {
             fetchParties(); // Refresh
           } else {
-            alert('❌ Failed to delete party');
+            alert('❌ Failed to delete party.'
+              + '\n\nThe Party might still be in battle.');
           }
         }
       });

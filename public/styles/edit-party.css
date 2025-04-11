@@ -1,80 +1,265 @@
 /* ========================
-   EDIT PARTY PAGE OVERRIDES
+   NAVBAR STYLES
    ======================== */
 
-/* Improve table scroll behavior for mobile */
-.table-container {
-    overflow-x: auto;
+   .navbar .desktop-nav {
+    display: none;
+  }
+  
+  @media (min-width: 769px) {
+    .navbar .desktop-nav {
+      display: flex;
+      gap: 1.5rem;
+      font-family: 'MedievalSharp', cursive;
+      letter-spacing: 1px;
+      color: var(--accent-gold);
+    }
+  
+    .navbar .desktop-nav a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+  
+    .navbar .desktop-nav a:hover {
+      color: var(--accent-gold);
+    }
+  
+    .menu-toggle {
+      display: none;
+    }
+  }
+  
+  /* ========================
+     PARTY FORM STYLES
+     ======================== */
+
+  .party-form-container {
+    max-width: 1500px;
+    width: 40%;
+    margin: 0 auto;
+    padding: 2rem 3rem;
+    background-color: #e3f2fd; 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .party-form-container h1 {
+    font-family: 'MedievalSharp', cursive;
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+  }
+  
+  .party-form-container input {
+    padding: 0.6rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
     width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0.75rem;
   }
   
-  #memberTable {
-    min-width: 900px;
-    width: max-content;
+  label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: bold;
+    color: var(--primary-color);
   }
   
-  /* Space the dual back buttons */
-  .back-button.back-left {
-    margin-bottom: 1rem;
-  }
-  /* === Adjust spacing for Group Name === */
-.party-form-container label[for="groupName"] {
-    margin-bottom: 0.5rem;
-    display: inline-block;
-  }
-  
-  #groupName.form-input {
-    margin-bottom: 1rem;
-    padding: 0.6rem 1rem;
+  input.form-input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     font-size: 1rem;
   }
   
-  
-  /* Make the back buttons visually stack and center on mobile */
-  @media (max-width: 768px) {
-    .back-button {
-      max-width: 90%;
-    }
-  
-    .back-button.back-left {
-      margin-bottom: 1.5rem;
-    }
-  
-    .party-form-container {
-      padding: 1.25rem;
-    }
+  .table-wrapper,
+  .table-container {
+    width: 100%;
+    margin-top: 1rem;
   }
   
-  /* Adjust font sizes and paddings for the Edit Party form */
-  @media (max-width: 576px) {
-    .party-form-container {
+  .mt-3 {
+    margin-top: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .button {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+  }
+  
+  .button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .button-secondary {
+    background-color: white;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+  }
+  
+  .button-secondary:hover {
+    background-color: #f0e6ff;
+  }
+  
+  .back-button {
+    display: block;
+    text-align: center;
+    margin: 2rem auto;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--background-light);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #ffeeba;
+    transform: translateY(-2px);
+  }
+  
+  .menu-toggle {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: block;
+      cursor: pointer;
       padding: 1rem;
     }
   
-    #memberTable {
-      font-size: 0.85rem;
+    .party-form-container {
+      padding: 1.5rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  
+    .party-form-container input.form-input {
+      max-width: 100%;
+    }
+  
+    .table-wrapper,
+    .table-container {
+      width: 100%;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      box-shadow: none;
+    }
+  
+    .button {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.95rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .party-form-container {
+      padding: 1rem;
+      border-radius: var(--radius-md);
     }
   
     .button {
       font-size: 0.85rem;
       padding: 0.4rem 0.7rem;
     }
-  
-    .mt-3 {
-      gap: 0.4rem;
-    }
   }
   
   @media (max-width: 480px) {
-    .mt-3 {
-      flex-direction: column;
-      align-items: center;
+    .button {
+      font-size: 0.8rem;
     }
   
-    .button {
-      width: 100%;
-      max-width: 250px;
-      text-align: center;
+    .mt-3 {
+      gap: 0.3rem;
     }
+  }
+  
+  #groupName {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .collapsible-member {
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  
+  .member-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'MedievalSharp', cursive;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+  }
+  
+  .member-header .toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .member-content {
+    padding: 1rem;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 1000px;
+    opacity: 1;
+    background-color: #fdfdfd;
+  }
+  
+  .member-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0 1rem;
+  }
+  
+  .member-row label {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .member-section-header {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
   }
   
