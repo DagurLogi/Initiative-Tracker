@@ -93,9 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (res.ok) {
-        alert('✅ Party created!');
-        /** @type {HTMLFormElement} */ (form).reset();
-        memberList.innerHTML = '';
+        window.location.href = '../party/view-parties.html'; // Redirect to view-party page
       } else {
         const errorData = await res.json();
         console.error('❌ Server error:', errorData);
