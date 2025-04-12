@@ -39,7 +39,15 @@ const DOMPurify = window.DOMPurify;
         div.textContent = `${creature.name} (${creature.meta})`;
         div.addEventListener('click', () => {
           if (!selectedMonstersMap.has(creature.id)) {
-            selectedMonstersMap.set(creature.id, { id: creature.id, name: creature.name, count: 1, groupSize: 1, initiatives: [] });
+            selectedMonstersMap.set(creature.id, {
+              id: creature.id,
+              name: creature.name,
+              baseName: creature.name,
+              count: 1,
+              groupSize: 1,
+              initiatives: []
+            });
+            
             renderSelectedMonsters();
           }
         });
@@ -169,26 +177,32 @@ const DOMPurify = window.DOMPurify;
       });
     }
 
+    const updatedInitiative = data.state?.updatedInitiative ?? data.initiative;
+
     data.monsters.forEach(monster => {
       const count = monster.count || 1;
       const groupSize = monster.groupSize || 1;
       const totalGroups = Math.ceil(count / groupSize);
 
-      const matching = data.initiative.filter(i => i.name.startsWith(monster.name)).sort((a, b) => {
+      const matching = updatedInitiative
+      .filter(i => i.baseName === monster.name || i.name.startsWith(monster.name))
+
+      .sort((a, b) => {
         const aNum = parseInt(a.name.replace(monster.name, '').trim()) || 0;
         const bNum = parseInt(b.name.replace(monster.name, '').trim()) || 0;
         return aNum - bNum;
       });
 
-      const groupInitiatives = [];
-        for (let i = 0; i < totalGroups; i++) {
-          const slice = matching.slice(i * groupSize, (i + 1) * groupSize);
-          groupInitiatives.push(slice[0]?.initiative ?? Math.floor(Math.random() * 20 + 1));
-        }
 
+      const groupInitiatives = [];
+      for (let i = 0; i < totalGroups; i++) {
+        const slice = matching.slice(i * groupSize, (i + 1) * groupSize);
+        groupInitiatives.push(slice[0]?.initiative ?? Math.floor(Math.random() * 20 + 1));
+      }
 
       selectedMonstersMap.set(monster.id, {
         ...monster,
+        baseName: monster.name,
         initiatives: groupInitiatives
       });
     });
@@ -203,7 +217,15 @@ const DOMPurify = window.DOMPurify;
     const name = DOMPurify.sanitize(encounterNameInput?.value.trim() || '');
     const partyId = partySelect ? parseInt(partySelect.value) : 0;
 
-    const monsters = Array.from(selectedMonstersMap.values());
+    const monsters = Array.from(selectedMonstersMap.values()).map(m => ({
+      id: m.id,
+      name: m.name,
+      baseName: m.baseName || m.name,
+      count: m.count,
+      groupSize: m.groupSize,
+      initiatives: m.initiatives
+    }));
+    
 
     const initiativeInputs = initiativeInputsDiv ? initiativeInputsDiv.querySelectorAll('input[type="number"]') : [];
     const initiatives = [];
@@ -240,6 +262,7 @@ const DOMPurify = window.DOMPurify;
           const init = monster.initiatives[i] || 0;
           initiatives.push({
             name: `${monster.name} ${j + 1}`,
+            baseName: monster.baseName || monster.name,
             initiative: init,
             dex: 0,
             type: 'monster',
@@ -247,6 +270,7 @@ const DOMPurify = window.DOMPurify;
             concentration: false,
             isDead: false
           });
+          
           
         }
       }

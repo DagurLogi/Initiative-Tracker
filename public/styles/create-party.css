@@ -145,7 +145,7 @@
   
   @media (max-width: 768px) {
     .menu-toggle {
-      display: block;
+      display: flex;
       cursor: pointer;
       padding: 1rem;
     }

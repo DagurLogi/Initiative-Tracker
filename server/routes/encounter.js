@@ -172,7 +172,8 @@ router.post('/', async (req, res) => {
 
 
         fullInitiative.push({
-          name: nameWithSuffix,
+          name: nameWithSuffix, //"Acolyte 1"
+          basename: sanitizedMonsterName, // "Acolyte"
           initiative: final,
           rawInitiative: roll,
           dex,
@@ -183,10 +184,28 @@ router.post('/', async (req, res) => {
           currentHp: extractFirstNumber(hit_points),
           passivePerception: extractFirstNumber(senses),
           statblock: {
-            meta, speed, stats, senses, skills, traits, actions, img_url, challenge,
-            languages, reactions, saving_throws, damage_immunities,
-            damage_resistances, damage_vulnerabilities, condition_immunities,
+            meta,
+            speed,
+            stats,
+            senses,
+            skills,
+            traits,
+            actions,
+            img_url,
+            challenge,
+            languages,
+            reactions,
+            saving_throws,
+            damage_immunities,
+            damage_resistances,
+            damage_vulnerabilities,
+            condition_immunities,
             legendary_actions,
+            armor_class,
+            hit_points,
+            type: stat.fullStatblock.type ?? null,
+            size: stat.fullStatblock.size ?? null,
+            alignment: stat.fullStatblock.alignment ?? null,
             ...(derivedMaxActions !== null ? { legendaryActions: { max: derivedMaxActions, used: 0 } } : {}),
             ...(derivedMaxResist !== null ? { legendaryResistances: { max: derivedMaxResist, used: 0 } } : {}),
             ...(spellSlots ? { spellSlots } : {})
@@ -348,7 +367,8 @@ router.put('/:id', async (req, res) => {
 
 
         fullInitiative.push({
-          name: nameWithSuffix,
+          name: nameWithSuffix, // "Acolyte 1"
+          basename: sanitizedMonsterName, // "Acolyte"
           initiative,
           rawInitiative: rolled ? initiative - mod : initiative,
           dex,
@@ -376,6 +396,11 @@ router.put('/:id', async (req, res) => {
             damage_vulnerabilities,
             condition_immunities,
             legendary_actions,
+            armor_class,
+            hit_points,
+            type: stat.fullStatblock.type ?? null,
+            size: stat.fullStatblock.size ?? null,
+            alignment: stat.fullStatblock.alignment ?? null,
             ...(calculatedLegendaryActions !== null
               ? {
                   legendaryActions:
@@ -397,8 +422,7 @@ router.put('/:id', async (req, res) => {
             ...(spellSlots
               ? { spellSlots: existing?.statblock?.spellSlots || spellSlots }
               : {})
-          },
-     
+          },         
           naturalOne: isNaturalOne,
           statusEffects: existing?.statusEffects || [],
           isConcentrating: existing?.isConcentrating ?? false,

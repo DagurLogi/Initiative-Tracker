@@ -48,8 +48,9 @@ function addMonsterToEncounter(creature) {
   selectedMonstersMap.set(creature.id, {
     id: creature.id,
     name: creature.name,
+    basename: creature.name,
     count: 1,
-    groupSize: 1 // 🆕 default group size
+    groupSize: 1
   });  
   renderSelectedMonsters();
 }
@@ -142,7 +143,14 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  const monsters = Array.from(selectedMonstersMap.values());
+  const monsters = Array.from(selectedMonstersMap.values()).map(m => ({
+    id: m.id,
+    name: m.name,
+    basename: m.basename || m.name, // make sure basename is included
+    count: m.count,
+    groupSize: m.groupSize
+  }));
+  
 
   const initiativeInputs = initiativeInputsDiv.querySelectorAll('input[type="number"]');
   const initiatives = [];

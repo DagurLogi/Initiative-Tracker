@@ -37,6 +37,19 @@
       <a href="../features/party/view-parties.html">Party</a>
       <a href="../features/encounter/view-encounters.html">Encounters</a>
   </div>
+  <!-- Battle Info Modal -->
+<div id="battleInfoModal" class="battle-modal">
+  <div class="battle-modal-content">
+    <p><strong>📢 Battle Info:</strong><br />
+      Players are <span style="color: indigo;">highlighted in purple</span>, regular enemies are <span style="color: gray;">grey</span>, and legendary creatures are <span style="color: orange;">highlighted in orange</span>.<br />
+      Healthbar: <span style="color: green;">Green</span>, <span style="color: goldenrod;">Yellow</span>, <span style="color: orange;">Orange</span>, <span style="color: red;">Red</span>.
+    </p>
+    <button id="dismissModal">OK</button>
+  </div>
+</div>
+
+<!-- Tooltip Info Button -->
+<button id="tooltipInfoBtn" title="Show battle color info">🛈</button>
 
   <div id="loading">
     <p>Loading battle data...</p>
@@ -47,8 +60,6 @@
   <header>
     <h1 id="encounterTitle">⚔️ Encounter: <span>Loading...</span></h1>
     <p class="flavor-text"><em>The battle begins. Dice have been rolled, swords are drawn, and fate is watching.</em></p>
-    <p class="flavor-text"><em>Heroes outlined in purple, regular enemies bland, mark them special for highlight and legendary creatures outlined in orange</em></p>
-    <p class="flavor-text"><em>Healthbar indication, Green: healthy, Yellow: wounded, Orange: hurt and Red: critical</em></p>
   </header>
 
   <main>
@@ -58,12 +69,14 @@
     </section>
 
     <div class="turn-controls">
-      <button id="prevBtn" aria-label="Previous turn">⏪ Previous</button>
       <div class="turn-info">
-        <span id="roundCounter">Round: 1</span>
-        <span id="turnCounter">Turn 1</span>
+        <div id="currentTurnName">Creature's Turn</div>
+        <div><span id="turnCounter">Turn 1</span> | <span id="roundCounter">Round 1</span></div>
       </div>
-      <button id="nextBtn" aria-label="Next turn">⏩ Next</button>
+      <div class="turn-buttons">
+        <button id="prevBtn" aria-label="Previous turn">⏪ Previous Turn</button>
+        <button id="nextBtn" aria-label="Next turn">⏩ Next Turn</button>
+      </div>
     </div>
   </main>
 

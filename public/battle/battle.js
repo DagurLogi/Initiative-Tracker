@@ -321,7 +321,8 @@ const DOMPurify = window.DOMPurify;
 
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
             <div class="statblock">
-              <p><strong>Name:</strong> ${c.name}</p>
+             <p><strong>Name:</strong> ${(c.basename ?? c.name).replace(/\s+\d+$/, '')}</p>
+            ${c.hasCustomName ? `<p><strong>Nickname:</strong> ${c.name}</p>` : ''}
               <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
               <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
               <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
@@ -329,12 +330,12 @@ const DOMPurify = window.DOMPurify;
                 <strong>Size:</strong> ${sb.size ?? '?'} | 
                 <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
               <div class="abilities">
-                STR: ${sb.stats?.STR ?? '?'} (${sb.stats?.STR_mod ?? ''}),
-                DEX: ${sb.stats?.DEX ?? '?'} (${sb.stats?.DEX_mod ?? ''}),
-                CON: ${sb.stats?.CON ?? '?'} (${sb.stats?.CON_mod ?? ''}),
-                INT: ${sb.stats?.INT ?? '?'} (${sb.stats?.INT_mod ?? ''}),
-                WIS: ${sb.stats?.WIS ?? '?'} (${sb.stats?.WIS_mod ?? ''}),
-                CHA: ${sb.stats?.CHA ?? '?'} (${sb.stats?.CHA_mod ?? ''})
+                STR: ${sb.stats?.STR ?? '?'} ${sb.stats?.STR_mod ?? ''},
+                DEX: ${sb.stats?.DEX ?? '?'} ${sb.stats?.DEX_mod ?? ''},
+                CON: ${sb.stats?.CON ?? '?'} ${sb.stats?.CON_mod ?? ''},
+                INT: ${sb.stats?.INT ?? '?'} ${sb.stats?.INT_mod ?? ''},
+                WIS: ${sb.stats?.WIS ?? '?'} ${sb.stats?.WIS_mod ?? ''},
+                CHA: ${sb.stats?.CHA ?? '?'} ${sb.stats?.CHA_mod ?? ''}
               </div>
               ${sb.traits ? `<p><strong>Traits:</strong> ${sb.traits}</p>` : ''}
               ${sb.actions ? `<p><strong>Actions:</strong> ${sb.actions}</p>` : ''}
@@ -381,12 +382,23 @@ const DOMPurify = window.DOMPurify;
       const newName = span.textContent.trim();
       const oldName = span.dataset.name;
       const combatant = combatants.find(c => c.name === oldName);
-      if (combatant && newName) {
+    
+      if (combatant && newName && newName !== oldName) {
         combatant.name = newName;
+        combatant.hasCustomName = true;
+    
+        // ✅ Restore the original name into `basename` if not already set
+        if (!combatant.basename) {
+          combatant.basename = oldName;
+        }
+    
         renderCombatants();
+        renderTracker({ scroll: false });
         saveEncounterState();
       }
     }
+    
+    
     
 
     document.querySelectorAll('.toggle-statblock-btn').forEach(btn => {
@@ -444,10 +456,6 @@ const DOMPurify = window.DOMPurify;
     });
     
 
-    
-
-    
-    
     document.querySelectorAll('.toggle-spell-slots').forEach(btn => {
       btn.addEventListener('click', e => {
         // 🛑 Prevent toggling if clicking a child like a slot button
@@ -597,9 +605,9 @@ const DOMPurify = window.DOMPurify;
             renderCombatants();
             saveEncounterState();
             restoreUIState(uiState);
-    }
-  });
-});
+        }
+      });
+    });
 
       document.querySelectorAll('.toggle-legendary-actions').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -759,13 +767,33 @@ const DOMPurify = window.DOMPurify;
     }
 }
   
-function renderTracker() {
+function renderTracker({ scroll = true } = {}) {
   if (roundDisplay) roundDisplay.textContent = `Round ${round}`;
   if (turnDisplay) turnDisplay.textContent = `Turn ${turnCounter}`;
   renderCombatants();
+
+  // ✅ Scroll only if requested
+  if (scroll) scrollToActiveCombatant();
+
+  // ✅ Update the "It's [Name]'s Turn" display
+  const currentTurnSpan = document.getElementById('currentTurnName');
+  const currentCombatant = combatants[currentIndex];
+  if (currentTurnSpan && currentCombatant) {
+    currentTurnSpan.textContent = `${currentCombatant.name}'s Turn`;
+    currentTurnSpan.title = currentCombatant.name;
+    currentTurnSpan.onclick = () => {
+      scrollToActiveCombatant();
+    };
+  }
 }
 
 
+function scrollToActiveCombatant() {
+  const activeCard = document.querySelector('.combatant-card.active');
+  if (activeCard) {
+    activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
   function nextTurn() {
     const uiState = rememberUIState();
   
@@ -879,6 +907,18 @@ function renderTracker() {
     });
   
     loadEncounterData();
+    // 🛈 Tooltip modal toggle only
+    const modal = document.getElementById('battleInfoModal');
+    const dismissBtn = document.getElementById('dismissModal');
+    const tooltipBtn = document.getElementById('tooltipInfoBtn');
+
+    dismissBtn?.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    tooltipBtn?.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
   });
   
 })();

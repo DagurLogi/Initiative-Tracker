@@ -33,6 +33,28 @@
     .menu-toggle {
       display: none;
     }
+
+    .turn-controls {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+    }
+
+    .turn-info {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 1.1rem;
+    }
+  
+    .turn-buttons {
+      flex: 0;
+    }
+
   }
   
 /* ====================
@@ -66,7 +88,7 @@
   max-width: 1200px;
   gap: 1rem;
   padding: 0 1rem;
-  padding-bottom: 100px;
+  padding-bottom: 20px;
 }
 
 /* Combatant Cards */
@@ -322,7 +344,7 @@
 .legendary-wrapper {
   margin-top: 0.5rem;
   padding: 0.5rem;
-  background: #fff4e6;
+  background: #f0d7b7;
   border-left: 4px solid #b85c00;
   border-radius: 6px;
   /*font-size: 0.9rem;*/
@@ -372,32 +394,50 @@
 }
 
 .hp-clickable {
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #0f0f0f;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 2px 6px;
   cursor: pointer;
-  padding: 0;
-  text-decoration: underline dotted;
+  font-weight: bold;
+  text-decoration: none; /* remove underline */
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
 }
 
 .hp-clickable:hover {
-  color: var(--primary-color);
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.hp-clickable:active {
+  transform: scale(0.98);
 }
 
 /* Turn Controls */
 .turn-controls {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background: #efeaff;
+  position: sticky;
+  bottom: 0;
+  background: #f5eaff;
+  z-index: 10;
   padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.15);
+  border-top: 2px solid #4a0072;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  z-index: 1000;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+/* Mobile styles (default) */
+.turn-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
 }
 
 #roundCounter, #turnCounter {
@@ -563,20 +603,23 @@
     flex-direction: column;
     gap: 1rem;
   }
-  .turn-controls {
-    left: 10px;
-    right: 10px;
-    align-items: stretch;
+   .turn-controls {
+    flex-direction: column;
   }
   .turn-controls button {
     width: 100%;
   }
   .turn-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
+    flex-direction: column;
+    gap: 0.3rem;
   }
-  
+  .turn-buttons {
+    width: 100%;
+    gap: 1rem;
+  }
+  .turn-buttons button {
+    width: 100%;
+  }
   .status-effects {
     flex-direction: column;
     align-items: stretch;
@@ -603,4 +646,123 @@
     align-items: flex-start;
     gap: 0.3rem;
   }
+}
+
+@media (max-width: 480px) {
+  .battle-modal-content {
+    width: 90%;
+    font-size: 0.85rem;
+  }
+}
+
+
+.battle-modal {
+  display: none; /* Keep this default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.battle-modal-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: left;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+.battle-modal-content button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#tooltipInfoBtn {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.current-turn-link {
+  margin: 0 10px;
+  font-weight: bold;
+  text-decoration: underline;
+  color: var(--accent-color, #6600cc);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.current-turn-link:hover {
+  color: var(--highlight-color, #aa33ff);
+}
+#currentTurnName {
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .turn-controls {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .turn-info {
+    flex-direction: column;
+  }
+
+  #currentTurnName {
+    max-width: 100%;
+  }
+}
+.turn-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.editable-name[contenteditable="true"] {
+  padding: 2px 6px;
+  border: 2px solid #999;
+  border-radius: 4px;
+  outline: none;
+  background-color: white;
 }
