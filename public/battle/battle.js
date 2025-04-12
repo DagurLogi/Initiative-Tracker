@@ -326,9 +326,19 @@ const DOMPurify = window.DOMPurify;
               <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
               <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
               <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
-              <p><strong>Type:</strong> ${sb.type ?? '?'} | 
-                <strong>Size:</strong> ${sb.size ?? '?'} | 
-                <strong>Alignment:</strong> ${sb.alignment ?? '?'}</p>
+              ${(() => {
+                let type = '?', size = '?', alignment = '?';
+                if (sb.meta) {
+                  const match = sb.meta.match(/^(.*?)\s+(\w+),\s+(.+)$/);
+                  if (match) {
+                    size = match[1];
+                    type = match[2].charAt(0).toUpperCase() + match[2].slice(1);
+                    alignment = match[3];
+                  }
+                }
+                return `<p><strong>Type:</strong> ${type} | <strong>Size:</strong> ${size} | <strong>Alignment:</strong> ${alignment}</p>`;
+              })()}
+              
               <div class="abilities">
                 STR: ${sb.stats?.STR ?? '?'} ${sb.stats?.STR_mod ?? ''},
                 DEX: ${sb.stats?.DEX ?? '?'} ${sb.stats?.DEX_mod ?? ''},
