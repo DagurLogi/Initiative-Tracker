@@ -234,6 +234,21 @@
   margin-top: 0.5rem;
   font-family: monospace;
 }
+.abilities {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.ability-row {
+  display: flex;
+  gap: 1rem;
+  margin: 2px 0;
+}
+
+.ability-row span {
+  min-width: 40px;
+  display: inline-block;
+}
 
 /* Spell Slots */
 .spell-slots {

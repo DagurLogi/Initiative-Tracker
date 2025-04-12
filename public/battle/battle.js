@@ -340,13 +340,20 @@ const DOMPurify = window.DOMPurify;
               })()}
               
               <div class="abilities">
-                STR: ${sb.stats?.STR ?? '?'} ${sb.stats?.STR_mod ?? ''},
-                DEX: ${sb.stats?.DEX ?? '?'} ${sb.stats?.DEX_mod ?? ''},
-                CON: ${sb.stats?.CON ?? '?'} ${sb.stats?.CON_mod ?? ''},
-                INT: ${sb.stats?.INT ?? '?'} ${sb.stats?.INT_mod ?? ''},
-                WIS: ${sb.stats?.WIS ?? '?'} ${sb.stats?.WIS_mod ?? ''},
-                CHA: ${sb.stats?.CHA ?? '?'} ${sb.stats?.CHA_mod ?? ''}
+                <div class="ability-row labels">
+                  <span>STR</span><span>DEX</span><span>CON</span>
+                  <span>INT</span><span>WIS</span><span>CHA</span>
+                </div>
+                <div class="ability-row values">
+                  <span>${sb.stats?.STR ?? '?'}</span><span>${sb.stats?.DEX ?? '?'}</span><span>${sb.stats?.CON ?? '?'}</span>
+                  <span>${sb.stats?.INT ?? '?'}</span><span>${sb.stats?.WIS ?? '?'}</span><span>${sb.stats?.CHA ?? '?'}</span>
+                </div>
+                <div class="ability-row modifiers">
+                  <span>${sb.stats?.STR_mod ?? ''}</span><span>${sb.stats?.DEX_mod ?? ''}</span><span>${sb.stats?.CON_mod ?? ''}</span>
+                  <span>${sb.stats?.INT_mod ?? ''}</span><span>${sb.stats?.WIS_mod ?? ''}</span><span>${sb.stats?.CHA_mod ?? ''}</span>
+                </div>
               </div>
+
               ${sb.traits ? `<p><strong>Traits:</strong> ${sb.traits}</p>` : ''}
               ${sb.actions ? `<p><strong>Actions:</strong> ${sb.actions}</p>` : ''}
             </div>
