@@ -7,9 +7,6 @@ Nyr todo
 -- Remove Party ID on the card detail.
 
 - Battle Tab
--- Make Hp changes more clickable
--- Fix hp, ac, type, size and alignment issues in statblock
--- Fix (()) in statblock
 -- Fix player statblocks
 
 Future Updates
@@ -17,6 +14,31 @@ Future Updates
 - Edit monsters in battle (Max Hp, Ac and more)
 
 
+Index
+- Remove underline
+- Globe in the url description
+
+Browse
+- Maybe just show 20 pages?
+- Ui features while scrolling
+-- Make the monsters fade from left to right or right to center, then disapear from center to left.
+- When typing in the search bar the screen tilts off center
+-- Monster Cards
+- scroll bar has missing round edge.
+- Damage vulnerabilities and resistances show blank instead of nothing.
+- Make the artwork show next to the modal?
+- Remove "view statblock" and instead have the card be clickable
+
+Create Encounter
+- When adding the monster a second time, add another to qty instead of doing nothing.
+- Rezise the boxes on the left so everything fits better.
+- Purple boarder is missing from the right side on the left side.
+- Option to have "auto roll" checkmark for players so it rolls their initiative for them.
+
+View Encounters
+- Change the layout of the buttons
+-- Hide/show details should be just +/-, the Enter battle should be the highlight, 
+edit should appear after showing the encounter and delete should be at the top right corner.
 
 
 
