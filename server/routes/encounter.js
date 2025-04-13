@@ -25,6 +25,13 @@ function decodeIfEncoded(str) {
   }
 }
 
+function extractPassivePerception(senses) {
+  if (typeof senses !== 'string') return null;
+  const match = senses.match(/Passive\s*Perception\s*:?(\s*\d+)/i);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+
 function extractLegendaryResistanceCount(traits) {
   const decoded = decodeIfEncoded(traits);
   const match = decoded.match(/Legendary Resistance \((\d+)\/Day\)/i);
@@ -142,7 +149,7 @@ router.post('/', async (req, res) => {
       const stat = creatureMap.get(id);
       const dex = stat?.dex || 0;
       const mod = stat?.mod || 0;
-
+    
       const numGroups = Math.ceil(count / groupSize);
       const groupRolls = Array.from({ length: numGroups }, () => {
         const roll = Math.floor(Math.random() * 20 + 1);
@@ -150,7 +157,7 @@ router.post('/', async (req, res) => {
         const final = isNaturalOne ? -99 : roll + mod;
         return { roll, final, naturalOne: isNaturalOne };
       });
-
+    
       for (let i = 0; i < count; i++) {
         const groupIndex = Math.floor(i / groupSize);
         const { final, roll, naturalOne } = groupRolls[groupIndex];
@@ -161,15 +168,18 @@ router.post('/', async (req, res) => {
           saving_throws, damage_immunities, damage_resistances,
           damage_vulnerabilities, condition_immunities, legendary_actions
         } = stat.fullStatblock;
-
+    
+        const decodedSenses = decodeIfEncoded(senses ?? '');
+        const passive = extractPassivePerception(decodedSenses);
+    
         let spellSlots = null;
         if (traits && /Spellcasting/.test(traits)) {
           spellSlots = extractSpellSlots(traits);
         }
-
+    
         const derivedMaxResist = extractLegendaryResistanceCount(traits);
         const derivedMaxActions = extractLegendaryActionCount(legendary_actions);
-
+    
         fullInitiative.push({
           name: nameWithSuffix,
           nickname: '',
@@ -183,7 +193,7 @@ router.post('/', async (req, res) => {
           hp: extractFirstNumber(hit_points),
           maxHp: extractFirstNumber(hit_points),
           currentHp: extractFirstNumber(hit_points),
-          passivePerception: extractFirstNumber(senses),
+          passivePerception: passive ?? null,
           statblock: {
             meta,
             speed,
@@ -218,6 +228,7 @@ router.post('/', async (req, res) => {
         });
       }
     }
+    
 
     fullInitiative.sort((a, b) => {
       if (a.naturalOne && !b.naturalOne) return 1;
@@ -299,6 +310,7 @@ router.put('/:id', async (req, res) => {
 
       fullInitiative.push({
         name: sanitizedPlayerName,
+        displayName: existing?.displayName ?? existing?.name,
         initiative: player.initiative,
         dex: match?.dex || player.dex || 0,
         type: 'player',
@@ -321,12 +333,12 @@ router.put('/:id', async (req, res) => {
       const stat = creatureMap.get(monsterId);
       const dex = stat?.dex || 0;
       const mod = stat?.mod || 0;
-
+    
       for (let i = 0; i < count; i++) {
         const groupIndex = Math.floor(i / groupSize);
         let initiative = groupInitiatives[groupIndex];
         let rolled = false;
-
+    
         let isNaturalOne = false;
         if (initiative === null || initiative === undefined) {
           const roll = Math.floor(Math.random() * 20 + 1);
@@ -334,50 +346,31 @@ router.put('/:id', async (req, res) => {
           initiative = isNaturalOne ? -99 : roll + mod;
           rolled = true;
         }
-
+    
         const index = i;
         const existing = findExisting(sanitizedMonsterName, index);
         const nameWithSuffix = existing?.nickname
-        ? existing.name // Preserve internal name if custom nickname exists
-        : `${sanitizedMonsterName} ${i + 1}`;
-
-
-
+          ? existing.name
+          : `${sanitizedMonsterName} ${i + 1}`;
+    
         const {
-          armor_class,
-          hit_points,
-          senses,
-          stats,
-          meta,
-          speed,
-          skills,
-          traits,
-          actions,
-          img_url,
-          challenge,
-          languages,
-          reactions,
-          saving_throws,
-          damage_immunities,
-          damage_resistances,
-          damage_vulnerabilities,
-          condition_immunities,
-          legendary_actions
+          armor_class, hit_points, senses, stats, meta, speed, skills,
+          traits, actions, img_url, challenge, languages, reactions,
+          saving_throws, damage_immunities, damage_resistances,
+          damage_vulnerabilities, condition_immunities, legendary_actions
         } = stat.fullStatblock;
-
+    
+        const decodedSenses = decodeIfEncoded(senses ?? '');
+        const passive = extractPassivePerception(decodedSenses);
+    
         let spellSlots = null;
         if (traits && /Spellcasting/.test(traits)) {
           spellSlots = extractSpellSlots(traits);
         }
-
-        // Only decode if it's actually encoded (defensive)
-        const decodedTraits = typeof traits === 'string' ? decodeURIComponent(traits.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')) : '';
-        const decodedLegendary = typeof legendary_actions === 'string' ? decodeURIComponent(legendary_actions.replace(/\\u003C/g, '<').replace(/\\u003E/g, '>')) : '';
-
+    
         const calculatedLegendaryResist = extractLegendaryResistanceCount(traits);
         const calculatedLegendaryActions = extractLegendaryActionCount(legendary_actions);
-
-
+    
         fullInitiative.push({
           name: existing?.name || nameWithSuffix,
           nickname: existing?.nickname ?? '',
@@ -387,11 +380,14 @@ router.put('/:id', async (req, res) => {
           rawInitiative: rolled ? initiative - mod : initiative,
           dex,
           type: 'monster',
+          isPlayer: existing?.isPlayer ?? false,
+          isSpecial: existing?.isSpecial ?? false,
+          displayName: existing?.displayName ?? existing?.nickname ?? existing?.name,
           ac: extractFirstNumber(armor_class),
           hp: extractFirstNumber(hit_points),
           maxHp: extractFirstNumber(hit_points),
           currentHp: existing?.currentHp ?? extractFirstNumber(hit_points),
-          passivePerception: extractFirstNumber(senses),
+          passivePerception: existing?.passivePerception != null ? existing.passivePerception : passive ?? null,
           statblock: {
             meta,
             speed,
@@ -416,22 +412,10 @@ router.put('/:id', async (req, res) => {
             size: stat.fullStatblock.size ?? null,
             alignment: stat.fullStatblock.alignment ?? null,
             ...(calculatedLegendaryActions !== null
-              ? {
-                  legendaryActions:
-                    existing?.statblock?.legendaryActions || {
-                      max: calculatedLegendaryActions,
-                      used: 0
-                    }
-                }
+              ? { legendaryActions: existing?.statblock?.legendaryActions || { max: calculatedLegendaryActions, used: 0 } }
               : {}),
             ...(calculatedLegendaryResist !== null
-              ? {
-                  legendaryResistances:
-                    existing?.statblock?.legendaryResistances || {
-                      max: calculatedLegendaryResist,
-                      used: 0
-                    }
-                }
+              ? { legendaryResistances: existing?.statblock?.legendaryResistances || { max: calculatedLegendaryResist, used: 0 } }
               : {}),
             ...(spellSlots
               ? { spellSlots: existing?.statblock?.spellSlots || spellSlots }
@@ -441,9 +425,10 @@ router.put('/:id', async (req, res) => {
           statusEffects: existing?.statusEffects || [],
           isConcentrating: existing?.isConcentrating ?? false,
           isDead: existing?.isDead || false
-        });        
+        });
       }
     }
+    
 
     fullInitiative.sort((a, b) => {
       if (a.naturalOne && !b.naturalOne) return 1;
@@ -511,6 +496,7 @@ router.patch('/:id/state', async (req, res) => {
         basename: xss(entry.basename ?? ''),
         nickname: xss(entry.nickname ?? ''),
         index: typeof entry.index === 'number' ? entry.index : null,
+        passivePerception: entry.passivePerception ?? existing?.passivePerception ?? null, 
         statusEffects: Array.isArray(entry.statusEffects)
           ? entry.statusEffects.map(effect => xss(effect))
           : [],

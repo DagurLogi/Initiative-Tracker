@@ -185,25 +185,21 @@ const DOMPurify = window.DOMPurify;
       const matching = updatedInitiative
         .filter(i => i.basename === (monster.basename || monster.name))
         .sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-    
-        const groupInitiatives = [];
-        for (let i = 0; i < totalGroups; i++) {
-          const match = updatedInitiative.find(init =>
-            init.basename === (monster.basename || monster.name)
-          );
-        
-          groupInitiatives.push(match?.initiative ?? null);
-        }
-        console.log(`Monster ${monster.name} init:`, groupInitiatives);
-        
-    
-      // ✅ Debug: Log what we got for this monster group
-      console.log(`Monster ${monster.name} init:`, groupInitiatives);
-    
+
+      // 💡 Grab the nickname from the first matching entry (optional)
+      const nickname = matching[0]?.nickname || '';
+
+      // 🧠 Build groupInitiatives correctly by using the sorted matches
+      const groupInitiatives = [];
+      for (let i = 0; i < totalGroups; i++) {
+        groupInitiatives.push(matching[i]?.initiative ?? null);
+      }
+
+      // ✅ Preserve everything
       selectedMonstersMap.set(monster.id, {
         ...monster,
         basename: monster.basename || monster.name,
-        nickname: monster.nickname || '',
+        nickname,
         initiatives: groupInitiatives
       });
     });
@@ -271,17 +267,21 @@ const DOMPurify = window.DOMPurify;
             name: DOMPurify.sanitize(name),
             basename: monster.basename || monster.name,
             nickname: existing?.nickname ?? '',
+            displayName: existing?.nickname || existing?.displayName || name,
             index: j,
             initiative: init ?? existing?.initiative,
             dex: existing?.dex || 0,
             type: 'monster',
+            isPlayer: existing?.isPlayer ?? false,
+            isSpecial: existing?.isSpecial ?? false,
             naturalOne: init === 1,
             isConcentrating: existing?.isConcentrating ?? false,
             isDead: existing?.isDead ?? false,
             currentHp: existing?.currentHp ?? null,
             statusEffects: existing?.statusEffects || [],
+            passivePerception: existing?.passivePerception ?? null,
             statblock: existing?.statblock || {}
-          });          
+          });        
         }
       }
     });
