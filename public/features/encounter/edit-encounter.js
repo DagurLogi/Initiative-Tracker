@@ -13,6 +13,7 @@ const DOMPurify = window.DOMPurify;
   const selectedMonstersMap = new Map();
   let loadedParty = null;
   let updatedInitiative = [];
+  let redirectToBattle = false;
   let encounterId = null;
 
   async function fetchParties() {
@@ -208,6 +209,11 @@ const DOMPurify = window.DOMPurify;
     renderSelectedMonsters();
   }
 
+  document.getElementById('saveAndStartBattleBtn')?.addEventListener('click', () => {
+    redirectToBattle = true;
+  });
+
+  
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!encounterId) return;
@@ -295,9 +301,17 @@ const DOMPurify = window.DOMPurify;
       });
 
       if (res.ok) {
+        const encounter = await res.json();
+        const encounterId = encounter.id;
         alert('✅ Encounter updated!');
-        window.location.href = 'view-encounters.html';
-      } else {
+      
+        if (redirectToBattle) {
+          window.location.href = `../../battle/battle.html?id=${encounterId}`;
+        } else {
+          window.location.href = 'view-encounters.html';
+        }
+      }
+       else {
         const err = await res.json();
         alert(`❌ ${err.error || 'Update failed.'}`);
       }

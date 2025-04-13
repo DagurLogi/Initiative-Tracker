@@ -11,6 +11,11 @@ const initiativeInputsDiv = /** @type {HTMLDivElement} */ (document.getElementBy
 
 const selectedMonstersMap = new Map();
 let loadedParty = null; 
+let redirectToBattle = false;
+
+document.getElementById('createAndStartBattleBtn')?.addEventListener('click', () => {
+  redirectToBattle = true;
+});
 
 async function fetchParties() {
   try {
@@ -196,9 +201,17 @@ form.addEventListener('submit', async (e) => {
     });
 
     if (res.ok) {
+      const encounter = await res.json();
+      const encounterId = encounter.id;
       alert('✅ Encounter saved!');
-      window.location.href = '../encounter/view-encounters.html'; 
-    } else {
+    
+      if (redirectToBattle) {
+        window.location.href = `../../battle/battle.html?id=${encounterId}`;
+      } else { 
+        window.location.href = '../encounter/view-encounters.html';
+      }
+    }
+     else {
       const errMsg = await res.json();
       alert(`❌ ${errMsg.error || 'Failed to save encounter.'}`);
     }
