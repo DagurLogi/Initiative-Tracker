@@ -10,7 +10,7 @@ const selectedMonstersDiv = /** @type {HTMLDivElement} */ (document.getElementBy
 const initiativeInputsDiv = /** @type {HTMLDivElement} */ (document.getElementById('initiativeInputs'));
 
 const selectedMonstersMap = new Map();
-let loadedParty = null; // 🆕 Track loaded party data
+let loadedParty = null; 
 
 async function fetchParties() {
   try {
@@ -50,7 +50,8 @@ function addMonsterToEncounter(creature) {
     name: creature.name,
     basename: creature.name,
     count: 1,
-    groupSize: 1
+    groupSize: 1,
+    nickname: ''                  
   });  
   renderSelectedMonsters();
 }
@@ -146,9 +147,10 @@ form.addEventListener('submit', async (e) => {
   const monsters = Array.from(selectedMonstersMap.values()).map(m => ({
     id: m.id,
     name: m.name,
-    basename: m.basename || m.name, // make sure basename is included
+    basename: m.basename || m.name,
     count: m.count,
-    groupSize: m.groupSize
+    groupSize: m.groupSize,
+    nickname: m.nickname || '',
   }));
   
 

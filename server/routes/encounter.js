@@ -170,10 +170,11 @@ router.post('/', async (req, res) => {
         const derivedMaxResist = extractLegendaryResistanceCount(traits);
         const derivedMaxActions = extractLegendaryActionCount(legendary_actions);
 
-
         fullInitiative.push({
-          name: nameWithSuffix, //"Acolyte 1"
-          basename: sanitizedMonsterName, // "Acolyte"
+          name: nameWithSuffix,
+          nickname: '',
+          basename: sanitizedMonsterName,
+          index: i,
           initiative: final,
           rawInitiative: roll,
           dex,
@@ -272,17 +273,23 @@ router.put('/:id', async (req, res) => {
       });
     });
 
-    const findExisting = (name) => {
-      return existingInitiative.find(entry => entry.name === name);
+    const findExisting = (basename, index) => {
+      return existingInitiative.find(entry =>
+        entry.basename === basename && parseInt(entry.index ?? -1) === index
+      );
     };
+    
+    
 
     for (const player of initiatives) {
       if (player.type !== 'player') continue;
 
       const sanitizedPlayerName = xss(player.name);
       const match = partyMembers.find(m => m.name === player.name);
-      const existing = findExisting(sanitizedPlayerName);
-
+      const findExistingPlayerByName = (name) => {
+        return existingInitiative.find(entry => entry.name === name && entry.type === 'player');
+      };
+      const existing = findExistingPlayerByName(sanitizedPlayerName);
       const cleanedStatblock = {
         class: match?.class || null,
         level: match?.level || null,
@@ -328,8 +335,13 @@ router.put('/:id', async (req, res) => {
           rolled = true;
         }
 
-        const nameWithSuffix = `${sanitizedMonsterName} ${i + 1}`;
-        const existing = findExisting(nameWithSuffix);
+        const index = i;
+        const existing = findExisting(sanitizedMonsterName, index);
+        const nameWithSuffix = existing?.nickname
+        ? existing.name // Preserve internal name if custom nickname exists
+        : `${sanitizedMonsterName} ${i + 1}`;
+
+
 
         const {
           armor_class,
@@ -367,8 +379,10 @@ router.put('/:id', async (req, res) => {
 
 
         fullInitiative.push({
-          name: nameWithSuffix, // "Acolyte 1"
-          basename: sanitizedMonsterName, // "Acolyte"
+          name: existing?.name || nameWithSuffix,
+          nickname: existing?.nickname ?? '',
+          basename: sanitizedMonsterName,
+          index: i,
           initiative,
           rawInitiative: rolled ? initiative - mod : initiative,
           dex,
@@ -422,12 +436,12 @@ router.put('/:id', async (req, res) => {
             ...(spellSlots
               ? { spellSlots: existing?.statblock?.spellSlots || spellSlots }
               : {})
-          },         
+          },
           naturalOne: isNaturalOne,
           statusEffects: existing?.statusEffects || [],
           isConcentrating: existing?.isConcentrating ?? false,
           isDead: existing?.isDead || false
-        });
+        });        
       }
     }
 
@@ -464,18 +478,52 @@ router.patch('/:id/state', async (req, res) => {
   const { updatedInitiative, currentRound, currentTurnIndex, totalTurns } = req.body;
 
   try {
-    // Sanitize all string-based user inputs within updatedInitiative
-    const sanitizedInitiative = Array.isArray(updatedInitiative)
-      ? updatedInitiative.map(entry => ({
-          ...entry,
-          name: xss(entry.name),
-          statusEffects: Array.isArray(entry.statusEffects)
-            ? entry.statusEffects.map(effect => xss(effect))
-            : [],
-          statblock: entry.statblock || {},
-        }))
-      : [];
+    // 1. Get existing encounter
+    const encounterRes = await pool.query('SELECT * FROM encounters WHERE id = $1', [id]);
+    const encounter = encounterRes.rows[0];
+    if (!encounter) {
+      return res.status(404).json({ error: 'Encounter not found' });
+    }
 
+    const existingInitiative = Array.isArray(encounter.initiative) ? encounter.initiative : [];
+
+    // 2. Helper: match by basename + index for monsters or name for players
+    function findMatchingEntry(entry) {
+      if (entry.type === 'player') {
+        return existingInitiative.find(e => e.type === 'player' && e.name === entry.name);
+      }
+      return existingInitiative.find(e =>
+        e.type === 'monster' &&
+        e.basename === entry.basename &&
+        parseInt(e.index ?? -1) === parseInt(entry.index ?? -1)
+      );
+    }    
+
+    // 3. Sanitize and merge entries
+    const sanitizedInitiative = Array.isArray(updatedInitiative)
+  ? updatedInitiative.map(entry => {
+      const existing = findMatchingEntry(entry);
+
+      return {
+        ...existing, // use all existing fields first
+        ...entry, // then override with incoming
+        name: xss(entry.name),
+        basename: xss(entry.basename ?? ''),
+        nickname: xss(entry.nickname ?? ''),
+        index: typeof entry.index === 'number' ? entry.index : null,
+        statusEffects: Array.isArray(entry.statusEffects)
+          ? entry.statusEffects.map(effect => xss(effect))
+          : [],
+        statblock: entry.statblock || existing?.statblock || {},
+        currentHp: entry.currentHp ?? existing?.currentHp ?? null,
+        isConcentrating: entry.isConcentrating ?? existing?.isConcentrating ?? false,
+        isDead: entry.isDead ?? existing?.isDead ?? false,
+        deathSaves: entry.deathSaves ?? existing?.deathSaves ?? { successes: 0, failures: 0 }
+      };
+    })
+  : [];
+
+    // 4. Save back
     await pool.query(
       `UPDATE encounters
        SET initiative = $1,
@@ -498,7 +546,6 @@ router.patch('/:id/state', async (req, res) => {
     res.status(500).json({ error: 'Failed to save encounter state' });
   }
 });
-
 
 
 // DELETE encounter

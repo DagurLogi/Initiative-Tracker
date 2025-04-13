@@ -12,6 +12,7 @@ const DOMPurify = window.DOMPurify;
 
   const selectedMonstersMap = new Map();
   let loadedParty = null;
+  let updatedInitiative = [];
   let encounterId = null;
 
   async function fetchParties() {
@@ -42,7 +43,7 @@ const DOMPurify = window.DOMPurify;
             selectedMonstersMap.set(creature.id, {
               id: creature.id,
               name: creature.name,
-              baseName: creature.name,
+              basename: creature.name,
               count: 1,
               groupSize: 1,
               initiatives: []
@@ -65,10 +66,6 @@ const DOMPurify = window.DOMPurify;
     selectedMonstersMap.forEach(monster => {
       const div = document.createElement('div');
       div.className = 'selected-monster';
-
-      const inputs = monster.initiatives?.map((val, i) => 
-        `<input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val === 0 ? '' : (val ?? '')}" />`
-      ).join('') || '';
       
     
       div.innerHTML = DOMPurify.sanitize(`
@@ -89,6 +86,7 @@ const DOMPurify = window.DOMPurify;
             <input type="number" class="monster-init" data-id="${monster.id}" data-index="${i}" value="${val ?? ''}" />
           `).join('') || ''}
         </div>
+
       `);
       
       selectedMonstersDiv?.appendChild(div);
@@ -177,35 +175,39 @@ const DOMPurify = window.DOMPurify;
       });
     }
 
-    const updatedInitiative = data.state?.updatedInitiative ?? data.initiative;
+    updatedInitiative = data.state?.updatedInitiative ?? data.initiative;
 
     data.monsters.forEach(monster => {
       const count = monster.count || 1;
       const groupSize = monster.groupSize || 1;
       const totalGroups = Math.ceil(count / groupSize);
-
+    
       const matching = updatedInitiative
-      .filter(i => i.baseName === monster.name || i.name.startsWith(monster.name))
-
-      .sort((a, b) => {
-        const aNum = parseInt(a.name.replace(monster.name, '').trim()) || 0;
-        const bNum = parseInt(b.name.replace(monster.name, '').trim()) || 0;
-        return aNum - bNum;
-      });
-
-
-      const groupInitiatives = [];
-      for (let i = 0; i < totalGroups; i++) {
-        const slice = matching.slice(i * groupSize, (i + 1) * groupSize);
-        groupInitiatives.push(slice[0]?.initiative ?? Math.floor(Math.random() * 20 + 1));
-      }
-
+        .filter(i => i.basename === (monster.basename || monster.name))
+        .sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+    
+        const groupInitiatives = [];
+        for (let i = 0; i < totalGroups; i++) {
+          const match = updatedInitiative.find(init =>
+            init.basename === (monster.basename || monster.name)
+          );
+        
+          groupInitiatives.push(match?.initiative ?? null);
+        }
+        console.log(`Monster ${monster.name} init:`, groupInitiatives);
+        
+    
+      // ✅ Debug: Log what we got for this monster group
+      console.log(`Monster ${monster.name} init:`, groupInitiatives);
+    
       selectedMonstersMap.set(monster.id, {
         ...monster,
-        baseName: monster.name,
+        basename: monster.basename || monster.name,
+        nickname: monster.nickname || '',
         initiatives: groupInitiatives
       });
     });
+    
 
     renderSelectedMonsters();
   }
@@ -220,7 +222,7 @@ const DOMPurify = window.DOMPurify;
     const monsters = Array.from(selectedMonstersMap.values()).map(m => ({
       id: m.id,
       name: m.name,
-      baseName: m.baseName || m.name,
+      basename: m.basename || m.name,
       count: m.count,
       groupSize: m.groupSize,
       initiatives: m.initiatives
@@ -257,24 +259,33 @@ const DOMPurify = window.DOMPurify;
       for (let i = 0; i < totalGroups; i++) {
         const start = i * monster.groupSize;
         const end = Math.min(start + monster.groupSize, monster.count);
-
         for (let j = start; j < end; j++) {
-          const init = monster.initiatives[i] || 0;
+          const existing = updatedInitiative.find(e =>
+            e.basename === monster.basename && e.index === j
+          );
+        
+          const init = monster.initiatives[i];
+          const name = existing?.nickname ? existing.name : `${monster.name} ${j + 1}`;
+
           initiatives.push({
-            name: `${monster.name} ${j + 1}`,
-            baseName: monster.baseName || monster.name,
-            initiative: init,
-            dex: 0,
+            name: DOMPurify.sanitize(name),
+            basename: monster.basename || monster.name,
+            nickname: existing?.nickname ?? '',
+            index: j,
+            initiative: init ?? existing?.initiative,
+            dex: existing?.dex || 0,
             type: 'monster',
             naturalOne: init === 1,
-            concentration: false,
-            isDead: false
-          });
-          
-          
+            isConcentrating: existing?.isConcentrating ?? false,
+            isDead: existing?.isDead ?? false,
+            currentHp: existing?.currentHp ?? null,
+            statusEffects: existing?.statusEffects || [],
+            statblock: existing?.statblock || {}
+          });          
         }
       }
     });
+    
 
     try {
       const res = await fetch(`/api/encounter/${encounterId}`, {

@@ -56,9 +56,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             const partyMembers = sortedInitiative.map(i => {
               const deadTag = i.isDead ? ' 💀' : '';
               const spellcasterTag = i.type === 'monster' && i.statblock?.spellSlots ? ' 🔮' : '';
-              const label = i.type === 'player' ? `<strong>${i.name}</strong>` : i.name;
-              return `<li>${label} (Initiative: ${i.initiative})${spellcasterTag}${deadTag}</li>`;
+            
+              const defaultName = `${i.basename ?? 'Unknown'} ${typeof i.index === 'number' ? i.index + 1 : ''}`;
+              let displayName = DOMPurify.sanitize(i.name || defaultName);
+            
+              if (i.nickname) {
+                displayName = `<em>${DOMPurify.sanitize(i.nickname)}</em>`;
+              }
+            
+              if (i.type === 'player') {
+                displayName = `<strong>${displayName}</strong>`;
+              }
+            
+              return `<li>${displayName} (Initiative: ${i.initiative ?? '?'})${spellcasterTag}${deadTag}</li>`;
             }).join('');
+            
+            
+            
+            
 
             const detailsHTML = `
               <p><strong>Party ID:</strong> ${data.party_id}</p>

@@ -272,8 +272,8 @@ const DOMPurify = window.DOMPurify;
           <div class="combatant-header">
             <div class="header-left">
               <h3>
-                <span class="editable-name" data-name="${c.name}" style="background-color: transparent;">
-                  ${c.name}
+                <span class="editable-name" data-name="${c.name}">
+                  ${c.displayName}
                 </span>
                 <button class="edit-name-btn" title="Edit name" data-name="${c.name}">✏️</button>
                 <button class="toggle-statblock-btn" data-name="${c.name}">📖</button>
@@ -322,7 +322,7 @@ const DOMPurify = window.DOMPurify;
           <div class="statblock-section hidden" id="statblock-${c.name.replace(/\s+/g, '-')}">
             <div class="statblock">
              <p><strong>Name:</strong> ${(c.basename ?? c.name).replace(/\s+\d+$/, '')}</p>
-            ${c.hasCustomName ? `<p><strong>Nickname:</strong> ${c.name}</p>` : ''}
+             ${c.nickname ? `<p><strong>Nickname:</strong> ${c.nickname}</p>` : ''}
               <p><strong>AC:</strong> ${sb.armor_class ?? '?'}</p>
               <p><strong>HP:</strong> ${sb.hit_points ?? '?'}</p>
               <p><strong>Speed:</strong> ${sb.speed ?? '?'}</p>
@@ -401,23 +401,24 @@ const DOMPurify = window.DOMPurify;
       const combatant = combatants.find(c => c.name === oldName);
     
       if (combatant && newName && newName !== oldName) {
-        combatant.name = newName;
-        combatant.hasCustomName = true;
+        combatant.nickname = newName;
+        combatant.displayName = newName;
     
-        // ✅ Restore the original name into `basename` if not already set
         if (!combatant.basename) {
           combatant.basename = oldName;
         }
-    
-        renderCombatants();
-        renderTracker({ scroll: false });
-        saveEncounterState();
       }
+    
+      // ✅ Reset to default display name if nickname is removed
+      if (combatant && !combatant.nickname) {
+        combatant.displayName = combatant.name;
+      }
+    
+      renderCombatants();
+      renderTracker({ scroll: false });
+      saveEncounterState();
     }
-    
-    
-    
-
+ 
     document.querySelectorAll('.toggle-statblock-btn').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation(); // Prevent bubbling if needed
@@ -878,11 +879,11 @@ function scrollToActiveCombatant() {
           statusEffects: c.statusEffects ?? [],
           isDead: c.isDead ?? false,
           isConcentrating: c.isConcentrating ?? false,
-          isPlayer: c.type === 'player', // ✅ add this line
-          statblock: sb
+          isPlayer: c.type === 'player',
+          statblock: sb,
+          displayName: c.nickname || c.name  // ✅ New field for display
         };
       });
-      
       
       combatants.sort((a, b) => b.initiative - a.initiative);
       
